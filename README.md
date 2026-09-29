@@ -73,41 +73,54 @@ Built to support a wide range of scheduling needs:
 
 ## ⚡ Quick Start (Development)
 
-Clone and run the project locally using the provided Docker Compose environment:
+Local development runs entirely with Docker Compose (Nginx, PHP-FPM, MySQL, Mailpit and more).
+
+### Requirements
+
+* [Docker](https://www.docker.com/) with Docker Compose
+* Git
+
+### Start the environment
 
 ```bash
-# Clone the repository
-git clone https://github.com/alextselegidis/easyappointments.git
+# Clone the repository (SSH: git@github.com:LittleArmstrong/mebeauty_appointments.git)
+git clone https://github.com/LittleArmstrong/mebeauty_appointments.git
 
 # Navigate into the project
-cd easyappointments
+cd mebeauty_appointments
+
+# Only needed if config.php does not exist yet (it is gitignored)
+cp config-sample.php config.php
 
 # Start the Docker environment
-docker compose up
-````
-
-Then open a second terminal and enter the application container:
-
-```bash id="app-shell"
-docker compose exec app bash
+docker compose up -d --build
 ```
 
-Inside the container, install dependencies:
+The `php-fpm` container automatically installs the Composer/NPM dependencies and compiles the assets on first start (see `docker/php-fpm/start-container`), so the initial startup can take a few minutes.
 
-```bash id="deps"
-npm install && composer install
+### Open the application
+
+* Booking page: <http://localhost>
+* Backend: <http://localhost/index.php/calendar>
+* The setup wizard runs on the first visit (empty database).
+
+If <http://localhost> is not reachable, nginx may have started before PHP-FPM (known race condition):
+
+```bash
+docker compose restart nginx
 ```
 
-Start the development watcher:
+All local service URLs, ports and credentials are listed in [docs/docker.md](docs/docker.md).
 
-```bash id="dev"
-npm start
-```
+### Development commands
 
-Build production assets:
-
-```bash id="build"
-npm run build
+```bash
+docker compose exec php-fpm bash           # shell into the application container
+docker compose exec php-fpm npm start      # watch and compile JS/SCSS
+docker compose exec php-fpm npm run build  # production assets and easyappointments-0.0.0.zip
+docker compose exec php-fpm composer test  # run the PHPUnit test suite
+docker compose logs -f                     # follow the container logs
+docker compose down                        # stop the environment (DB data stays in ./docker/mysql)
 ```
 
 > Note: Works on Windows (WSL recommended), macOS, and Linux using Docker Compose.
@@ -132,6 +145,8 @@ npm run build
 6. Open the application in your browser and follow the setup wizard
 
 Once completed, the system is ready to use.
+
+> Tip: Run `npm run build` to generate a production archive (`easyappointments-0.0.0.zip`) that includes the compiled assets.
 
 ---
 
