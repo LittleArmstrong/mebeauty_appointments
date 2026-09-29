@@ -1,0 +1,394 @@
+---
+name: easyappointments-ci3
+description: Development knowledge for mebeauty_appointments, an Easy!Appointments 1.6.0 application based on CodeIgniter 3. Combines the official Easy!Appointments Framework documentation with the complete mebeauty_appointments codebase. Repository-specific architecture and conventions take precedence over generic framework guidance.
+---
+
+# Easyappointments-Ci3
+
+Development knowledge for **mebeauty_appointments**, an **Easy!Appointments 1.6.0** application built on **CodeIgniter 3** (CI 3.1.11). This skill combines the official Easy!Appointments Framework documentation with the complete mebeauty_appointments codebase. Repository-specific architecture and conventions take precedence over generic framework guidance.
+
+## 📚 Sources
+
+This skill synthesizes knowledge from **multiple sources**:
+
+| Source | Type | Location | Confidence |
+|--------|------|----------|------------|
+| Official Easy!Appointments/CI3 Framework docs | documentation | `references/documentation/easyappointments-ci3_docs/` (173 pages) | high |
+| Merged API reference | api | `references/api/merged_api.md` | high |
+| Codebase analysis (architecture, API, patterns) | codebase_analysis | `references/codebase_analysis/` (61 files) | high/medium |
+| GitHub repository (README, repo metadata) | github | `references/github/LittleArmstrong_mebeauty_appointments/` | high |
+
+### Source Agreements
+
+- ✅ All sources agree the project is an Easy!Appointments fork on CodeIgniter 3 (CI 3.1.11 per docs; CI_* core classes confirmed in the codebase).
+- ✅ MVC structure is confirmed both by the official docs (controllers/models/views conventions) and by codebase analysis (confidence 0.95, evidenced by `application/controllers/`, `application/models/`, `application/views/`).
+- ✅ PHP is the dominant language (89.2%), matching the PHP/CI3 stack described in the docs.
+- ✅ Helper loading conventions (`$this->load->helper('...')`, `MY_` prefix for extending helpers) appear in both the official docs and the repo's `application/helpers/` directory.
+
+### Source Priorities
+
+When sources disagree, trust in this order:
+
+1. **Codebase analysis** — ground truth: what the code actually does (`references/codebase_analysis/`)
+2. **Official documentation** — intended API and usage patterns (`references/documentation/`, `references/api/`)
+3. **GitHub README/metadata** — real-world usage and project context (`references/github/`)
+
+## 📦 About
+
+MeBeauty Appointments forked from Easy!Appointments — Self Hosted Appointment Scheduler.
+
+**Repository:** [LittleArmstrong/mebeauty_appointments](https://github.com/LittleArmstrong/mebeauty_appointments)
+**Homepage:** https://easyappointments.org
+**License:** GNU General Public License v3.0
+**Last Updated:** 2026-08-08
+
+### Languages
+
+- **PHP:** 89.2%
+- **JavaScript:** 9.1%
+- **SCSS:** 1.6%
+- **HTML:** 0.2%
+- **Dockerfile / Shell:** 0.0%
+
+## 💡 When to Use This Skill
+
+Use this skill when you need to:
+
+- **Work with this specific repo** — implement, extend, or debug features in mebeauty_appointments (controllers, models, migrations, settings, API endpoints).
+- **Understand Easy!Appointments 1.6.0 architecture** — the `EA_*` core classes, the service layer, the API v1 endpoints, and how booking/calendar flow works.
+- **Write or debug CodeIgniter 3 code** in this project — helpers, libraries, database query builder, sessions, form validation, email, migrations.
+- **Find concrete code examples before implementing** — real API signatures extracted from the actual codebase, not just framework theory.
+- **Navigate the official documentation quickly** — categorized references to the CI3 3.1.11 docs in `references/documentation/`.
+- **Create database migrations** — 69 numbered migrations (001–069) provide a template for how this project evolves its schema.
+- **Consume or extend the REST API** — the API v1 controllers (`api/v1/*`) and the `Api` library (bearer-token auth).
+- **Check design patterns and architecture** — how the codebase is organized, what patterns the analysis detected, where the service layer lives.
+
+**When NOT to use this skill:**
+
+- General CodeIgniter 3 questions unrelated to this repository (use the docs references directly instead).
+- Frontend-only work that does not touch application PHP code.
+
+## 🎯 Quick Reference
+
+### Codebase patterns (high confidence — real usage)
+
+**Pattern 1: Custom model base class (`EA_Model` extends `CI_Model`)** — all repo models inherit a CRUD scaffold with field casting and API/db field mapping. From `references/codebase_analysis/.../api_reference/EA_Model.md`:
+
+```php
+// application/core/EA_Model.php — methods available on every model
+$record_id = $this->appointments_model->add($record);      // int — insert, returns new ID
+$row   = $this->appointments_model->get_row($record_id);   // array — single record
+$batch = $this->appointments_model->get_batch($where, 20, 0, 'start_datetime'); // array
+$value = $this->appointments_model->get_value('customer_id', $record_id); // string
+
+// record hygiene helpers (mutate by reference)
+$this->appointments_model->cast($record);              // cast fields to correct types
+$this->appointments_model->only($record, ['id', 'name']); // keep only listed fields
+$this->appointments_model->optional($record, ['notes']);   // remove null fields
+
+// field mapping between API and DB names
+$this->appointments_model->db_field('appointmentId');  // ?string — 'id' or NULL
+```
+
+**Pattern 2: Permission helper (`can` / `cannot`)** — role-based access checks used across controllers. From `application/helpers/permission_helper.php`:
+
+```php
+if (can('appointments', 'update', $user_id)) {
+    // current user may update the resource
+}
+
+if (cannot('customers', 'delete')) {
+    // deny the action
+}
+```
+
+**Pattern 3: API library — bearer token authentication and query parameters.** From `application/libraries/Api.php`:
+
+```php
+// inside an API v1 controller (extends EA_Controller)
+$this->load->library('api');
+$this->api->model('appointments_model');  // bind the model
+$this->api->auth();                       // verify bearer token, 401 if missing/invalid
+
+$keyword  = $this->api->request_keyword();   // ?string — 'q' query param
+$limit    = $this->api->request_limit();     // ?int
+$offset   = $this->api->request_offset();    // ?int
+$order_by = $this->api->request_order_by();  // ?string
+$fields   = $this->api->request_fields();    // ?array
+$with     = $this->api->request_with();      // ?array
+```
+
+**Pattern 4: Database migrations** — every migration extends `EA_Migration` and defines `up()`/`down()`. 69 migrations (001–069) follow this shape. From `application/migrations/001_specific_calendar_sync.php` etc.:
+
+```php
+class Migration_Add_custom_field extends EA_Migration
+{
+    public function up()
+    {
+        $this->dbforge->add_column('settings', [
+            'custom_field' => ['type' => 'TEXT', 'null' => TRUE]
+        ]);
+    }
+
+    public function down()
+    {
+        $this->dbforge->drop_column('settings', 'custom_field');
+    }
+}
+```
+
+*(Shape inferred from the `up()`/`down()`/`EA_Migration` API reference and the 069 migration files; the migration numbering 001–069 covers settings, table renames, new tables like `blocked_periods`/`webhooks`, and column additions.)*
+
+**Pattern 5: Core controller (`EA_Controller` extends `CI_Controller`)** — every controller inherits session/language/timezone setup. From `application/core/EA_Controller.php`:
+
+```php
+class My_controller extends EA_Controller
+{
+    public function __construct()
+    {
+        parent::__construct();
+        // EA_Controller already: ensures user exists, configures language,
+        // loads common HTML/script vars, configures timezone, checks storage writable
+    }
+}
+```
+
+### Official documentation patterns (high confidence — CI3 3.1.11)
+
+**Pattern 6: Loading helpers** — helpers are procedural functions loaded before use; extend with an `MY_` prefix file. From official docs:
+
+```php
+$this->load->helper('email');          // load one helper
+$this->load->helper(['form', 'url']);  // load several at once
+// application/helpers/MY_array_helper.php extends the array helper
+```
+
+**Pattern 7: Email helper** — validate an e-mail address. From official docs:
+
+```php
+$this->load->helper('email');
+
+if (valid_email('email@somesite.com')) {
+    echo 'email is valid';
+} else {
+    echo 'email is not valid';
+}
+```
+
+**Pattern 8: Form helper** — generate form elements and escape output. From official docs:
+
+```php
+$this->load->helper('form');
+echo form_open('email/send');  // open form posting to the 'email/send' route
+
+$string = 'Here is a string containing "quoted" text.';
+?>
+<input type="text" name="myfield" value="<?php echo $string; ?>" />
+```
+
+**Pattern 9: Benchmarking class** — measure execution time between marked points. From official docs:
+
+```php
+$this->benchmark->mark('code_start');
+// Some code happens here
+$this->benchmark->mark('code_end');
+echo $this->benchmark->elapsed_time('code_start', 'code_end');
+```
+
+**Pattern 10: Output class** — control finalized output sent to the browser. From official docs:
+
+```php
+$this->output->parse_exec_vars = FALSE;   // disable {elapsed_time} / {memory_usage} parsing
+```
+
+### Development workflow (from GitHub README)
+
+```bash
+# Local development (Docker Compose)
+git clone https://github.com/LittleArmstrong/mebeauty_appointments.git
+docker compose up                      # start the environment
+docker compose exec app bash           # second terminal, app shell
+npm install && composer install        # dependencies
+npm start                              # development watcher
+npm run build                          # build production assets
+```
+
+**Production installation** (from README): Apache/Nginx + PHP 8.2+ + MySQL; upload folder, make `storage` writable, rename `config-sample.php` → `config.php`, update configuration values, open the app in a browser and follow the setup wizard.
+
+### Design Patterns Detected
+
+*From C3.1 codebase analysis (confidence > 0.7):*
+
+- **Observer**: 7 instances
+- **Builder**: 2 instances
+- **Factory**: 1 instance
+
+*Total: 10 high-confidence patterns*
+
+The unfiltered pattern scan (see `references/codebase_analysis/.../ARCHITECTURE.md`) reports many more low-confidence hits (Adapter 138, Observer 62, TemplateMethod 17, Builder 16, Factory 10, Command 7, Strategy 4) — treat these as suggestive only; the >0.7 list above is the reliable signal. The Observer/Builder/Factory hits on `Google_sync`, `Notifications`, and the CI core classes (`CI_DB_query_builder`, `CI_Email`, `CI_Zip`) are the most credible.
+
+## 🧪 Code Examples
+
+See the **Quick Reference** above for the 10 most useful examples. Additional structured API references (class/function signatures with parameters and return types) are available for every scanned file in `references/codebase_analysis/LittleArmstrong_mebeauty_appointments/api_reference/` — including:
+
+- **Core classes**: `EA_Model.md`, `EA_Controller.md`, `EA_Email.md`, `EA_Calendar.md`, `EA_Encryption.md`, `EA_Session.md`, `EA_DB_query_builder.md`
+- **Models**: `Appointments_model.md`, `Customers_model.md`, `Providers_model.md`, `Services_model.md`, `Settings_model.md`, `Webhooks_model.md`, `Blocked_periods_model.md`, `Working_plan_exceptions_model.md`, `Roles_model.md`, `Users_model.md`, `Consents_model.md`, `Secretaries_model.md`, `Service_categories_model.md`, `Unavailabilities_model.md`
+- **API v1 controllers**: `Admins_api_v1.md`, `Appointments_api_v1.md`, `Availabilities_api_v1.md`, `Customers_api_v1.md`, `Providers_api_v1.md`, `Settings_api_v1.md`, `Services_api_v1.md`, `Webhooks_api_v1.md`, `Blocked_periods_api_v1.md`, `Unavailabilities_api_v1.md`, `Working_plan_exceptions_api_v1.md`, `Secretaries_api_v1.md`, `Service_categories_api_v1.md`
+- **Libraries**: `Api.md`, `Availability.md`, `Calendar.md`, `Google_sync.md`, `Caldav.md`, `Notifications.md`, `Webhooks_client.md`, `Cleanup.md`, `Jitsi_client.md`, `Altcha_client.md`, `Ldap_client.md`
+- **Migrations**: `001_specific_calendar_sync.md` … `069_add_altcha_settings.md`
+- **CI3 framework internals** (from `system/`): `DB_query_builder.md`, `DB_forge.md`, `Email.md`, `Encryption.md`, `Session.md`, `form_helper.md`, `url_helper.md`, `array_helper.md`, plus all database drivers
+
+## 🔧 API Reference
+
+*Extracted from codebase analysis (C2.5)* — full signatures for the most useful classes:
+
+### EA_Model (application/core/EA_Model.php)
+
+| Method | Signature | Returns |
+|--------|-----------|---------|
+| `get_value` | `(field: string, record_id: int)` | `string` |
+| `get_row` | `(record_id: int)` | `array` |
+| `get_batch` | `(where = null, limit: ?int = null, offset: ?int = null, order_by: ?string = null)` | `array` |
+| `add` | `(record: array)` | `int` |
+| `cast` | `(&$record: array)` | `void` |
+| `only` | `(&$record: array, fields: array)` | `void` |
+| `optional` | `(&$record: array, fields: array)` | `void` |
+| `db_field` | `(api_field: string)` | `?string` |
+| `quote_order_by` | `(order_by: ?string)` | `?string` |
+
+### Api (application/libraries/Api.php)
+
+| Method | Returns |
+|--------|---------|
+| `model(model: string)` | `void` |
+| `auth()` | `void` |
+| `get_bearer_token()` | `?string` |
+| `get_authorization_header()` | `?string` |
+| `request_authentication()` | `void` |
+| `request_keyword()` | `?string` |
+| `request_limit()` | `?int` |
+| `request_offset()` | `?int` |
+| `request_order_by()` | `?string` |
+| `request_fields()` | `?array` |
+| `request_with()` | `?array` |
+
+### EA_Controller (application/core/EA_Controller.php)
+
+| Method | Returns |
+|--------|---------|
+| `ensure_user_exists()` | — |
+| `configure_language()` | — |
+| `load_common_html_vars()` | — |
+| `load_common_script_vars()` | — |
+| `configure_timezone()` | `void` |
+| `check_storage_writable()` | `void` |
+
+### permission_helper (application/helpers/permission_helper.php)
+
+| Function | Signature | Returns |
+|----------|-----------|---------|
+| `can` | `(action: string, resource: string, user_id: ?int = null)` | `bool` |
+| `cannot` | `(action: string, resource: string, user_id: ?int = null)` | `bool` |
+
+## 📖 Reference Documentation
+
+### `references/api/` — Merged API Reference (api source, **high confidence**)
+
+`merged_api.md` cross-references every API mentioned in the official documentation against the codebase. **Most entries are flagged "documented but not found in codebase"** — see the Known Discrepancies section below for how to interpret this.
+
+### `references/documentation/easyappointments-ci3_docs/` — Official Docs (documentation source, **high confidence**)
+
+173 pages of the CodeIgniter 3.1.11 documentation as mirrored at https://developers.easyappointments.org/framework/. Organized as:
+
+- `framework.md` (358 KB) — the bulk: core classes, libraries, helpers, database
+- `api.md` — DB driver reference, query builder, utilities
+- `database.md` — query builder, forge, utilities, sessions, caching
+- `libraries.md` — session, calendar, email, encryption, pagination, upload
+- `helpers.md` — helper loading, extending with `MY_` prefix
+- `tutorials.md` — coding style, general concepts
+- `overview.md`, `installation.md` — CI overview and installation
+
+### `references/codebase_analysis/` — Codebase Analysis (codebase_analysis source, **high/medium confidence**)
+
+Automated analysis of the actual repository code:
+
+- `index.md` — navigation hub per repository
+- `LittleArmstrong_mebeauty_appointments/ARCHITECTURE.md` — MVC (0.95) and Service Layer (0.75) detection, design patterns, config files, directory structure, tech stack
+- `.../api_reference/` — **435 files**: one signature reference per scanned PHP file (core classes, models, controllers, libraries, helpers, migrations, CI system internals)
+- `.../patterns/` — per-file design-pattern detections with confidence scores (`detected_patterns.json` has the raw data)
+- `.../architecture_details/` — MVC/service-layer evidence with components
+- `.../configuration/` — 10 config files (`composer.json`, `package.json`, `docker-compose.yml`, `openapi.yml`, `.github/workflows/ci.yml`, Dockerfile…)
+- `.../dependencies/` — module dependency graph (1120 modules)
+
+### `references/github/LittleArmstrong_mebeauty_appointments/` — GitHub (github source, **high confidence**)
+
+`README.md` — the repo README (features, Docker quick start, production installation, license). `index.md` — repo metadata (0 stars, GPL v3.0).
+
+## 🛠️ Working with This Skill
+
+### Navigation tips for multi-source references
+
+1. **Start with the Quick Reference above** — it covers the 10 most common operations.
+2. **For a class/method signature**: search `references/codebase_analysis/LittleArmstrong_mebeauty_appointments/api_reference/` for `<ClassName>.md` (or `<file_name>.md`).
+3. **For how a feature *should* work**: read the relevant page in `references/documentation/easyappointments-ci3_docs/framework.md` or `libraries.md`.
+4. **For how this repo actually does it**: check `ARCHITECTURE.md` first, then look at the matching controller/model in the api_reference.
+5. **For migration history / schema evolution**: read the 001–069 migration references in order.
+6. **For the project overview and setup**: see the GitHub README reference.
+
+### Beginner
+
+- Start with the **Quick Reference** patterns 6–10 (helpers, form, email, benchmark, output) — these are pure CI3 and match the official docs.
+- Use the GitHub README quick start (Docker) to run the app locally.
+- Read `ARCHITECTURE.md` for the big picture (MVC, service layer, directory layout).
+- Understand the `EA_*` classes: they are the project's customization layer over stock CI3 (`EA_Controller`, `EA_Model`, `EA_Email`, `EA_Calendar`).
+
+### Intermediate
+
+- Use patterns 1–5 and the **API Reference tables**: extend `EA_Model` subclasses, add controllers extending `EA_Controller`, gate access with `can()`/`cannot()`, authenticate API endpoints with `$this->api->auth()`.
+- Add settings the way the project does: via a numbered migration inserting into the `settings` table (see migrations 002, 003, 004, 017… for the canonical pattern).
+- When debugging, remember the docs describe generic CI3 while the codebase may override behavior via `EA_*` classes — check the codebase reference first.
+
+### Advanced
+
+- Build new API v1 endpoints by mirroring `application/controllers/api/v1/*` + the `Api` library pattern (bearer token, keyword/limit/offset/order_by/fields/with query params).
+- Extend the service layer (18 service classes) rather than putting business logic in controllers.
+- Implement webhooks/CalDAV/Google sync by studying `Webhooks_client`, `Caldav`, `Google_sync` references and the 040/041 (webhooks) and 055–056/059 (CalDAV) migrations.
+- Use `references/codebase_analysis/.../patterns/detected_patterns.json` for a raw, confidence-scored map of where design patterns were detected.
+
+### Resolving conflicts
+
+Follow the **Source Priorities** list: codebase analysis > official docs > GitHub README. If a documented API is not in the codebase references, treat the docs entry as *generic framework guidance* and verify against the actual code before using it.
+
+## 🧩 Key Concepts
+
+- **`EA_` prefix classes** — mebeauty_appointments extends stock CI3 classes (`CI_Controller`, `CI_Model`, `CI_Email`, `CI_Calendar`) with `EA_` subclasses that add project-wide behavior (timezone config, language config, storage checks, CRUD scaffolding, field casting).
+- **MVC (confidence 0.95)** — controllers in `application/controllers/` (44 files), models in `application/models/` (20+), views/pages under `application/views/`.
+- **Service Layer (confidence 0.75)** — 18 service classes encapsulate business logic; controllers stay thin.
+- **API v1** — REST endpoints under `application/controllers/api/v1/` secured via the `Api` library bearer-token auth, with a matching `openapi.yml` (1289 settings).
+- **Settings system** — application configuration stored in the `settings` table and added/modified via numbered migrations (e.g. `002_add_google_analytics_setting`, `017_add_api_token_setting`, `053_add_default_language_setting`).
+- **Migrations** — sequential `application/migrations/NNN_*.php` files extending `EA_Migration`; 069 exist, including reverts (`046`, `047`, `059`).
+- **Domain model files** — appointments, customers, providers, secretaries, admins, services, service categories, unavailabilities, blocked periods, working plan exceptions, consents, webhooks.
+- **Integrations** — Google Calendar sync (`Google_sync`, `Caldav`), Google/Matomo analytics, Jitsi, LDAP, Altcha (captcha), webhooks.
+- **`permission_helper`** — `can()`/`cannot()` role/permission checks used by controllers.
+- **Helpers** (CI3 concept) — procedural function collections loaded via `$this->load->helper()`; the repo adds its own in `application/helpers/` and can extend stock helpers via `MY_`-prefixed files.
+
+## ⚠️ Known Discrepancies
+
+The conflict report (`references/conflicts.md`) lists **207 high-severity "conflicts"**, but they are **all the same single class of discrepancy**:
+
+> **API documented in the official framework docs but not found in the mebeauty_appointments codebase analysis.**
+
+Examples: `xss_clean`, `html_escape`, `form_open`, `where`, `select`, `get`, `post`, `anchor`, `password_hash`, `form_open`, `uri_string`…
+
+**How to interpret these:**
+
+- This is expected: the official docs describe the *full* CodeIgniter 3 framework, while the codebase analysis scanned what this repo *actually uses/implements*. Many entries are also documentation-scraping noise (single words like `a`, `for`, `foo`, `bar`, `case`).
+- These are **not** evidence the framework APIs are broken or missing — most are plain PHP or stock CI3 functionality (e.g. `password_hash`, `xss_clean`) that exists in the runtime.
+- **Resolution rule**: the codebase analysis is ground truth for *this repository's* code. When implementing, check `references/codebase_analysis/.../api_reference/` for the file you're touching; use the official docs only for framework-level behavior (query builder, sessions, helpers) that the analysis doesn't contradict.
+- The "documented but not found" flag on an API means: don't assume this repo has a wrapper for it — call the standard CI3/PHP function directly.
+
+**Minor inconsistency:** the design-pattern counts differ between the Quick Reference (confidence > 0.7: Observer 7, Builder 2, Factory 1) and `ARCHITECTURE.md` (unfiltered: Adapter 138, Observer 62, …). Prefer the >0.7 counts for reliability; treat the raw counts as upper bounds.
+
+---
+
+*Synthesized from official documentation, codebase analysis, and GitHub repository metadata by Skill Seekers.*

@@ -1,0 +1,4492 @@
+{
+  "nodes": [
+    {
+      "file": "application/config/app.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/autoload.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/config.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/constants.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/database.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/email.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/google.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/hooks.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/migration.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/mimes.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/profiler.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/routes.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/config/testing/routes.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/About.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Account.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Admins.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Altcha_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Api_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Appointments.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Blocked_periods.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Booking.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Booking_cancellation.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Booking_confirmation.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Booking_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Business_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Caldav.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Calendar.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Captcha.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Consents.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Console.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Customers.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/General_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Google.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Google_analytics_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Google_calendar_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Installation.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Integrations.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Jitsi_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Ldap_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Legal_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Localization.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Login.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Logout.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Matomo_analytics_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Privacy.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Providers.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Recovery.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Secretaries.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Service_categories.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Services.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Test.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Unavailabilities.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Update.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/User.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Webhooks.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/Working_plan_exceptions.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Admins_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Appointments_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Availabilities_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Blocked_periods_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Customers_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Providers_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Secretaries_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Service_categories_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Services_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Settings_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Unavailabilities_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Webhooks_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/controllers/api/v1/Working_plan_exceptions_api_v1.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Benchmark.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Cache.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Calendar.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Config.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Controller.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_DB_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_DB_query_builder.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_DB_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Email.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Encrypt.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Encryption.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Exceptions.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Hooks.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Input.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Loader.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Log.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Migration.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Output.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Profiler.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Router.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Security.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Session.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_URI.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/core/EA_Upload.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/array_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/asset_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/config_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/date_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/debug_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/env_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/html_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/http_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/installation_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/language_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/password_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/path_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/permission_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/rate_limit_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/routes_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/security_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/session_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/setting_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/helpers/validation_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/hooks/security_headers.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/hooks/storage_cleanup.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/albanian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/arabic/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bosnian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/bulgarian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/catalan/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/chinese/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/croatian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/czech/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/danish/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/dutch/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/english/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/estonian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/finnish/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/french/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/german/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/greek/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hebrew/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hindi/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/hungarian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/italian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/japanese/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/latvian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/lithuanian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/luxembourgish/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/marathi/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/norwegian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/persian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/polish/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/portuguese-br/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/romanian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/russian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/serbian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovak/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/slovenian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/spanish/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/swedish/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/thai/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/traditional-chinese/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/turkish/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/translations_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/language/ukrainian/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Accounts.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Altcha_client.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Api.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Availability.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Caldav_sync.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Cleanup.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Email_messages.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Google_sync.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Ics_file.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Instance.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Jitsi_client.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Ldap_client.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Notifications.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Permissions.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Synchronization.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Timezones.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/libraries/Webhooks_client.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/001_specific_calendar_sync.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/002_add_google_analytics_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/003_add_customer_notifications_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/004_add_date_format_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/005_add_require_captcha_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/006_add_calendar_view_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/007_add_service_availabilities_type.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/008_add_service_attendants_number.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/009_change_column_types.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/010_add_time_format_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/011_remove_prefix_from_fkey_constraints.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/012_legal_contents.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/013_add_weekday_start_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/014_create_appointment_location_column.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/015_add_working_plan_exceptions_to_user_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/016_add_require_phone_number_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/017_add_api_token_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/018_add_timezone_to_users.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/019_add_display_any_provider_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/020_add_language_to_users.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/021_modify_sync_period_columns.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/022_add_booking_field_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/023_rename_service_categories_table_to_categories.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/024_rename_id_service_categories_column_of_services_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/025_rename_is_unavailable_column_of_appointments_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/026_add_color_column_to_services_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/027_add_color_column_to_appointments_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/028_add_matomo_analytics_url_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/029_add_display_delete_personal_information_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/030_add_disable_booking_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/031_add_disable_booking_message_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/032_add_company_logo_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/033_add_company_color_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/034_add_display_login_button_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/035_add_is_private_column_to_services_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/036_add_is_private_column_to_users_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/037_add_timestamp_columns.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/038_add_theme_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/039_add_limit_customer_access_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/040_create_webhooks_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/041_add_webhooks_column_to_roles_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/042_add_future_booking_limit_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/043_add_appointment_status_options_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/044_add_status_column_to_appointments_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/045_drop_delete_datetime_column_from_all_tables.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/046_revert_rename_service_categories_table_to_categories.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/047_revert_rename_id_service_categories_column_of_services_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/048_create_blocked_periods_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/049_add_blocked_periods_column_to_roles_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/050_add_custom_fields_columns_to_users_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/051_insert_custom_field_rows_to_settings_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/052_add_matomo_analytics_site_id_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/053_add_default_language_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/054_add_default_timezone_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/055_add_caldav_columns_to_user_settings_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/056_add_id_caldav_calendar_column_to_appointments_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/057_add_ldap_rows_to_settings_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/058_add_ldap_dn_column_to_users_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/059_drop_caldav_calendar_column_from_user_settings_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/060_add_secret_header_column_to_webhooks_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/061_replace_availabilities_type_with_slot_interval.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/062_add_meeting_link_column_to_appointments_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/063_add_google_calendar_sync_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/064_add_password_reset_columns_to_user_settings_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/065_create_working_plan_exceptions_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/066_migrate_working_plan_exceptions_to_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/067_add_id_users_to_consents_table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/068_add_data_retention_days_setting.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/migrations/069_add_altcha_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Admins_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Appointments_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Blocked_periods_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Consents_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Customers_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Providers_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Roles_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Secretaries_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Service_categories_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Services_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Settings_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Unavailabilities_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Users_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Webhooks_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/models/Working_plan_exceptions_model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/appointment_status_options.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/appointments_modal.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/backend_footer.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/backend_header.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_cancellation_frame.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_final_step.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_footer.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_header.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_info_step.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_no_services_message.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_time_step.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/booking_type_step.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/color_selection.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/company_color_style.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/cookie_notice_modal.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/custom_fields.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/google_analytics_script.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/js_lang_script.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/js_vars_script.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/ldap_import_modal.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/matomo_analytics_script.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/privacy_policy_modal.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/settings_nav.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/terms_and_conditions_modal.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/timezone_dropdown.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/unavailabilities_modal.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/components/working_plan_exceptions_modal.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/emails/account_recovery_email.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/emails/appointment_deleted_email.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/emails/appointment_saved_email.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/emails/password_reset_email.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/cli/error_404.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/cli/error_db.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/cli/error_exception.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/cli/error_general.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/cli/error_php.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/html/error_404.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/html/error_db.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/html/error_exception.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/html/error_general.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/errors/html/error_php.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/layouts/account_layout.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/layouts/backend_layout.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/layouts/booking_layout.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/layouts/message_layout.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/about.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/account.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/admins.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/altcha_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/api_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/blocked_periods.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/booking.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/booking_cancellation.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/booking_confirmation.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/booking_message.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/booking_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/business_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/calendar.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/customers.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/general_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/google_analytics_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/google_calendar_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/installation.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/integrations.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/jitsi_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/ldap_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/legal_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/login.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/logout.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/matomo_analytics_settings.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/password_reset.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/providers.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/recovery.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/secretaries.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/service_categories.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/services.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/update.php",
+      "language": "PHP"
+    },
+    {
+      "file": "application/views/pages/webhooks.php",
+      "language": "PHP"
+    },
+    {
+      "file": "assets/js/app.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/components/appointment_status_options.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/components/appointments_modal.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/components/color_selection.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/components/ldap_import_modal.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/components/unavailabilities_modal.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/components/working_plan_exceptions_modal.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/account_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/admins_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/altcha_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/api_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/appointments_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/blocked_periods_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/booking_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/booking_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/business_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/caldav_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/calendar_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/customers_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/general_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/google_analytics_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/google_calendar_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/google_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/jitsi_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/ldap_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/legal_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/localization_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/login_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/matomo_analytics_settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/password_reset_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/providers_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/recovery_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/secretaries_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/service_categories_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/services_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/settings_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/unavailabilities_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/http/webhooks_http_client.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/layouts/account_layout.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/layouts/backend_layout.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/layouts/booking_layout.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/layouts/message_layout.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/account.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/admins.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/altcha_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/api_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/blocked_periods.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/booking.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/booking_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/business_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/calendar.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/customers.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/general_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/google_analytics_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/google_calendar_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/installation.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/jitsi_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/ldap_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/legal_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/login.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/matomo_analytics_settings.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/password_reset.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/providers.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/recovery.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/secretaries.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/service_categories.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/services.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/pages/webhooks.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/altcha.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/calendar_default_view.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/calendar_event_popover.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/calendar_sync.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/calendar_table_view.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/date.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/file.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/http.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/lang.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/message.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/string.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/ui.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/url.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/validation.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "assets/js/utils/working_plan.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "config-sample.php",
+      "language": "PHP"
+    },
+    {
+      "file": "gulpfile.js",
+      "language": "JavaScript"
+    },
+    {
+      "file": "index.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Benchmark.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/CodeIgniter.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Common.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Config.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Controller.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Exceptions.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Hooks.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Input.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Loader.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Log.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Model.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Output.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Router.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Security.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/URI.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/Utf8.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/compat/hash.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/compat/mbstring.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/compat/password.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/core/compat/standard.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/DB.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/DB_cache.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/DB_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/DB_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/DB_query_builder.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/DB_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/DB_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/cubrid/cubrid_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/cubrid/cubrid_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/cubrid/cubrid_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/cubrid/cubrid_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/ibase/ibase_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/ibase/ibase_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/ibase/ibase_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/ibase/ibase_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mssql/mssql_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mssql/mssql_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mssql/mssql_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mssql/mssql_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysql/mysql_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysql/mysql_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysql/mysql_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysql/mysql_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysqli/mysqli_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysqli/mysqli_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysqli/mysqli_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/mysqli/mysqli_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/oci8/oci8_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/oci8/oci8_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/oci8/oci8_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/oci8/oci8_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/odbc/odbc_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/odbc/odbc_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/odbc/odbc_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/odbc/odbc_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/pdo_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/pdo_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/pdo_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/pdo_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_4d_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_4d_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_cubrid_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_cubrid_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_dblib_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_dblib_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_firebird_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_firebird_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_ibm_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_ibm_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_informix_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_informix_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_mysql_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_mysql_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_oci_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_oci_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_odbc_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_odbc_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_pgsql_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_pgsql_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_sqlite_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_sqlite_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_sqlsrv_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/pdo/subdrivers/pdo_sqlsrv_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/postgre/postgre_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/postgre/postgre_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/postgre/postgre_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/postgre/postgre_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlite3/sqlite3_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlite3/sqlite3_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlite3/sqlite3_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlite3/sqlite3_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlsrv/sqlsrv_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlsrv/sqlsrv_forge.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlsrv/sqlsrv_result.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/database/drivers/sqlsrv/sqlsrv_utility.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/array_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/captcha_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/cookie_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/date_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/directory_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/download_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/file_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/form_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/html_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/inflector_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/language_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/number_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/path_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/security_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/string_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/text_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/typography_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/url_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/helpers/xml_helper.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/calendar_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/date_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/db_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/email_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/form_validation_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/ftp_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/imglib_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/migration_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/number_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/pagination_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/profiler_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/unit_test_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/language/english/upload_lang.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/Cache.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/drivers/Cache_apc.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/drivers/Cache_apcu.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/drivers/Cache_dummy.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/drivers/Cache_file.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/drivers/Cache_memcached.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/drivers/Cache_redis.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Cache/drivers/Cache_wincache.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Calendar.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Email.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Encrypt.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Encryption.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Form_validation.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Ftp.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Image_lib.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Migration.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Pagination.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Parser.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Profiler.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Session/Session.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Session/Session_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Session/drivers/Session_database_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Session/drivers/Session_files_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Session/drivers/Session_memcached_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Session/drivers/Session_redis_driver.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Table.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Trackback.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Typography.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Unit_test.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Upload.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/User_agent.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Xmlrpc.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Xmlrpcs.php",
+      "language": "PHP"
+    },
+    {
+      "file": "system/libraries/Zip.php",
+      "language": "PHP"
+    },
+    {
+      "file": "tests/TestCase.php",
+      "language": "PHP"
+    },
+    {
+      "file": "tests/Unit/Helper/ArrayHelperTest.php",
+      "language": "PHP"
+    },
+    {
+      "file": "tests/Unit/Helper/ValidationHelperTest.php",
+      "language": "PHP"
+    }
+  ],
+  "edges": [
+    {
+      "source": "tests/TestCase.php",
+      "target": "application/core/EA_Controller.php",
+      "import_type": "use",
+      "line_number": 6
+    }
+  ]
+}
