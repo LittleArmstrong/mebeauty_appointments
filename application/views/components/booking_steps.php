@@ -1,3 +1,10 @@
+<?php
+/**
+ * Local variables.
+ *
+ * None.
+ */
+?>
 <div class="overflow-hidden p-3 p-md-4 d-flex justify-content-center">
     <div id="steps" class="d-inline-block overflow-hidden">
         <div id="step-1" class="book-step active-step d-inline-block float-start rounded text-center bg-white"

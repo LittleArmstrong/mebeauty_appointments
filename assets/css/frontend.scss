@@ -36,14 +36,14 @@
 #book-appointment-wizard .book-step:not(.active-step) {
     height: 35px !important;
     width: 35px !important;
-    background: rgba(0,0,0,0.2) !important;
+    background: rgba(0,0,0,0.08) !important;
     padding: 8px !important;
     margin-right: 12px !important;
     margin-top: 6px !important;
 }
 
 #book-appointment-wizard .book-step:not(.active-step) strong {
-    color: rgba(255,255,255,0.5) !important;
+    color: rgba(0,0,0,0.45) !important;
     font-size: 12px !important;
 }
 
@@ -332,7 +332,7 @@ $mebeauty-gold: #d1ae5e !default;
 }
 
 .site-footer {
-    border-top: 1px solid #d1ae5e;
+    border-top: 1px solid $mebeauty-gold;
     background: #000;
     color: #fff;
     padding: 3rem 1rem 0.5rem;
@@ -369,7 +369,7 @@ $mebeauty-gold: #d1ae5e !default;
     font-weight: 600;
     font-style: italic;
     letter-spacing: 0.1em;
-    color: #d1ae5e;
+    color: $mebeauty-gold;
 }
 
 .site-footer h2 a {
@@ -383,7 +383,7 @@ $mebeauty-gold: #d1ae5e !default;
     font-family: 'Dancing Script', cursive;
     font-size: 1.875rem;
     font-weight: 600;
-    color: #d1ae5e;
+    color: $mebeauty-gold;
 }
 
 .site-footer a {
@@ -393,7 +393,7 @@ $mebeauty-gold: #d1ae5e !default;
 }
 
 .site-footer a:hover {
-    color: #d1ae5e;
+    color: $mebeauty-gold;
 }
 
 .site-footer-social {
@@ -457,9 +457,9 @@ $mebeauty-gold: #d1ae5e !default;
     z-index: 40;
     padding: 0.75rem;
     border-radius: 9999px;
-    background: #d1ae5e;
+    background: $mebeauty-gold;
     color: #000;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
     transition: transform 0.15s ease-in-out;
 }
 
