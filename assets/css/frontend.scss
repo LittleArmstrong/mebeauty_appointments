@@ -80,3 +80,172 @@
 #book-appointment-wizard .flatpickr-calendar.inline {
     margin: auto; 
 }
+
+/* MeBeauty website layout (booking flow) */
+
+$mebeauty-gold: #d1ae5e !default;
+
+.site-navbar {
+    position: static;
+    left: 0;
+    right: 0;
+    z-index: 50;
+}
+
+.site-navbar > nav {
+    border-bottom: 1px solid $mebeauty-gold;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.625rem 1rem;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar > nav {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+.site-navbar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 80rem;
+    margin: 0 auto;
+}
+
+.site-navbar-logo {
+    display: flex;
+    align-items: center;
+}
+
+.site-navbar-logo img {
+    width: 5rem;
+    height: auto;
+    margin-right: 0.75rem;
+}
+
+.site-navbar-toggle {
+    display: flex;
+    align-items: center;
+    order: 2;
+}
+
+.site-navbar-toggle button {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.25rem;
+    padding: 0.5rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.site-navbar-toggle button:hover {
+    background: rgba($mebeauty-gold, 0.1);
+}
+
+.site-navbar-toggle button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px $mebeauty-gold;
+}
+
+.site-navbar-toggle svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: $mebeauty-gold;
+    fill: currentColor;
+}
+
+.site-navbar-toggle .svg-close {
+    display: none;
+}
+
+.site-navbar-toggle button.open .svg-burger {
+    display: none;
+}
+
+.site-navbar-toggle button.open .svg-close {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-toggle {
+        display: none;
+    }
+}
+
+.site-navbar-menu {
+    display: none;
+    order: 1;
+    width: 100%;
+}
+
+.site-navbar-menu.open {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: auto;
+    }
+}
+
+.site-navbar-menu ul {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 500;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu ul {
+        flex-direction: row;
+        margin-top: 0;
+        column-gap: 2rem;
+    }
+}
+
+.site-navbar-menu li {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.site-navbar-menu li:last-child {
+    margin-bottom: 0.25rem;
+    border-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu li {
+        border-bottom: 0;
+    }
+
+    .site-navbar-menu li:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.site-navbar-menu a {
+    display: block;
+    padding: 0.5rem 1rem 0.5rem 0.75rem;
+    color: #fff;
+    text-decoration: none;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu a {
+        padding: 0 0.25rem;
+    }
+
+    .site-navbar-menu a:hover {
+        color: $mebeauty-gold;
+    }
+}

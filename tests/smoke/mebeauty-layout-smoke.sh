@@ -13,5 +13,8 @@ check() {
 
 check "booking-theme"      "$BASE/index.php/booking" 'themes/mebeauty'
 check "booking-black-page" "$BASE/index.php/booking" 'site-page'
+check "booking-navbar-logo" "$BASE/index.php/booking" 'mebeauty/logo\.png'
+check "booking-nav-links"   "$BASE/index.php/booking" 'mebeauty-koeln\.de/Behandlungen'
+check "booking-mobile-menu" "$BASE/index.php/booking" 'navbar-mobile-menu'
 
 exit $FAIL
