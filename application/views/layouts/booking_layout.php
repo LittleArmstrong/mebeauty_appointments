@@ -23,7 +23,7 @@
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/vendor/cookieconsent/cookieconsent.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/vendor/flatpickr/flatpickr.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/vendor/flatpickr/material_green.min.css') ?>">
-    <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/css/themes/' . vars('theme') . '.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/css/themes/mebeauty.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/css/general.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/css/frontend.css') ?>">
 
@@ -32,7 +32,7 @@
     <?php slot('styles'); ?>
 </head>
 
-<body>
+<body class="site-page">
 <div id="main" class="container min-vh-100">
     <div class="row wrapper min-vh-100 justify-content-center align-items-center py-0 py-md-3">
         <div id="book-appointment-wizard" class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0 my-auto">
