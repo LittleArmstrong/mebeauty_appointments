@@ -21,14 +21,14 @@
 #book-appointment-wizard .book-step.active-step {
     height: 45px !important;
     width: 45px !important;
-    background: var(--bs-white) !important;
+    background: var(--bs-black) !important;
     padding: 7px !important;
     margin-right: 13px !important;
     margin-top: 0 !important;
 }
 
 #book-appointment-wizard .book-step.active-step strong {
-    color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
     font-size: 21px !important;
 }
 
