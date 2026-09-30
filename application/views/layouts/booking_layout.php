@@ -4,18 +4,18 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="theme-color" content="#35A768">
+    <meta name="theme-color" content="#d1ae5e">
     <meta name="google" content="notranslate">
 
-    <meta property="og:title" content="<?= lang('page_title') . ' ' . e(vars('company_name')) ?> | Easy!Appointments"/>
-    <meta property="og:description" content="Book Your Appointment With A Few Clicks"/>
+    <meta property="og:title" content="Buchung | MeBeauty"/>
+    <meta property="og:description" content="Termin online buchen – MeBeauty Köln"/>
     <meta property="og:url" content="<?= base_url() ?>">
-    <meta property="og:image" content="<?= base_url('assets/img/social-card.png') ?>"/>
+    <meta property="og:image" content="<?= base_url('assets/img/mebeauty/logo.png') ?>"/>
     <meta property="og:type" content="website">
 
     <?php slot('meta'); ?>
 
-    <title><?= lang('page_title') . ' ' . e(vars('company_name')) ?> | Easy!Appointments</title>
+    <title>Buchung | MeBeauty – Termin online buchen</title>
 
     <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/favicon.ico') ?>">
     <link rel="icon" sizes="192x192" href="<?= asset_url('assets/img/logo.png') ?>">
@@ -40,10 +40,7 @@
     <div class="row wrapper min-vh-100 justify-content-center align-items-center py-0 py-md-3">
         <div id="book-appointment-wizard" class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0 my-auto">
 
-            <?php component('booking_header', [
-                'company_name' => vars('company_name'),
-                'company_logo' => vars('company_logo'),
-            ]); ?>
+            <?php component('booking_steps'); ?>
 
             <?php slot('content'); ?>
 
