@@ -4,9 +4,13 @@
 
 **Blocked by:** 01: Theme-Fundament + Assets
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Navbar mit Logo und vier Links auf `https://mebeauty-koeln.de` sichtbar über der Buchungsseite.
 - [ ] Auf Desktop sichtbar (ab 1024px), auf Mobil verborgen hinter Hamburger-Button.
 - [ ] Hamburger-Menü öffnet/schließt das Menü und wechselt das Icon (Burger ↔ Schließen).
 - [ ] Smoke-Check: Logo-Asset, Website-Links und Mobile-Menü-Markup im gerenderten HTML vorhanden.
+
+## Comments
+
+Implemented on integration branch `agent/mebeauty-reskin-integration`. Commit `d1a0abee`.

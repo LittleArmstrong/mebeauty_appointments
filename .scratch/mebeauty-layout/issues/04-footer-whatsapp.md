@@ -4,10 +4,14 @@
 
 **Blocked by:** 01: Theme-Fundament + Assets
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Footer mit Social-Icons (Instagram, TikTok, WhatsApp), Behandlungsliste (8 Links auf Website-Anker), Kontaktdaten (Telefon, E-Mail, Adresse) und Telefonsprechzeiten sichtbar.
 - [ ] Impressum/Datenschutz-Links aus den bestehenden Einstellungen, mit den Website-Seiten als Fallback.
 - [ ] Schwebender WhatsApp-Button (wa.me-Link) unten rechts sichtbar.
 - [ ] Responsives Raster: 1 Spalte (Mobil) → 2 (md) → 4 (lg).
 - [ ] Smoke-Check: Behandlungs-Links, Kontaktdaten, Rechtslinks und WhatsApp-Link im gerenderten HTML vorhanden.
+
+## Comments
+
+Implemented on integration branch `agent/mebeauty-reskin-integration`. Commits: `9e1ca14c` (Footer+WhatsApp), `11e699e5` (Smoke-Check verschärft), `6967b545` (Review-Fixes: Legal-Mapping korrigiert auf EA-Semantik imprint_url=Impressum / legal_notice_url=Datenschutz).
