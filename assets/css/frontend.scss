@@ -90,6 +90,8 @@ $mebeauty-gold: #d1ae5e !default;
     left: 0;
     right: 0;
     z-index: 50;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
 }
 
 .site-navbar > nav {
@@ -121,7 +123,7 @@ $mebeauty-gold: #d1ae5e !default;
 
 .site-navbar-logo img {
     width: 5rem;
-    height: auto;
+    height: 4rem;
     margin-right: 0.75rem;
 }
 
@@ -173,7 +175,7 @@ $mebeauty-gold: #d1ae5e !default;
 }
 
 @media (min-width: 1024px) {
-    .site-navbar-toggle {
+    .site-navbar-toggle button {
         display: none;
     }
 }
@@ -226,10 +228,6 @@ $mebeauty-gold: #d1ae5e !default;
 @media (min-width: 1024px) {
     .site-navbar-menu li {
         border-bottom: 0;
-    }
-
-    .site-navbar-menu li:last-child {
-        margin-bottom: 0;
     }
 }
 
