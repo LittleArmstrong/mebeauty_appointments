@@ -38,7 +38,7 @@ Die Buchungsseite (Booking-Flow) erhält das Layout der MeBeauty-Website als SCS
 
 - Kein Vendoring der kompilierten Astro-CSS: Das Design wird als Bootstrap-Theme (`mebeauty`) plus Komponenten-Styles in SCSS nachgebaut; der bestehende Gulp-Build kompiliert alles. Optisches Ziel ist 1:1-Gleichheit mit der Website (Layout wie `Kontakt.astro`, `siteTitle` „Buchung").
 - Design-Tokens: Gold `#d1ae5e` (Primary), Goldenrod `#FFCC66`, Seitenhintergrund Schwarz, Basisschrift Karla, Akzentschrift Dancing Script; Breakpoints wie Tailwind (md 768px, lg 1024px).
-- Die Buchungsseite lädt das mebeauty-Theme fest; das Backend behält seine eigene Theme-Auswahl.
+- Die Buchungsseite nutzt das Theme über die bestehende Theme-Einstellung (kein Hardcoding im Layout); „mebeauty" wird als Theme-Option angeboten und per Migration als Standard gesetzt, ohne explizite nicht-Standard-Wahlen zu überschreiben. Das Backend behält seine eigene Theme-Auswahl.
 - Neue View-Komponenten: Website-Navbar, Intro-Hero, Website-Footer, WhatsApp-Button. Der bisherige Buchungs-Kopfbereich (Firmenlogo/-name) entfällt; der Schritt-Indikator wandert in eine eigene Komponente; der Card-Footer mit Sprachwahl und Login bleibt.
 - Navbar: Logo + vier Links absolut auf die Hauptdomain (Home, Behandlungen, Preise, Kontakt), absolute Positionierung über dem Hero, Hamburger-Menü mit Vanilla-JS.
 - Intro: Hero-Bild, Gradient-Overlay (rgba(38,35,29,0.6) → #26241e), Titel in Dancing Script mit goldenem Unterstrich, kein zusätzlicher Button (wie auf der Kontaktseite).
