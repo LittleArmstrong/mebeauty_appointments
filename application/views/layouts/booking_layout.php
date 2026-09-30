@@ -57,6 +57,9 @@
     </div>
 </div>
 
+<?php component('site_footer'); ?>
+<?php component('site_whatsapp'); ?>
+
 <?php if (vars('display_cookie_notice') === '1'): ?>
     <?php component('cookie_notice_modal', ['cookie_notice_content' => vars('cookie_notice_content')]); ?>
 <?php endif; ?>

@@ -18,5 +18,9 @@ check "booking-nav-links"   "$BASE/index.php/booking" 'mebeauty-koeln\.de/Behand
 check "booking-mobile-menu" "$BASE/index.php/booking" 'navbar-mobile-menu'
 check "booking-hero"       "$BASE/index.php/booking" 'site-intro'
 check "booking-hero-title" "$BASE/index.php/booking" '>Buchung</h1>'
+check "booking-footer-treatments" "$BASE/index.php/booking" 'mebeauty-koeln\.de/Behandlungen#01_Gesichtsbehandlungen'
+check "booking-footer-contact"     "$BASE/index.php/booking" 'Fußfallstr\. 25a'
+check "booking-footer-legal"       "$BASE/index.php/booking" 'mebeauty-koeln\.de/Impressum'
+check "booking-whatsapp"           "$BASE/index.php/booking" 'wa\.me/4917619256689'
 
 exit $FAIL
