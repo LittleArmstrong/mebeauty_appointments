@@ -16,5 +16,7 @@ check "booking-black-page" "$BASE/index.php/booking" 'site-page'
 check "booking-navbar-logo" "$BASE/index.php/booking" 'mebeauty/logo\.png'
 check "booking-nav-links"   "$BASE/index.php/booking" 'mebeauty-koeln\.de/Behandlungen'
 check "booking-mobile-menu" "$BASE/index.php/booking" 'navbar-mobile-menu'
+check "booking-hero"       "$BASE/index.php/booking" 'site-intro'
+check "booking-hero-title" "$BASE/index.php/booking" '>Buchung</h1>'
 
 exit $FAIL

@@ -34,6 +34,7 @@
 
 <body class="site-page">
 <?php component('site_navbar'); ?>
+<?php component('site_intro', ['title' => 'Buchung']); ?>
 
 <div id="main" class="container min-vh-100">
     <div class="row wrapper min-vh-100 justify-content-center align-items-center py-0 py-md-3">
