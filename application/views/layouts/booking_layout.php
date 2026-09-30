@@ -37,7 +37,7 @@
 <?php component('site_intro', ['title' => 'Buchung']); ?>
 
 <div id="main" class="container">
-    <div class="row wrapper justify-content-center py-12">
+    <div class="row wrapper justify-content-center py-24">
         <div id="book-appointment-wizard" class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0">
 
             <?php component('booking_steps'); ?>

@@ -42,10 +42,10 @@ $imprint_url = vars('imprint_url') ?: $site_url . '/Impressum';
             <h3>Telefon</h3>
             <p><a href="tel:+4917619256689">+49 176 192 566 89</a></p>
             <p><a href="tel:+491786827117">+49 178 682 71 17 (Olga)</a></p>
-            <h3 class="mt-4">E-Mail</h3>
+            <h3>E-Mail</h3>
             <p><a href="mailto:info@mebeauty-koeln.de">info@mebeauty-koeln.de</a></p>
             <p><a href="mailto:olga@rebirth-of-shakti.de">olga@rebirth-of-shakti.de</a></p>
-            <h3 class="mt-4">Adresse</h3>
+            <h3>Adresse</h3>
             <a href="https://maps.apple.com/?q=Mebeauty+K%C3%B6ln+51109" target="_blank">
                 <p>Fußfallstr. 25a</p>
                 <p>51109 Köln</p>
