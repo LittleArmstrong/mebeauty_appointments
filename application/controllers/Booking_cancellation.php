@@ -35,6 +35,7 @@ class Booking_cancellation extends EA_Controller
         $this->load->library('synchronization');
         $this->load->library('notifications');
         $this->load->library('webhooks_client');
+        $this->load->library('availability');
     }
 
     /**
@@ -97,6 +98,30 @@ class Booking_cancellation extends EA_Controller
             $appointment = $occurrences[0];
 
             $provider = $this->providers_model->find($appointment['id_users_provider']);
+
+            // Make sure the appointment can still be cancelled.
+
+            $lock = $this->availability->get_appointment_lock($appointment['start_datetime'], $provider['timezone']);
+
+            if ($lock['locked']) {
+                html_vars([
+                    'page_title' => lang('appointment_locked'),
+                    'company_color' => setting('company_color'),
+                    'message_title' => lang('appointment_locked'),
+                    'message_text' => strtr($lock['message'], [
+                        '{$limit}' => $lock['limit_text'],
+                    ]),
+                    'message_icon' => base_url('assets/img/error.png'),
+                    'google_analytics_code' => setting('google_analytics_code'),
+                    'matomo_analytics_url' => setting('matomo_analytics_url'),
+                    'matomo_analytics_site_id' => setting('matomo_analytics_site_id'),
+                    'display_login_button' => setting('display_login_button'),
+                ]);
+
+                $this->load->view('pages/booking_message');
+
+                return;
+            }
 
             $customer = $this->customers_model->find($appointment['id_users_customer']);
 
