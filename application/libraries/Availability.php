@@ -571,6 +571,40 @@ class Availability
     }
 
     /**
+     * Get the booking deadline for the selected date.
+     *
+     * In fixed time mode the deadline of day D is (D - deadline days) at the deadline time. In minutes mode
+     * there is no such deadline and null is returned.
+     *
+     * @param string $date Selected date (Y-m-d).
+     * @param string $timezone Timezone used for the deadline calculation.
+     *
+     * @return DateTime|null Returns the deadline moment, or null when the minutes mode is active.
+     *
+     * @throws Exception
+     */
+    public function get_booking_deadline(string $date, string $timezone): ?DateTime
+    {
+        if (setting('booking_deadline_mode', 'minutes') !== 'fixed_time') {
+            return null;
+        }
+
+        $deadline_time = (string) setting('booking_deadline_time', '18:00');
+
+        $deadline_days = max(0, (int) setting('booking_deadline_days', '1'));
+
+        [$hour, $minute] = array_pad(explode(':', $deadline_time), 2, '0');
+
+        $deadline = new DateTime($date, new DateTimeZone($timezone));
+
+        $deadline->setTime((int) $hour, (int) $minute, 0);
+
+        $deadline->modify('-' . $deadline_days . ' days');
+
+        return $deadline;
+    }
+
+    /**
      * Consider the book advance timeout and remove available hours that have passed the threshold.
      *
      * If the selected date is today, remove past hours. It is important  include the timeout before booking
@@ -589,12 +623,24 @@ class Availability
     {
         $provider_timezone = new DateTimeZone($provider['timezone']);
 
-        $book_advance_timeout = setting('book_advance_timeout', 0);
-        $book_advance_timeout = is_numeric($book_advance_timeout) ? max(0, (int) $book_advance_timeout) : 0;
-
         $threshold = new DateTime('now', $provider_timezone);
 
-        $threshold->modify('+' . $book_advance_timeout . ' minutes');
+        $deadline = $this->get_booking_deadline($date, $provider['timezone']);
+
+        if ($deadline !== null) {
+            // Fixed time mode: once the deadline has passed the whole day is locked. No minimum lead
+            // time applies in this mode, only hours that lie in the past are filtered below.
+            if (new DateTime('now', $provider_timezone) > $deadline) {
+                return [];
+            }
+        } else {
+            // Minutes mode: keep the existing book advance timeout behavior.
+            $book_advance_timeout = setting('book_advance_timeout', 0);
+
+            $book_advance_timeout = is_numeric($book_advance_timeout) ? max(0, (int) $book_advance_timeout) : 0;
+
+            $threshold->modify('+' . $book_advance_timeout . ' minutes');
+        }
 
         foreach ($available_hours as $index => $value) {
             $available_hour = new DateTime($date . ' ' . $value, $provider_timezone);
