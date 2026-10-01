@@ -148,10 +148,21 @@ class Availability
             $slot_end = clone $slot_start;
             $slot_end->add($duration);
 
-            while ($slot_end <= $period['end']) {
+            $buffer_time = $this->get_buffer_time();
+
+            $end_of_day_buffer = setting('appointment_buffer_end_of_day', '1') === '1' ? $buffer_time : 0;
+
+            while ($slot_end->getTimestamp() + $end_of_day_buffer * 60 <= $period['end']->getTimestamp()) {
+                // The buffer after existing appointments shifts the conflict window backwards.
+                $conflict_start = clone $slot_start;
+
+                if ($buffer_time > 0) {
+                    $conflict_start->modify('-' . $buffer_time . ' minutes');
+                }
+
                 // Make sure there is no other service appointment for this time slot.
                 $other_service_attendants_number = $this->CI->appointments_model->get_other_service_attendants_number(
-                    $slot_start,
+                    $conflict_start,
                     $slot_end,
                     $service['id'],
                     $provider['id'],
@@ -166,7 +177,7 @@ class Availability
 
                 // Check reserved attendants for this time slot and see if current attendants fit.
                 $appointment_attendants_number = $this->CI->appointments_model->get_attendants_number_for_period(
-                    $slot_start,
+                    $conflict_start,
                     $slot_end,
                     $service['id'],
                     $provider['id'],
@@ -360,9 +371,27 @@ class Availability
             $where['id !='] = (int) $exclude_appointment_id;
         }
 
+        $buffer_time = $this->get_buffer_time();
+
+        $appointments = array_values($this->CI->appointments_model->get($where));
+
+        if ($buffer_time > 0) {
+            // The buffer reserves clean-up time after each real appointment. Unavailabilities and
+            // blocked periods are explicit blocks and are not extended.
+            foreach ($appointments as &$appointment) {
+                $appointment_end = new DateTime($appointment['end_datetime']);
+
+                $appointment_end->modify('+' . $buffer_time . ' minutes');
+
+                $appointment['end_datetime'] = $appointment_end->format('Y-m-d H:i:s');
+            }
+
+            unset($appointment);
+        }
+
         $appointments = array_values(
             array_merge(
-                $this->CI->appointments_model->get($where),
+                $appointments,
                 $this->CI->unavailabilities_model->get($where),
                 $this->CI->blocked_periods_model->get_for_period($date, $date),
             ),
@@ -558,7 +587,12 @@ class Availability
 
             $diff = $current_hour->diff($end_hour);
 
-            while ($diff->h * 60 + $diff->i >= (int) $service['duration'] && $diff->invert === 0) {
+            $end_of_day_buffer = setting('appointment_buffer_end_of_day', '1') === '1' ? $this->get_buffer_time() : 0;
+
+            while (
+                $diff->h * 60 + $diff->i >= (int) $service['duration'] + $end_of_day_buffer &&
+                $diff->invert === 0
+            ) {
                 $available_hours[] = $current_hour->format('H:i');
 
                 $current_hour->add(new DateInterval('PT' . $interval . 'M'));
@@ -602,6 +636,18 @@ class Availability
         $deadline->modify('-' . $deadline_days . ' days');
 
         return $deadline;
+    }
+
+    /**
+     * Get the normalized global buffer time in minutes.
+     *
+     * @return int
+     */
+    protected function get_buffer_time(): int
+    {
+        $buffer_time = setting('appointment_buffer_time', 0);
+
+        return is_numeric($buffer_time) ? max(0, (int) $buffer_time) : 0;
     }
 
     /**
