@@ -19,7 +19,8 @@
 
             <div class="col-12 col-lg-6">
                 <div id="select-time" class="mx-auto py-3" style="max-width: 288px;">
-                    <div class="mb-3">
+                    <?php $timezone_display = setting('booking_timezone_display', 'dropdown'); ?>
+                    <div id="booking-timezone-block" class="mb-3" <?= $timezone_display === 'dropdown' ? '' : 'hidden' ?>>
                         <label for="select-timezone" class="form-label">
                             <?= lang('timezone') ?>
                         </label>
