@@ -68,5 +68,8 @@ Die Buchungsseite (Booking-Flow) erhält das Layout der MeBeauty-Website als SCS
 ## Further Notes
 
 - Die Website bleibt die Design-Quelle der Wahrheit; Anpassungen dort müssen manuell im SCSS nachgezogen werden (in der ADR festgehalten).
-- GLOSSARY.md wird um die Begriffe Booking-Flow, Wizard-Card und mebeauty-Site ergänzt.
+- GLOSSARY.md wurde um die Begriffe Booking-Flow, Wizard-Card und mebeauty-Site ergänzt.
+- Die 1:1-Übereinstimmung (Navbar, Footer, Hero, Mobile-Menü) wurde per Playwright-Messung verifiziert; Methode und Referenzwerte: `docs/visual-measurement.md`.
+- Favicon wurde übernommen (echtes MeBeauty-Icon; die Website selbst liefert aktuell ein kaputtes Favicon).
+- Folgeticket außerhalb dieses Specs: PHPUnit-CLI-Bootstrap-Fix (`.scratch/phpunit-cli-bootstrap/issues/01-fix-cli-bootstrap.md`).
 - Der abschließende Session-Report folgt AGENTS.md (git status/diff, kein Commit ohne Freigabe).

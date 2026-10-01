@@ -15,3 +15,5 @@
 ## Comments
 
 Implemented on integration branch `agent/mebeauty-reskin-integration`. Commits: `9e1ca14c` (Footer+WhatsApp), `11e699e5` (Smoke-Check verschärft), `6967b545` (Review-Fixes: Legal-Mapping korrigiert auf EA-Semantik imprint_url=Impressum / legal_notice_url=Datenschutz).
+
+Follow-ups: Footer-Typografie 1:1 zur Website (20px/28px, h2 line-height 40px, p-Margins 0) — `8215d998`; Abstand Wizard↔Footer über Nutzerwahl (`my-5`) — `d2805e89`.

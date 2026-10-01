@@ -17,3 +17,5 @@
 ## Comments
 
 Implemented on integration branch `agent/mebeauty-reskin-integration`. Commits: `063d3d77` (Feinschliff+Smoke+Doku), `6967b545` (Review-Fixes: Steps-Kontrast auf heller Card, booking_header entfernt, Legal-Separator). Hinweis: `opencode export` schlug fehl (kein TTY im Subagent), im Session-Report vermerkt. Gulp-`build`-Vendor-Task hat ein vorbestehendes EACCES-Problem (Root-Ownership in Docker-Volume); `gulp styles` läuft fehlerfrei.
+
+Follow-ups: Stepper-Styling (schwarz → gold, weiße Zahl) — `bfc340d3`/`8215d998`; visuelle 1:1-Messung dokumentiert in `docs/visual-measurement.md` — `570a1dce`; `.vscode/settings.json` (Prettier für PHP deaktiviert) — `d2805e89`.

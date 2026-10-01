@@ -14,3 +14,5 @@
 ## Comments
 
 Implemented on integration branch `agent/mebeauty-reskin-integration`. Commit `1b99f3d1`.
+
+Follow-ups: Hero-Titel-Metriken 1:1 (line-height 1, weight 400) — `570a1dce`.

@@ -14,3 +14,5 @@
 ## Comments
 
 Implemented on integration branch `agent/mebeauty-reskin-integration`. Commit `d1a0abee`.
+
+Follow-ups: Navbar per Playwright-Messung 1:1 zur Website angeglichen (Menü zentriert, 20px/28px, Bar 85px) — `d03a25a0`; Referenzwerte in `docs/visual-measurement.md`.
