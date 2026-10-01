@@ -94,19 +94,121 @@
                             </div>
                         <?php endif; ?>
 
-                        <h5 class="mb-3 fw-light"><?= lang(
-                            'allow_rescheduling_cancellation_before',
-                        ) ?></h5>
+                        <h5 class="mb-3 fw-light"><?= lang('booking_deadline_mode') ?></h5>
 
                         <div class="mb-5">
-                            <label for="book-advance-timeout" class="form-label">
-                                <?= lang('timeout_minutes') ?>
+                            <label for="booking-deadline-mode" class="form-label">
+                                <?= lang('booking_deadline_mode') ?>
                             </label>
-                            <input id="book-advance-timeout" data-field="book_advance_timeout" class="form-control"
-                                   type="number" min="15">
+                            <select id="booking-deadline-mode" data-field="booking_deadline_mode" class="form-select">
+                                <option value="minutes"><?= lang('booking_deadline_mode_minutes') ?></option>
+                                <option value="fixed_time"><?= lang('booking_deadline_mode_fixed_time') ?></option>
+                            </select>
                             <div class="form-text text-muted">
                                 <small>
-                                    <?= lang('book_advance_timeout_hint') ?>
+                                    <?= lang('booking_deadline_mode_hint') ?>
+                                </small>
+                            </div>
+
+                            <div id="minutes-mode-fields" class="mt-3">
+                                <label for="book-advance-timeout" class="form-label">
+                                    <?= lang('timeout_minutes') ?>
+                                </label>
+                                <input id="book-advance-timeout" data-field="book_advance_timeout" class="form-control"
+                                       type="number" min="15">
+                                <div class="form-text text-muted">
+                                    <small>
+                                        <?= lang('book_advance_timeout_hint') ?>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div id="fixed-time-fields" class="mt-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="booking-deadline-time" class="form-label">
+                                            <?= lang('deadline_time') ?>
+                                        </label>
+                                        <input id="booking-deadline-time" data-field="booking_deadline_time"
+                                               class="form-control" type="time">
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('deadline_time_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="booking-deadline-days" class="form-label">
+                                            <?= lang('deadline_days') ?>
+                                        </label>
+                                        <input id="booking-deadline-days" data-field="booking_deadline_days"
+                                               class="form-control" type="number" min="0">
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('deadline_days_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3 fw-light"><?= lang('appointment_buffer_time') ?></h5>
+
+                        <div class="mb-5">
+                            <label for="appointment-buffer-time" class="form-label">
+                                <?= lang('appointment_buffer_time') ?>
+                            </label>
+                            <input id="appointment-buffer-time" data-field="appointment_buffer_time"
+                                   class="form-control" type="number" min="0">
+                            <div class="form-text text-muted">
+                                <small>
+                                    <?= lang('appointment_buffer_time_hint') ?>
+                                </small>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input id="appointment-buffer-end-of-day" data-field="appointment_buffer_end_of_day"
+                                       class="form-check-input" type="checkbox">
+                                <label for="appointment-buffer-end-of-day" class="form-check-label">
+                                    <?= lang('appointment_buffer_end_of_day') ?>
+                                </label>
+                            </div>
+                            <div class="form-text text-muted">
+                                <small>
+                                    <?= lang('appointment_buffer_end_of_day_hint') ?>
+                                </small>
+                            </div>
+                        </div>
+
+                        <h5 class="mb-3 fw-light"><?= lang('booking_timezone_display') ?></h5>
+
+                        <div class="mb-5">
+                            <label for="booking-timezone-display" class="form-label">
+                                <?= lang('booking_timezone_display') ?>
+                            </label>
+                            <select id="booking-timezone-display" data-field="booking_timezone_display"
+                                    class="form-select">
+                                <option value="dropdown"><?= lang('booking_timezone_display_dropdown') ?></option>
+                                <option value="confirm_only"><?= lang('booking_timezone_display_confirm_only') ?></option>
+                                <option value="hidden"><?= lang('booking_timezone_display_hidden') ?></option>
+                            </select>
+                            <div class="form-text text-muted">
+                                <small>
+                                    <?= lang('booking_timezone_display_hint') ?>
+                                </small>
+                            </div>
+
+                            <label for="booking-timezone-source" class="form-label mt-3">
+                                <?= lang('booking_timezone_source') ?>
+                            </label>
+                            <select id="booking-timezone-source" data-field="booking_timezone_source"
+                                    class="form-select">
+                                <option value="company"><?= lang('booking_timezone_source_company') ?></option>
+                                <option value="browser"><?= lang('booking_timezone_source_browser') ?></option>
+                            </select>
+                            <div class="form-text text-muted">
+                                <small>
+                                    <?= lang('booking_timezone_source_hint') ?>
                                 </small>
                             </div>
                         </div>
