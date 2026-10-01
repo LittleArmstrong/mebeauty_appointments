@@ -244,27 +244,48 @@ class Booking extends EA_Controller
             $appointment = $results[0];
             $provider = $this->providers_model->find($appointment['id_users_provider']);
 
-            // Make sure the appointment can still be rescheduled.
+            // Make sure the appointment can still be rescheduled or cancelled.
 
             $provider_timezone = new DateTimeZone($provider['timezone']);
 
             $appointment_start = new DateTime($appointment['start_datetime'], $provider_timezone);
 
-            $limit = new DateTime('now', $provider_timezone);
+            $deadline = $this->availability->get_booking_deadline(
+                $appointment_start->format('Y-m-d'),
+                $provider['timezone'],
+            );
 
-            $limit->modify('+' . $book_advance_timeout . ' minutes');
+            if ($deadline !== null) {
+                // Fixed time mode: the whole day is locked once the deadline has passed.
+                $is_locked = new DateTime('now', $provider_timezone) > $deadline;
 
-            if ($appointment_start < $limit) {
+                $limit_text = format_date_time($deadline);
+
+                $locked_message = lang('appointment_locked_message_deadline');
+            } else {
+                // Minutes mode: keep the existing advance timeout behavior.
+                $limit = new DateTime('now', $provider_timezone);
+
+                $limit->modify('+' . $book_advance_timeout . ' minutes');
+
+                $is_locked = $appointment_start < $limit;
+
                 $hours = floor($book_advance_timeout / 60);
 
                 $minutes = $book_advance_timeout % 60;
 
+                $limit_text = sprintf('%02d:%02d', $hours, $minutes);
+
+                $locked_message = lang('appointment_locked_message');
+            }
+
+            if ($is_locked) {
                 html_vars([
                     'show_message' => true,
                     'page_title' => lang('page_title') . ' ' . $company_name,
                     'message_title' => lang('appointment_locked'),
-                    'message_text' => strtr(lang('appointment_locked_message'), [
-                        '{$limit}' => sprintf('%02d:%02d', $hours, $minutes),
+                    'message_text' => strtr($locked_message, [
+                        '{$limit}' => $limit_text,
                     ]),
                     'message_icon' => base_url('assets/img/error.png'),
                     'google_analytics_code' => $google_analytics_code,
