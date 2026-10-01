@@ -30,15 +30,15 @@ class Migration_Add_booking_deadline_and_buffer_settings extends EA_Migration
     public function down(): void
     {
         $this->db
-            ->where_in('name', array_keys([
-                'booking_deadline_mode' => 'minutes',
-                'booking_deadline_time' => '18:00',
-                'booking_deadline_days' => '1',
-                'appointment_buffer_time' => '0',
-                'appointment_buffer_end_of_day' => '1',
-                'booking_timezone_display' => 'dropdown',
-                'booking_timezone_source' => 'company',
-            ]))
+            ->where_in('name', [
+                'booking_deadline_mode',
+                'booking_deadline_time',
+                'booking_deadline_days',
+                'appointment_buffer_time',
+                'appointment_buffer_end_of_day',
+                'booking_timezone_display',
+                'booking_timezone_source',
+            ])
             ->delete('settings');
     }
 }

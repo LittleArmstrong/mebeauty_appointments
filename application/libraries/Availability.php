@@ -150,7 +150,7 @@ class Availability
 
             $buffer_time = $this->get_buffer_time();
 
-            $end_of_day_buffer = setting('appointment_buffer_end_of_day', '1') === '1' ? $buffer_time : 0;
+            $end_of_day_buffer = $this->get_end_of_day_buffer();
 
             while ($slot_end->getTimestamp() + $end_of_day_buffer * 60 <= $period['end']->getTimestamp()) {
                 // The buffer after existing appointments shifts the conflict window backwards.
@@ -587,7 +587,7 @@ class Availability
 
             $diff = $current_hour->diff($end_hour);
 
-            $end_of_day_buffer = setting('appointment_buffer_end_of_day', '1') === '1' ? $this->get_buffer_time() : 0;
+            $end_of_day_buffer = $this->get_end_of_day_buffer();
 
             while (
                 $diff->h * 60 + $diff->i >= (int) $service['duration'] + $end_of_day_buffer &&
@@ -651,6 +651,74 @@ class Availability
     }
 
     /**
+     * Get the buffer time that applies at the end of the day.
+     *
+     * Returns the global buffer time when the end-of-day buffer is enabled, otherwise zero.
+     *
+     * @return int
+     */
+    protected function get_end_of_day_buffer(): int
+    {
+        return setting('appointment_buffer_end_of_day', '1') === '1' ? $this->get_buffer_time() : 0;
+    }
+
+    /**
+     * Check whether the given deadline has already passed.
+     *
+     * @param DateTime $deadline The deadline moment.
+     * @param string $timezone Timezone used for the current time.
+     *
+     * @return bool Returns true when the current time is after the deadline.
+     *
+     * @throws Exception
+     */
+    public function is_deadline_passed(DateTime $deadline, string $timezone): bool
+    {
+        return new DateTime('now', new DateTimeZone($timezone)) > $deadline;
+    }
+
+    /**
+     * Get the lock status of an appointment start moment.
+     *
+     * In fixed time mode the appointment is locked once the booking deadline of its day has passed. In minutes
+     * mode the appointment is locked when its start lies inside the book advance timeout window.
+     *
+     * @param string $start_datetime Appointment start date and time.
+     * @param string $timezone Timezone used for the lock calculation.
+     *
+     * @return array{locked: bool, limit_text: string, message: string} Returns the lock status, the formatted
+     * limit for the message and the language message key content.
+     *
+     * @throws Exception
+     */
+    public function get_appointment_lock(string $start_datetime, string $timezone): array
+    {
+        $appointment_start = new DateTime($start_datetime, new DateTimeZone($timezone));
+
+        $deadline = $this->get_booking_deadline($appointment_start->format('Y-m-d'), $timezone);
+
+        if ($deadline !== null) {
+            return [
+                'locked' => $this->is_deadline_passed($deadline, $timezone),
+                'limit_text' => format_date_time($deadline),
+                'message' => lang('appointment_locked_message_deadline'),
+            ];
+        }
+
+        $book_advance_timeout = setting('book_advance_timeout', 0);
+        $book_advance_timeout = is_numeric($book_advance_timeout) ? max(0, (int) $book_advance_timeout) : 0;
+
+        $limit = new DateTime('now', new DateTimeZone($timezone));
+        $limit->modify('+' . $book_advance_timeout . ' minutes');
+
+        return [
+            'locked' => $appointment_start < $limit,
+            'limit_text' => sprintf('%02d:%02d', intdiv($book_advance_timeout, 60), $book_advance_timeout % 60),
+            'message' => lang('appointment_locked_message'),
+        ];
+    }
+
+    /**
      * Consider the book advance timeout and remove available hours that have passed the threshold.
      *
      * If the selected date is today, remove past hours. It is important  include the timeout before booking
@@ -676,7 +744,7 @@ class Availability
         if ($deadline !== null) {
             // Fixed time mode: once the deadline has passed the whole day is locked. No minimum lead
             // time applies in this mode, only hours that lie in the past are filtered below.
-            if (new DateTime('now', $provider_timezone) > $deadline) {
+            if ($this->is_deadline_passed($deadline, $provider['timezone'])) {
                 return [];
             }
         } else {
