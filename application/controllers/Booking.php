@@ -330,6 +330,8 @@ class Booking extends EA_Controller
             'customer_token' => $customer_token,
             'default_language' => setting('default_language'),
             'default_timezone' => setting('default_timezone'),
+            'booking_timezone_display' => setting('booking_timezone_display', 'dropdown'),
+            'booking_timezone_source' => setting('booking_timezone_source', 'company'),
         ]);
 
         html_vars([

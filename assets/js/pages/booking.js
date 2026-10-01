@@ -168,9 +168,16 @@ App.Pages.Booking = (function () {
 
         App.Utils.UI.setDateTimePickerValue($selectDate, new Date());
 
-        const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const isTimezoneSupported = $selectTimezone.find(`option[value="${browserTimezone}"]`).length > 0;
-        $selectTimezone.val(isTimezoneSupported ? browserTimezone : 'UTC');
+        const timezoneDisplay = vars('booking_timezone_display');
+        const timezoneSource = vars('booking_timezone_source');
+
+        if (timezoneDisplay === 'dropdown' || timezoneSource === 'browser') {
+            const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const isTimezoneSupported = $selectTimezone.find(`option[value="${browserTimezone}"]`).length > 0;
+            $selectTimezone.val(isTimezoneSupported ? browserTimezone : 'UTC');
+        } else {
+            $selectTimezone.val(vars('default_timezone'));
+        }
 
         // Bind the event handlers (might not be necessary every time we use this class).
         addEventListeners();
@@ -726,7 +733,12 @@ App.Pages.Booking = (function () {
                 selectedTime;
         }
 
-        const timezoneOptionText = $selectTimezone.find('option:selected').text();
+        const timezoneRow = vars('booking_timezone_display') === 'hidden'
+            ? ''
+            : `<div class="mb-2">
+                    <i class="fas fa-globe me-2"></i>
+                    ${$selectTimezone.find('option:selected').text()}
+                </div>`;
 
         $('#appointment-details').html(`
             <div>
@@ -744,10 +756,7 @@ App.Pages.Booking = (function () {
                     <i class="fas fa-clock me-2"></i>
                     ${service.duration} ${lang('minutes')}
                 </div>
-                <div class="mb-2">
-                    <i class="fas fa-globe me-2"></i>
-                    ${timezoneOptionText}
-                </div> 
+                ${timezoneRow}
                 <div class="mb-2" ${!Number(service.price) ? 'hidden' : ''}>
                     <i class="fas fa-cash-register me-2"></i>
                     ${Number(service.price).toFixed(2)} ${service.currency}
