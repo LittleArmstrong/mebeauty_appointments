@@ -22,6 +22,27 @@ window.App.Layouts.Booking = (function () {
      */
     function initialize() {
         App.Utils.Lang.enableLanguageSelection($selectLanguage);
+        initializeMobileMenu();
+    }
+
+    /**
+     * Toggle the mebeauty navbar mobile menu (burger menu).
+     */
+    function initializeMobileMenu() {
+        const $menuBtn = $('#navbar-mobile-menu-btn');
+        const $menu = $('#navbar-mobile-menu');
+
+        if (!$menuBtn.length || !$menu.length) {
+            return;
+        }
+
+        $menuBtn.on('click', () => {
+            const open = !$menu.hasClass('open');
+
+            $menu.toggleClass('open', open);
+            $menuBtn.toggleClass('open', open);
+            $menuBtn.attr('aria-expanded', open ? 'true' : 'false');
+        });
     }
 
     document.addEventListener('DOMContentLoaded', initialize);

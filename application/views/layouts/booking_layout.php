@@ -4,21 +4,21 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="theme-color" content="#35A768">
+    <meta name="theme-color" content="#d1ae5e">
     <meta name="google" content="notranslate">
 
-    <meta property="og:title" content="<?= lang('page_title') . ' ' . e(vars('company_name')) ?> | Easy!Appointments"/>
-    <meta property="og:description" content="Book Your Appointment With A Few Clicks"/>
+    <meta property="og:title" content="Buchung | MeBeauty"/>
+    <meta property="og:description" content="Termin online buchen – MeBeauty Köln"/>
     <meta property="og:url" content="<?= base_url() ?>">
-    <meta property="og:image" content="<?= base_url('assets/img/social-card.png') ?>"/>
+    <meta property="og:image" content="<?= base_url('assets/img/mebeauty/logo.png') ?>"/>
     <meta property="og:type" content="website">
 
     <?php slot('meta'); ?>
 
-    <title><?= lang('page_title') . ' ' . e(vars('company_name')) ?> | Easy!Appointments</title>
+    <title>Buchung | MeBeauty – Termin online buchen</title>
 
-    <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/favicon.ico') ?>">
-    <link rel="icon" sizes="192x192" href="<?= asset_url('assets/img/logo.png') ?>">
+    <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/mebeauty/favicon.ico') ?>">
+    <link rel="icon" sizes="192x192" href="<?= asset_url('assets/img/mebeauty/icon-192.png') ?>">
 
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/vendor/cookieconsent/cookieconsent.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/vendor/flatpickr/flatpickr.min.css') ?>">
@@ -32,15 +32,15 @@
     <?php slot('styles'); ?>
 </head>
 
-<body>
-<div id="main" class="container min-vh-100">
-    <div class="row wrapper min-vh-100 justify-content-center align-items-center py-0 py-md-3">
-        <div id="book-appointment-wizard" class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0 my-auto">
+<body class="site-page">
+<?php component('site_navbar'); ?>
+<?php component('site_intro', ['title' => 'Buchung']); ?>
 
-            <?php component('booking_header', [
-                'company_name' => vars('company_name'),
-                'company_logo' => vars('company_logo'),
-            ]); ?>
+<div id="main" class="container my-5">
+    <div class="row wrapper justify-content-center">
+        <div id="book-appointment-wizard" class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0">
+
+            <?php component('booking_steps'); ?>
 
             <?php slot('content'); ?>
 
@@ -53,6 +53,9 @@
         </div>
     </div>
 </div>
+
+<?php component('site_footer'); ?>
+<?php component('site_whatsapp'); ?>
 
 <?php if (vars('display_cookie_notice') === '1'): ?>
     <?php component('cookie_notice_modal', ['cookie_notice_content' => vars('cookie_notice_content')]); ?>

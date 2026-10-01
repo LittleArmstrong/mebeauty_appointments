@@ -21,14 +21,14 @@
 #book-appointment-wizard .book-step.active-step {
     height: 45px !important;
     width: 45px !important;
-    background: var(--bs-white) !important;
+    background: var(--bs-primary) !important;
     padding: 7px !important;
     margin-right: 13px !important;
     margin-top: 0 !important;
 }
 
 #book-appointment-wizard .book-step.active-step strong {
-    color: var(--bs-primary) !important;
+    color: var(--bs-white) !important;
     font-size: 21px !important;
 }
 
@@ -36,14 +36,14 @@
 #book-appointment-wizard .book-step:not(.active-step) {
     height: 35px !important;
     width: 35px !important;
-    background: rgba(0,0,0,0.2) !important;
+    background: rgba(0,0,0,0.08) !important;
     padding: 8px !important;
     margin-right: 12px !important;
     margin-top: 6px !important;
 }
 
 #book-appointment-wizard .book-step:not(.active-step) strong {
-    color: rgba(255,255,255,0.5) !important;
+    color: rgba(0,0,0,0.45) !important;
     font-size: 12px !important;
 }
 
@@ -79,4 +79,412 @@
 
 #book-appointment-wizard .flatpickr-calendar.inline {
     margin: auto; 
+}
+
+/* MeBeauty website layout (booking flow) */
+
+$mebeauty-gold: #d1ae5e !default;
+
+.site-navbar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+}
+
+.site-navbar > nav {
+    border-bottom: 1px solid $mebeauty-gold;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.625rem 1rem;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar > nav {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+.site-navbar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 80rem;
+    margin: 0 auto;
+}
+
+.site-navbar-logo {
+    display: flex;
+    align-items: center;
+}
+
+.site-navbar-logo img {
+    width: 5rem;
+    height: 4rem;
+    margin-right: 0.75rem;
+}
+
+.site-navbar-toggle {
+    display: flex;
+    align-items: center;
+    order: 2;
+}
+
+.site-navbar-toggle button {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.25rem;
+    padding: 0.5rem;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.site-navbar-toggle button:hover {
+    background: rgba($mebeauty-gold, 0.1);
+}
+
+.site-navbar-toggle button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px $mebeauty-gold;
+}
+
+.site-navbar-toggle svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: $mebeauty-gold;
+    fill: currentColor;
+}
+
+.site-navbar-toggle .svg-close {
+    display: none;
+}
+
+.site-navbar-toggle button.open .svg-burger {
+    display: none;
+}
+
+.site-navbar-toggle button.open .svg-close {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-toggle button {
+        display: none;
+    }
+}
+
+.site-navbar-menu {
+    display: none;
+    order: 1;
+    width: 100%;
+}
+
+.site-navbar-menu.open {
+    display: block;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: auto;
+    }
+}
+
+.site-navbar-menu ul {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-weight: 500;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu ul {
+        flex-direction: row;
+        margin-top: 0;
+        column-gap: 2rem;
+    }
+}
+
+.site-navbar-menu li {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.site-navbar-menu li:last-child {
+    margin-bottom: 0.25rem;
+    border-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu li {
+        border-bottom: 0;
+    }
+}
+
+.site-navbar-menu a {
+    display: block;
+    padding: 0.5rem 1rem 0.5rem 0.75rem;
+    color: #fff;
+    text-decoration: none;
+}
+
+@media (min-width: 1024px) {
+    .site-navbar-menu a {
+        padding: 0 0.25rem;
+    }
+
+    .site-navbar-menu a:hover {
+        color: $mebeauty-gold;
+    }
+}
+
+.site-intro {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 45vh;
+    background-color: #000;
+}
+
+.site-intro-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0;
+}
+
+@media (min-width: 1024px) {
+    .site-intro-image {
+        object-position: 50% 20%;
+    }
+}
+
+.site-intro-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(38, 35, 29, 0.6), #26241e);
+}
+
+.site-intro-content {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0 auto;
+    padding: 0.75rem;
+    text-align: center;
+}
+
+.site-intro-title {
+    width: 100%;
+    margin: 2rem 0 0;
+    font-family: 'Dancing Script', cursive;
+    font-size: 3rem;
+    line-height: 1;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: #fff;
+}
+
+@media (min-width: 768px) {
+    .site-intro-title {
+        margin: 0 0 0.5rem;
+        font-size: 4.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .site-intro-title {
+        font-size: 6rem;
+    }
+}
+
+.site-intro-underline {
+    display: inline-block;
+    width: 7rem;
+    margin-top: 1.25rem;
+    border-top: 2px solid $mebeauty-gold;
+}
+
+@media (min-width: 768px) {
+    .site-intro-underline {
+        width: 9rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .site-intro-underline {
+        width: 14rem;
+    }
+}
+
+.site-footer {
+    border-top: 1px solid $mebeauty-gold;
+    background: #000;
+    color: #fff;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    padding: 3rem 1rem 0.5rem;
+}
+
+.site-footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    width: 100%;
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .site-footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        text-align: left;
+    }
+}
+
+@media (min-width: 1024px) {
+    .site-footer-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.site-footer h2 {
+    margin: 0;
+    font-family: 'Dancing Script', cursive;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 600;
+    font-style: italic;
+    letter-spacing: 0.1em;
+    color: $mebeauty-gold;
+}
+
+.site-footer h2 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.site-footer h3 {
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.25rem;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: $mebeauty-gold;
+}
+
+.site-footer h3:not(:first-child) {
+    margin-top: 1rem;
+}
+
+.site-footer a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease-in-out;
+}
+
+.site-footer a:hover {
+    color: $mebeauty-gold;
+}
+
+.site-footer-social {
+    display: flex;
+    justify-content: center;
+    column-gap: 1.75rem;
+    margin-top: 1rem;
+}
+
+@media (min-width: 768px) {
+    .site-footer-social {
+        justify-content: flex-start;
+    }
+}
+
+.site-footer-social img {
+    width: 32px;
+    height: 32px;
+    transition: transform 0.15s ease-in-out;
+}
+
+.site-footer-social img:hover {
+    transform: scale(1.05);
+}
+
+.site-footer-treatments {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-footer-treatments li + li {
+    margin-top: 0.25rem;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+.site-footer .site-footer-note {
+    margin: 1rem 0 0.75rem;
+    padding-bottom: 0.25rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-style: italic;
+}
+
+.site-footer-legal {
+    display: flex;
+    justify-content: center;
+    column-gap: 1.75rem;
+    margin: 2rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.site-whatsapp {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 40;
+    padding: 0.75rem;
+    border-radius: 9999px;
+    background: $mebeauty-gold;
+    color: #000;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.15s ease-in-out;
+}
+
+.site-whatsapp:hover {
+    color: #000;
+    transform: scale(1.1);
+}
+
+.site-whatsapp svg {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
+}
+
+@media (min-width: 640px) {
+    .site-whatsapp svg {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
 }
