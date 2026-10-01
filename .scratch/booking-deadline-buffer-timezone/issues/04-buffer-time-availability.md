@@ -4,7 +4,7 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Termin 10:00–11:00, Puffer 15: Slots 11:00–11:15 werden nicht angeboten; ab 11:15 wieder buchbar
 - [ ] Tagesende aktiv: Arbeitszeit 10–19, Dauer 60, Puffer 15 → letzter Slot 17:45

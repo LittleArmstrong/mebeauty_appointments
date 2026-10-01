@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] `fixed_time` mit `18:00` und `days=1`: Nach heute 18:00 liefert morgen keine Stunden mehr und ist im Datumswähler ausgegraut; übermorgen bleibt buchbar
 - [ ] `fixed_time` mit `08:00` und `days=0`: gleichtägige Slots sind nur bis 08:00 am selben Tag buchbar

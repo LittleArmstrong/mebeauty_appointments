@@ -4,7 +4,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Alle neuen Keys sind in `german` und `english` vorhanden; andere Sprachen bleiben unberührt (fallen auf Englisch zurück)
 - [ ] Sperr-Message-Variante enthält Platzhalter für Datum + Uhrzeit der Frist

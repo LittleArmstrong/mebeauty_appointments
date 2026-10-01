@@ -4,7 +4,7 @@
 
 **Blocked by:** 02, 07
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Manage-Link nach Fristablauf zeigt Sperrseite mit Datum + Uhrzeit der Frist
 - [ ] Manage-Link vor Fristablauf erlaubt Umbuchen und Stornieren weiterhin

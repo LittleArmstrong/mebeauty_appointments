@@ -4,7 +4,7 @@
 
 **Blocked by:** 01, 07
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Modus-Select: bei `fixed_time` werden Frist-Uhrzeit und Tagesabstand eingeblendet, bei `minutes` ausgeblendet
 - [ ] Puffer-Input erlaubt `min="0"`; Tagesende-Checkbox steuert `appointment_buffer_end_of_day`

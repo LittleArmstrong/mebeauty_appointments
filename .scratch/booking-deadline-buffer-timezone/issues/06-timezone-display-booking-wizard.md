@@ -4,7 +4,7 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] `hidden` + Quelle `company`: keine Zeitzonen-UI im Wizard; Zeiten in Firmen-Default-Zeitzone
 - [ ] `confirm_only`: Dropdown ausgeblendet, Zeitzonen-Zeile im Bestätigungs-Frame sichtbar
