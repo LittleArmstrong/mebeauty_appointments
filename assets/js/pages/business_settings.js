@@ -153,12 +153,26 @@ App.Pages.BusinessSettings = (function () {
     }
 
     /**
+     * Show the fields that belong to the selected deadline mode.
+     */
+    function updateDeadlineModeFields() {
+        const $mode = $('#booking-deadline-mode');
+
+        $('#minutes-mode-fields').prop('hidden', $mode.val() !== 'minutes');
+        $('#fixed-time-fields').prop('hidden', $mode.val() !== 'fixed_time');
+    }
+
+    /**
      * Initialize the module.
      */
     function initialize() {
         const businessSettings = vars('business_settings');
 
         deserialize(businessSettings);
+
+        updateDeadlineModeFields();
+
+        $('#booking-deadline-mode').on('change', updateDeadlineModeFields);
 
         let companyWorkingPlan = {};
         let appointmentStatusOptions = [];
