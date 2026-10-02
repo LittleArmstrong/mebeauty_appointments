@@ -208,14 +208,16 @@ App.Http.Booking = (function () {
             dataType: 'json',
             beforeSend: () => {
                 $layer.appendTo('body').css({
-                    background: 'white',
+                    background: 'rgba(255, 255, 255, 0.75)',
                     position: 'fixed',
                     top: '0',
                     left: '0',
                     height: '100vh',
                     width: '100vw',
-                    opacity: '0.5',
+                    'z-index': '999999',
                 });
+
+                $('<div/>', { class: 'any-element animation is-loading d-block mx-auto' }).appendTo($layer);
             },
         })
             .done((response) => {

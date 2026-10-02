@@ -35,3 +35,19 @@ _Avoid_: Vorlauftage, Offset-Tage
 **Pufferzeit (Buffer Time)**:
 Globale Ruhe-/Aufräumzeit nach einem Termin, in der kein neuer Termin beginnen darf; optional gilt sie auch vor dem Arbeitsende.
 _Avoid_: Aufräumzeit, Abstandszeit
+
+**App-Logo (Wordmark)**:
+Das rechteckige MeBeauty-Logo (`assets/img/mebeauty/logo.png`), verwendet in der Buchungs-Navbar und als Social-Vorschau (og:image).
+_Avoid_: quadratisches App-Logo, Icon
+
+**App-Logo (quadratisch)**:
+Die quadratischen MeBeauty-Logo-Dateien (`assets/img/mebeauty/logo-128.png`, `assets/img/mebeauty/logo-192.png`), verwendet für das E-Mail-Logo und den Backend-Header.
+_Avoid_: Wordmark, App-Logo (Wordmark)
+
+**Favicon**:
+Das Browser-Tab-Icon (`assets/img/favicon.ico`, 16×16).
+_Avoid_: App-Icon, Logo
+
+**Sekundäres Logo**:
+Das quadratische Standard-Logo (`assets/img/logo.png`), verwendet auf Login/Recovery/Logout/About und als 192er-Icon-Fallback.
+_Avoid_: App-Logo, Favicon

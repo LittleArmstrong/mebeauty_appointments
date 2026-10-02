@@ -19,6 +19,9 @@ $customer_full_name = trim($customer_first_name . ' ' . $customer_last_name);
 $customer_email = trim((string) ($customer['email'] ?? ''));
 $customer_phone_number = trim((string) ($customer['phone_number'] ?? ''));
 $customer_address = trim((string) ($customer['address'] ?? ''));
+
+$primary_color = $settings['company_color'] ?: DEFAULT_PRIMARY_COLOR;
+$primary_color_hover = $primary_color === DEFAULT_PRIMARY_COLOR ? DEFAULT_PRIMARY_COLOR_HOVER : $primary_color;
 ?>
 
 <!doctype html>
@@ -179,7 +182,7 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
         }
 
         a {
-            color: #429A82;
+            color: <?= $primary_color ?>;
             text-decoration: underline;
         }
 
@@ -207,10 +210,10 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
 
         .btn a {
             background-color: #ffffff;
-            border: solid 1px #429A82;
+            border: solid 1px <?= $primary_color ?>;
             border-radius: 5px;
             box-sizing: border-box;
-            color: #429A82;
+            color: <?= $primary_color ?>;
             cursor: pointer;
             display: inline-block;
             font-size: 14px;
@@ -221,12 +224,12 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
         }
 
         .btn-primary table td {
-            background-color: #429A82;
+            background-color: <?= $primary_color ?>;
         }
 
         .btn-primary a {
-            background-color: #429A82;
-            border-color: #429A82;
+            background-color: <?= $primary_color ?>;
+            border-color: <?= $primary_color ?>;
             color: #ffffff;
         }
 
@@ -377,12 +380,12 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
             }
 
             .btn-primary table td:hover {
-                background-color: #34495e !important;
+                background-color: <?= $primary_color_hover ?> !important;
             }
 
             .btn-primary a:hover {
-                background-color: #34495e !important;
-                border-color: #34495e !important;
+                background-color: <?= $primary_color_hover ?> !important;
+                border-color: <?= $primary_color_hover ?> !important;
             }
         }
 
@@ -615,7 +618,7 @@ $customer_address = trim((string) ($customer['address'] ?? ''));
                                                                     <td>
                                                                         <a href="<?= e(
                                                                             $appointment_link,
-                                                                        ) ?>" target="_blank">Reschedule / Cancel Appointment</a>
+                                                                        ) ?>" target="_blank"><?= lang('manage_appointment') ?></a>
                                                                     </td>
                                                                 </tr>
                                                             </tbody>

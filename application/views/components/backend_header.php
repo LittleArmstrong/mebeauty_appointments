@@ -6,7 +6,7 @@
  * @var string $company_logo
  */
 
-$company_logo = setting('company_logo') ?: base_url('assets/img/logo.png');
+$company_logo = setting('company_logo') ?: base_url('assets/img/mebeauty/logo-128.png');
 $company_name = setting('company_name', 'MeBeauty');
 ?>
 

@@ -6,6 +6,9 @@
  * @var string $message
  * @var array $settings
  */
+
+$primary_color = $settings['company_color'] ?: DEFAULT_PRIMARY_COLOR;
+$primary_color_hover = $primary_color === DEFAULT_PRIMARY_COLOR ? DEFAULT_PRIMARY_COLOR_HOVER : $primary_color;
 ?>
 
 <!doctype html>
@@ -156,7 +159,7 @@
         }
 
         a {
-            color: #429A82;
+            color: <?= $primary_color ?>;
             text-decoration: underline;
         }
 
@@ -184,10 +187,10 @@
 
         .btn a {
             background-color: #ffffff;
-            border: solid 1px #429A82;
+            border: solid 1px <?= $primary_color ?>;
             border-radius: 5px;
             box-sizing: border-box;
-            color: #429A82;
+            color: <?= $primary_color ?>;
             cursor: pointer;
             display: inline-block;
             font-size: 14px;
@@ -198,12 +201,12 @@
         }
 
         .btn-primary table td {
-            background-color: #429A82;
+            background-color: <?= $primary_color ?>;
         }
 
         .btn-primary a {
-            background-color: #429A82;
-            border-color: #429A82;
+            background-color: <?= $primary_color ?>;
+            border-color: <?= $primary_color ?>;
             color: #ffffff;
         }
 
@@ -354,12 +357,12 @@
             }
 
             .btn-primary table td:hover {
-                background-color: #34495e !important;
+                background-color: <?= $primary_color_hover ?> !important;
             }
 
             .btn-primary a:hover {
-                background-color: #34495e !important;
-                border-color: #34495e !important;
+                background-color: <?= $primary_color_hover ?> !important;
+                border-color: <?= $primary_color_hover ?> !important;
             }
         }
 

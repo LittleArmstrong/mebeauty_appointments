@@ -51,6 +51,7 @@ $lang['appointment_link_title'] = 'Appointment Link';
 $lang['success'] = 'Success';
 $lang['appointment_added_to_your_plan'] = 'A new appointment has been added to your plan.';
 $lang['appointment_link_description'] = 'You can make changes by clicking the appointment link below.';
+$lang['manage_appointment'] = 'Manage appointment';
 $lang['appointment_locked'] = 'Modification impossible!';
 $lang['appointment_locked_message'] = 'The appointment cannot be changed less than {$limit} hours in advance.';
 $lang['appointment_locked_message_deadline'] = 'The appointment can no longer be changed or cancelled. Bookings and changes are possible until {$limit}.';
