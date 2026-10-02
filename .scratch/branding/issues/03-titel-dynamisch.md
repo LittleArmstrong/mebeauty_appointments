@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 Firmenname korrigieren
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Backend-, Account-, Message- und Booking-Layout-Titel sowie `og:title` verwenden den Firmennamen aus `company_name` (Fallback „MeBeauty“)
 - [ ] Die vier E-Mail-Templates verwenden denselben Firmennamen

@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] `setting('company_name')` liefert „MeBeauty“ (nicht „Test“)
 - [ ] Der öffentliche Buchungsseiten-Titel enthält „MeBeauty“ statt „Test“

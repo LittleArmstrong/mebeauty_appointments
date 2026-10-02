@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Es existiert nur noch eine Favicon-Datei, und alle Layouts referenzieren sie (keine doppelte Kopie)
 - [ ] Das App-Logo ist ein quadratisches MeBeauty-Logo (aus `icon-192` auf 128×128 resized), nicht mehr das Easy!Appointments-Logo

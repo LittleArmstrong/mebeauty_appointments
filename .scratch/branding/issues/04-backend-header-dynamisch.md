@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 Firmenname korrigieren, 02 Bilder: Favicon + App-Logo auf MeBeauty
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Firmenname kommt aus `company_name` (Fallback „MeBeauty“)
 - [ ] Logo kommt aus `company_logo` (Data-URI), Fallback auf das Standard-App-Logo

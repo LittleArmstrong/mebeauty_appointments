@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] `og:image` verweist auf die Social-Card-Datei
 - [ ] Die Social-Card-Datei bleibt unverändert (nicht gelöscht, nicht ersetzt)

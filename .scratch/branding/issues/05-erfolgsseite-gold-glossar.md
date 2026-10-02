@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [ ] Kreis und Icon in der Theme-Primärfarbe, Überschrift in dunklerem Gold (Kontrast auf hellem Grund)
 - [ ] Die wirkungslose Tippfehler-Klasse wird zur gültigen Layout-Klasse korrigiert
