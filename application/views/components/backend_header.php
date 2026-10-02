@@ -9,11 +9,9 @@
 
 <nav id="header" class="navbar navbar-expand-md navbar-dark bg-primary p-0">
     <div id="header-logo" class="navbar-brand p-1 lh-1">
-        <img src="<?= base_url(
-            'assets/img/logo.png',
-        ) ?>" alt="logo" class="float-start me-2" style="width: 45px; height: 45px;">
-        <h6 class="mb-1 mt-1 fw-bold text-white" style="font-size: 15px;">EASY!APPOINTMENTS</h6>
-        <small class="d-block text-white-50" style="font-size: 12px;">Online Appointment Scheduler</small>
+        <img src="<?= setting('company_logo') ?: base_url('assets/img/logo.png') ?>" alt="logo" class="float-start me-2" style="width: 45px; height: 45px;">
+        <h6 class="mb-1 mt-1 fw-bold text-white" style="font-size: 15px;"><?= setting('company_name', 'MeBeauty') ?></h6>
+        <small class="d-block text-white-50" style="font-size: 12px;">Kosmetik & Beauty Studio</small>
     </div>
 
     <button type="button" class="navbar-toggler me-1" data-bs-toggle="collapse" data-bs-target="#header-menu">
