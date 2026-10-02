@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#d1ae5e">
     <meta name="google" content="notranslate">
 
-    <meta property="og:title" content="Buchung | MeBeauty"/>
+    <meta property="og:title" content="Buchung | <?= setting('company_name', 'MeBeauty') ?>"/>
     <meta property="og:description" content="Termin online buchen – MeBeauty Köln"/>
     <meta property="og:url" content="<?= base_url() ?>">
     <meta property="og:image" content="<?= base_url('assets/img/mebeauty/logo.png') ?>"/>
@@ -15,7 +15,7 @@
 
     <?php slot('meta'); ?>
 
-    <title>Buchung | MeBeauty – Termin online buchen</title>
+    <title>Buchung | <?= setting('company_name', 'MeBeauty') ?></title>
 
     <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/favicon.ico') ?>">
     <link rel="icon" sizes="192x192" href="<?= asset_url('assets/img/mebeauty/icon-192.png') ?>">
