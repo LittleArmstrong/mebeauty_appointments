@@ -10,7 +10,7 @@
     <meta property="og:title" content="Buchung | <?= setting('company_name', 'MeBeauty') ?>"/>
     <meta property="og:description" content="Termin online buchen – MeBeauty Köln"/>
     <meta property="og:url" content="<?= base_url() ?>">
-    <meta property="og:image" content="<?= base_url('assets/img/mebeauty/logo.png') ?>"/>
+    <meta property="og:image" content="<?= base_url('assets/img/social-card.png') ?>"/>
     <meta property="og:type" content="website">
 
     <?php slot('meta'); ?>
