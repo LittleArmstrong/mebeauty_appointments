@@ -5,12 +5,15 @@
  * @var string $active_menu
  * @var string $company_logo
  */
+
+$company_logo = setting('company_logo') ?: base_url('assets/img/logo.png');
+$company_name = setting('company_name', 'MeBeauty');
 ?>
 
 <nav id="header" class="navbar navbar-expand-md navbar-dark bg-primary p-0">
     <div id="header-logo" class="navbar-brand p-1 lh-1">
-        <img src="<?= setting('company_logo') ?: base_url('assets/img/logo.png') ?>" alt="logo" class="float-start me-2" style="width: 45px; height: 45px;">
-        <h6 class="mb-1 mt-1 fw-bold text-white" style="font-size: 15px;"><?= setting('company_name', 'MeBeauty') ?></h6>
+        <img src="<?= $company_logo ?>" alt="logo" class="float-start me-2" style="width: 45px; height: 45px;">
+        <h6 class="mb-1 mt-1 fw-bold text-white" style="font-size: 15px;"><?= $company_name ?></h6>
         <small class="d-block text-white-50" style="font-size: 12px;">Kosmetik & Beauty Studio</small>
     </div>
 
