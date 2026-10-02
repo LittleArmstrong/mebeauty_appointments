@@ -2,13 +2,13 @@
 
 <?php section('content'); ?>
 
-<div class="d-flex align-items-center justify-content-center min-vh-100-">
+<div class="d-flex align-items-center justify-content-center min-vh-100">
     <div class="text-center py-4 px-3">
-        <div class="d-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 mx-auto mb-4" style="width: 100px; height: 100px;">
-            <i class="fas fa-calendar-check fa-3x text-success"></i>
+        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mx-auto mb-4" style="width: 100px; height: 100px;">
+            <i class="fas fa-calendar-check fa-3x text-primary"></i>
         </div>
 
-        <h3 class="text-success fw-semibold mb-4"><?= lang('appointment_registered') ?></h3>
+        <h3 class="text-primary-emphasis fw-semibold mb-4"><?= lang('appointment_registered') ?></h3>
 
         <p class="fs-5 text-muted mb-1">
             <?= lang('appointment_details_was_sent_to_you') ?>

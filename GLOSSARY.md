@@ -16,6 +16,10 @@ _Avoid_: Buchungsformular-Card, Book-Appointment-Wizard-Container
 Die Astro-Website unter mebeauty-koeln.de; Design-Quelle der Wahrheit für die App.
 _Avoid_: Website, Hauptdomain, Marketing-Site
 
+**Firmenfarbe (Company Color)**:
+Die in den Business Settings gespeicherte Primärfarbe, die die feste Theme-Primärfarbe zur Laufzeit überschreibt (nur wenn sie vom Standard abweicht).
+_Avoid_: Markenfarbe, Theme-Farbe
+
 **Vorlaufzeit (Lead Time)**:
 Mindestabstand in Minuten zwischen dem aktuellen Zeitpunkt und dem Beginn eines buchbaren Termins.
 _Avoid_: Zeitbegrenzung einer Buchung
