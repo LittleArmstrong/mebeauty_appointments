@@ -303,7 +303,7 @@ class Email_messages
         if ($company_logo && str_starts_with($company_logo, 'data:')) {
             [$meta, $base64] = explode(',', $company_logo, 2);
             preg_match('#data:([^;]+)#', $meta, $mime);
-            $php_mailer->addStringEmbeddedImage($base64, 'logo.png', 'logo.png', 'base64', $mime[1] ?? 'image/png');
+            $php_mailer->addStringEmbeddedImage(base64_decode($base64), 'logo.png', 'logo.png', 'base64', $mime[1] ?? 'image/png');
         } else {
             $php_mailer->addEmbeddedImage(FCPATH . 'assets/img/logo.png', 'logo.png', 'logo.png', 'base64', 'image/png');
         }
