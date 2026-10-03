@@ -6,7 +6,7 @@
     "bracketSameLine": false,
     "quoteProps": "preserve",
     "trailingComma": "all",
-    "trailingCommaPHP": true,
+    "trailingCommaPHP": false,
     "phpVersion": "8.0",
     "plugins": ["@prettier/plugin-php"]
 }

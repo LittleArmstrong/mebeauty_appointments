@@ -278,7 +278,7 @@ $this->output->parse_exec_vars = FALSE;   // disable {elapsed_time} / {memory_us
 # Local development (Docker Compose)
 git clone https://github.com/LittleArmstrong/mebeauty_appointments.git
 docker compose up                      # start the environment
-docker compose exec app bash           # second terminal, app shell
+docker compose exec php-fpm bash       # second terminal, app container
 npm install && composer install        # dependencies
 npm start                              # development watcher
 npm run build                          # build production assets

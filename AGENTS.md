@@ -86,8 +86,10 @@ Before implementing a change:
 2. Search for existing patterns and similar functionality.
 3. Identify the affected controller/model/service/library/view/migration.
 4. Check relevant tests.
-5. Check the `easyappointments-ci3` skill and repository references when applicable.
-6. Explain the planned approach before making substantial changes.
+5. Check `.scratch/` for an existing spec on the same feature — a `Status: resolved`
+   spec means the work is already committed, so don't redo it.
+6. Check the `easyappointments-ci3` skill and repository references when applicable.
+7. Explain the planned approach before making substantial changes.
 
 Prefer:
 
@@ -171,11 +173,19 @@ If a task requires handling credentials, ask the user when the correct secure ap
 After making changes:
 
 1. Inspect the diff.
-2. Run the most relevant tests.
-3. Run relevant linters/static analysis.
-4. Run relevant build/check commands.
-5. Check for accidental modifications.
-6. Report exactly what was executed and the result.
+2. Run the PHPUnit suite and syntax checks. All PHP/Composer commands must run
+   inside the `php-fpm` container (the host `php` binary is a ddev shim and will
+   fail). See `docs/docker.md` for the full command list.
+
+   ```bash
+   docker compose exec -T php-fpm composer test          # PHPUnit suite
+   docker compose exec -T php-fpm php -l <file>          # PHP syntax, per changed file
+   node --check <file>                                    # JS syntax, per changed file
+   bash tests/smoke/mebeauty-layout-smoke.sh             # public-page HTTP smoke (site must be up)
+   ```
+
+3. Check for accidental modifications.
+4. Report exactly what was executed and the result.
 
 Do not claim a test passed unless it was actually executed.
 
@@ -250,11 +260,7 @@ Do not commit or push the session summary.
 
 * Prefer small, reviewable changes.
 * Ask when requirements are ambiguous.
-* Do not guess important requirements.
 * Clearly distinguish verified facts from assumptions.
-* Do not over-engineer.
-* Do not perform autonomous Git history changes.
-* Keep the user in control of commits, pushes, merges, and releases.
 
 ---
 
