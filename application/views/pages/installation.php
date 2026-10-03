@@ -4,7 +4,7 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <title>Installation | MeBeauty</title>
+    <title>Installation | <?= DEFAULT_COMPANY_NAME ?></title>
 
     <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/favicon.ico') ?>">
     <link rel="stylesheet" type="text/css" href="<?= asset_url('assets/css/themes/default.css') ?>">

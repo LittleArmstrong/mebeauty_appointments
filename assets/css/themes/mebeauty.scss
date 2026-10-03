@@ -90,3 +90,8 @@ $link-hover-color: $goldenrod !default;
 .site-page {
     background-color: $black;
 }
+
+// Backend header: black under the mebeauty theme, independent of the company color.
+:root {
+    --ea-header-bg: #{$black};
+}

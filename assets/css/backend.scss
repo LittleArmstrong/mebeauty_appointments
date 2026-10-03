@@ -10,6 +10,11 @@
  * ---------------------------------------------------------------------------- */
 
 /* Navigation hover and active states */
+#header {
+    background-color: var(--ea-header-bg, var(--bs-primary)) !important;
+    border-color: var(--ea-header-bg, var(--bs-primary)) !important;
+}
+
 #header #header-menu .nav-item:hover {
     background: rgba(0, 0, 0, 0.1);
 }

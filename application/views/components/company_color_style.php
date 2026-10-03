@@ -251,8 +251,6 @@ if (!empty($company_color) && $company_color !== DEFAULT_COMPANY_COLOR):
     }
 
     /* Application-specific overrides */
-    #header,
-    #book-appointment-wizard #header,
     #frame-footer .backend-link {
         background-color: var(--bs-primary) !important;
         border-color: var(--bs-primary) !important;

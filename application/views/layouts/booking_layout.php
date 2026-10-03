@@ -7,15 +7,15 @@
     <meta name="theme-color" content="#d1ae5e">
     <meta name="google" content="notranslate">
 
-    <meta property="og:title" content="Buchung | <?= setting('company_name', 'MeBeauty') ?>"/>
-    <meta property="og:description" content="Termin online buchen – MeBeauty Köln"/>
+    <meta property="og:title" content="Buchung | <?= setting('company_name', DEFAULT_COMPANY_NAME) ?>"/>
+    <meta property="og:description" content="Termin online buchen – <?= setting('company_name', DEFAULT_COMPANY_NAME) ?>"/>
     <meta property="og:url" content="<?= base_url() ?>">
     <meta property="og:image" content="<?= base_url('assets/img/social-card.png') ?>"/>
     <meta property="og:type" content="website">
 
     <?php slot('meta'); ?>
 
-    <title>Buchung | <?= setting('company_name', 'MeBeauty') ?></title>
+    <title>Buchung | <?= setting('company_name', DEFAULT_COMPANY_NAME) ?></title>
 
     <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/favicon.ico') ?>">
     <link rel="icon" sizes="192x192" href="<?= asset_url('assets/img/mebeauty/icon-192.png') ?>">
@@ -39,6 +39,13 @@
 <div id="main" class="container my-5">
     <div class="row wrapper justify-content-center">
         <div id="book-appointment-wizard" class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0">
+
+            <?php if (setting('booking_show_company_header', '1') === '1'): ?>
+                <?php component('booking_company_header', [
+                    'company_name' => vars('company_name'),
+                    'company_logo' => vars('company_logo'),
+                ]); ?>
+            <?php endif; ?>
 
             <?php component('booking_steps'); ?>
 

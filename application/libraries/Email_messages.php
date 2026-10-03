@@ -298,7 +298,15 @@ class Email_messages
             $php_mailer->AltBody = $plain_text;
         }
 
-        $php_mailer->addEmbeddedImage(FCPATH . 'assets/img/mebeauty/logo-192.png', 'logo.png', 'logo.png', 'base64', 'image/png');
+        $company_logo = setting('company_logo');
+
+        if ($company_logo && str_starts_with($company_logo, 'data:')) {
+            [$meta, $base64] = explode(',', $company_logo, 2);
+            preg_match('#data:([^;]+)#', $meta, $mime);
+            $php_mailer->addStringEmbeddedImage($base64, 'logo.png', 'logo.png', 'base64', $mime[1] ?? 'image/png');
+        } else {
+            $php_mailer->addEmbeddedImage(FCPATH . 'assets/img/logo.png', 'logo.png', 'logo.png', 'base64', 'image/png');
+        }
 
         return $php_mailer;
     }

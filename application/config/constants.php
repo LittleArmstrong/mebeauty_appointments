@@ -94,6 +94,8 @@ const EVENT_MINIMUM_DURATION = 5; // Minutes
 
 const DEFAULT_COMPANY_COLOR = '#ffffff';
 
+const DEFAULT_COMPANY_NAME = 'MeBeauty';
+
 const DEFAULT_PRIMARY_COLOR = '#d1ae5e';
 const DEFAULT_PRIMARY_COLOR_HOVER = '#b8943f';
 

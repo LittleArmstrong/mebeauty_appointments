@@ -486,6 +486,22 @@
 
                                     <div class="mb-3">
                                         <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="booking-show-company-header"
+                                                   data-field="booking_show_company_header">
+                                            <label class="form-check-label" for="booking-show-company-header">
+                                                <?= lang('booking_show_company_header') ?>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('booking_show_company_header_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox"
                                                    id="display-delete-personal-information"
                                                    data-field="display_delete_personal_information">
