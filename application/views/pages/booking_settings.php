@@ -348,6 +348,66 @@
                             </div>
                         </div>
 
+                        <h5 class="mb-3 fw-light"><?= lang('manage_deadline_mode') ?></h5>
+
+                        <div class="mb-5">
+                            <label for="manage-deadline-mode" class="form-label">
+                                <?= lang('manage_deadline_mode') ?>
+                            </label>
+                            <select id="manage-deadline-mode" data-field="manage_deadline_mode" class="form-select">
+                                <option value="inherit"><?= lang('manage_deadline_mode_inherit') ?></option>
+                                <option value="minutes"><?= lang('booking_deadline_mode_minutes') ?></option>
+                                <option value="fixed_time"><?= lang('booking_deadline_mode_fixed_time') ?></option>
+                            </select>
+                            <div class="form-text text-muted">
+                                <small>
+                                    <?= lang('manage_deadline_mode_hint') ?>
+                                </small>
+                            </div>
+
+                            <div id="manage-minutes-mode-fields" class="mt-3">
+                                <label for="manage-deadline-minutes" class="form-label">
+                                    <?= lang('timeout_minutes') ?>
+                                </label>
+                                <input id="manage-deadline-minutes" data-field="manage_deadline_minutes"
+                                       class="form-control" type="number" min="0">
+                                <div class="form-text text-muted">
+                                    <small>
+                                        <?= lang('manage_deadline_minutes_hint') ?>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div id="manage-fixed-time-fields" class="mt-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="manage-deadline-time" class="form-label">
+                                            <?= lang('deadline_time') ?>
+                                        </label>
+                                        <input id="manage-deadline-time" data-field="manage_deadline_time"
+                                               class="form-control" type="time">
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('deadline_time_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="manage-deadline-days" class="form-label">
+                                            <?= lang('deadline_days') ?>
+                                        </label>
+                                        <input id="manage-deadline-days" data-field="manage_deadline_days"
+                                               class="form-control" type="number" min="0">
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('deadline_days_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <h5 class="mb-3 fw-light"><?= lang('booking_timezone_display') ?></h5>
 
                         <div class="mb-5">

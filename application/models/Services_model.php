@@ -27,6 +27,7 @@ class Services_model extends EA_Model
         'id' => 'integer',
         'price' => 'float',
         'attendants_number' => 'integer',
+        'slot_capacity' => 'integer',
         'is_private' => 'boolean',
         'id_service_categories' => 'integer',
     ];
@@ -45,6 +46,7 @@ class Services_model extends EA_Model
         'color' => 'color',
         'slotInterval' => 'slot_interval',
         'attendantsNumber' => 'attendants_number',
+        'slotCapacity' => 'slot_capacity',
         'isPrivate' => 'is_private',
         'serviceCategoryId' => 'id_service_categories',
     ];
@@ -125,6 +127,13 @@ class Services_model extends EA_Model
         if (empty($service['attendants_number']) || (int) $service['attendants_number'] < 1) {
             throw new InvalidArgumentException(
                 'The provided attendants number is invalid: ' . $service['attendants_number'],
+            );
+        }
+
+        // Validate the slot capacity value (0 = unlimited).
+        if (isset($service['slot_capacity']) && $service['slot_capacity'] !== '' && (int) $service['slot_capacity'] < 0) {
+            throw new InvalidArgumentException(
+                'The provided slot capacity is invalid: ' . $service['slot_capacity'],
             );
         }
     }
@@ -481,6 +490,7 @@ class Services_model extends EA_Model
             'location' => $service['location'],
             'slotInterval' => (int) $service['slot_interval'],
             'attendantsNumber' => (int) $service['attendants_number'],
+            'slotCapacity' => (int) $service['slot_capacity'],
             'isPrivate' => (bool) $service['is_private'],
             'serviceCategoryId' =>
                 $service['id_service_categories'] !== null ? (int) $service['id_service_categories'] : null,
@@ -537,6 +547,10 @@ class Services_model extends EA_Model
 
         if (array_key_exists('attendantsNumber', $service)) {
             $decoded_resource['attendants_number'] = $service['attendantsNumber'];
+        }
+
+        if (array_key_exists('slotCapacity', $service)) {
+            $decoded_resource['slot_capacity'] = $service['slotCapacity'];
         }
 
         if (array_key_exists('serviceCategoryId', $service)) {

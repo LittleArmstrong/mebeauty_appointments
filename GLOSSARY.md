@@ -25,8 +25,16 @@ Mindestabstand in Minuten zwischen dem aktuellen Zeitpunkt und dem Beginn eines 
 _Avoid_: Zeitbegrenzung einer Buchung
 
 **Buchungsfrist (Booking Deadline)**:
-Zeitpunkt (feste Uhrzeit plus Tagesabstand), bis zu dem ein Termin an einem bestimmten Tag gebucht oder storniert werden kann; danach ist der Tag gesperrt.
+Zeitpunkt (feste Uhrzeit plus Tagesabstand oder Mindestvorlaufzeit), bis zu dem ein **neuer** Termin an einem bestimmten Tag gebucht werden kann; danach ist der Tag für Neubuchungen gesperrt.
 _Avoid_: Buchungslimit, Buchungsschluss
+
+**Umbuchungs-/Stornierungsfrist (Manage Deadline)**:
+Frist, bis zu der ein bestehender Termin umgebucht oder storniert werden kann; gilt für Umbuchen und Stornieren gemeinsam. Standardmäßig wird die Buchungsfrist übernommen, optional lässt sich eine eigene Zeit (Minuten oder feste Uhrzeit plus Tagesabstand) setzen.
+_Avoid_: Änderungsfrist, Stornofrist
+
+**Slot-Kapazität (Slot Capacity)**:
+Maximale Anzahl paralleler Buchungen eines Services über alle Dienstleister hinweg (0 = unbegrenzt); bildet begrenzte Ressourcen wie Räume oder Geräte ab.
+_Avoid_: Parallel-Limit, Geräte-Limit
 
 **Tagesabstand (Day Offset)**:
 Anzahl Tage N vor dem Termintag, an dem die Buchungsfrist liegt (Frist für Tag D = Tag D−N um die Frist-Uhrzeit).

@@ -75,9 +75,61 @@ class Availability
             $available_hours = $this->generate_available_hours($date, $service, $available_periods);
         }
 
+        $available_hours = $this->consider_slot_capacity($date, $service, $available_hours, $exclude_appointment_id);
+
         $available_hours = $this->consider_book_advance_timeout($date, $available_hours, $provider);
 
         return $this->consider_future_booking_limit($date, $available_hours, $provider);
+    }
+
+    /**
+     * Remove available hours that exceed the service slot capacity across providers.
+     *
+     * When a service has a slot capacity greater than zero, at most that many appointments may overlap at once
+     * regardless of the provider. This covers limited shared resources such as rooms or devices.
+     *
+     * @param string $date Selected date (Y-m-d).
+     * @param array $service Service data.
+     * @param array $available_hours Already generated available hours.
+     * @param int|null $exclude_appointment_id Exclude an appointment from the capacity count.
+     *
+     * @return array Returns the filtered available hours.
+     *
+     * @throws Exception
+     */
+    protected function consider_slot_capacity(
+        string $date,
+        array $service,
+        array $available_hours,
+        ?int $exclude_appointment_id = null,
+    ): array {
+        $slot_capacity = (int) ($service['slot_capacity'] ?? 0);
+
+        if ($slot_capacity <= 0) {
+            return $available_hours;
+        }
+
+        $filtered_hours = [];
+
+        foreach ($available_hours as $available_hour) {
+            $slot_start = new DateTime($date . ' ' . $available_hour);
+
+            $slot_end = clone $slot_start;
+            $slot_end->add(new DateInterval('PT' . (int) $service['duration'] . 'M'));
+
+            $bookings_number = $this->CI->appointments_model->get_service_slot_bookings_number(
+                $slot_start,
+                $slot_end,
+                (int) $service['id'],
+                $exclude_appointment_id,
+            );
+
+            if ($bookings_number < $slot_capacity) {
+                $filtered_hours[] = $available_hour;
+            }
+        }
+
+        return $filtered_hours;
     }
 
     /**
@@ -680,21 +732,37 @@ class Availability
     /**
      * Get the lock status of an appointment start moment.
      *
-     * In fixed time mode the appointment is locked once the booking deadline of its day has passed. In minutes
-     * mode the appointment is locked when its start lies inside the book advance timeout window.
+     * In fixed time mode the appointment is locked once the deadline of its day has passed. In minutes mode the
+     * appointment is locked when its start lies inside the minimum lead time window.
+     *
+     * The `booking` kind uses the booking deadline (new bookings). The `manage` kind uses the manage deadline,
+     * which covers rescheduling and cancellation and defaults to inheriting the booking deadline.
      *
      * @param string $start_datetime Appointment start date and time.
      * @param string $timezone Timezone used for the lock calculation.
+     * @param string $kind Lock kind (`booking` or `manage`).
      *
      * @return array{locked: bool, limit_text: string, message: string} Returns the lock status, the formatted
      * limit for the message and the language message key content.
      *
      * @throws Exception
      */
-    public function get_appointment_lock(string $start_datetime, string $timezone): array
+    public function get_appointment_lock(string $start_datetime, string $timezone, string $kind = 'booking'): array
     {
         $appointment_start = new DateTime($start_datetime, new DateTimeZone($timezone));
 
+        return $kind === 'manage'
+            ? $this->get_manage_lock($appointment_start, $timezone)
+            : $this->get_booking_lock($appointment_start, $timezone);
+    }
+
+    /**
+     * Get the booking lock status of an appointment start moment.
+     *
+     * @throws Exception
+     */
+    protected function get_booking_lock(DateTime $appointment_start, string $timezone): array
+    {
         $deadline = $this->get_booking_deadline($appointment_start->format('Y-m-d'), $timezone);
 
         if ($deadline !== null) {
@@ -716,6 +784,69 @@ class Availability
             'limit_text' => sprintf('%02d:%02d', intdiv($book_advance_timeout, 60), $book_advance_timeout % 60),
             'message' => lang('appointment_locked_message'),
         ];
+    }
+
+    /**
+     * Get the manage lock status (rescheduling and cancellation) of an appointment start moment.
+     *
+     * @throws Exception
+     */
+    protected function get_manage_lock(DateTime $appointment_start, string $timezone): array
+    {
+        $mode = setting('manage_deadline_mode', 'inherit');
+
+        if ($mode === 'inherit') {
+            return $this->get_booking_lock($appointment_start, $timezone);
+        }
+
+        if ($mode === 'fixed_time') {
+            $deadline = $this->get_manage_deadline($appointment_start->format('Y-m-d'), $timezone);
+
+            return [
+                'locked' => $this->is_deadline_passed($deadline, $timezone),
+                'limit_text' => format_date_time($deadline),
+                'message' => lang('manage_locked_message_deadline'),
+            ];
+        }
+
+        $minutes = setting('manage_deadline_minutes', 0);
+        $minutes = is_numeric($minutes) ? max(0, (int) $minutes) : 0;
+
+        $limit = new DateTime('now', new DateTimeZone($timezone));
+        $limit->modify('+' . $minutes . ' minutes');
+
+        return [
+            'locked' => $appointment_start < $limit,
+            'limit_text' => sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60),
+            'message' => lang('manage_locked_message_minutes'),
+        ];
+    }
+
+    /**
+     * Get the manage deadline for the selected date in fixed time mode.
+     *
+     * @param string $date Selected date (Y-m-d).
+     * @param string $timezone Timezone used for the deadline calculation.
+     *
+     * @return DateTime Returns the manage deadline moment.
+     *
+     * @throws Exception
+     */
+    protected function get_manage_deadline(string $date, string $timezone): DateTime
+    {
+        $deadline_time = (string) setting('manage_deadline_time', '18:00');
+
+        $deadline_days = max(0, (int) setting('manage_deadline_days', '1'));
+
+        [$hour, $minute] = array_pad(explode(':', $deadline_time), 2, '0');
+
+        $deadline = new DateTime($date, new DateTimeZone($timezone));
+
+        $deadline->setTime((int) $hour, (int) $minute, 0);
+
+        $deadline->modify('-' . $deadline_days . ' days');
+
+        return $deadline;
     }
 
     /**

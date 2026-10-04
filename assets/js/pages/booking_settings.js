@@ -98,6 +98,16 @@ App.Pages.BookingSettings = (function () {
     }
 
     /**
+     * Show the fields that belong to the selected manage deadline mode.
+     */
+    function updateManageDeadlineModeFields() {
+        const $mode = $('#manage-deadline-mode');
+
+        $('#manage-minutes-mode-fields').prop('hidden', $mode.val() !== 'minutes');
+        $('#manage-fixed-time-fields').prop('hidden', $mode.val() !== 'fixed_time');
+    }
+
+    /**
      * Serialize the page values into an array.
      *
      * @returns {Array}
@@ -239,6 +249,10 @@ App.Pages.BookingSettings = (function () {
         updateDeadlineModeFields();
 
         $('#booking-deadline-mode').on('change', updateDeadlineModeFields);
+
+        updateManageDeadlineModeFields();
+
+        $('#manage-deadline-mode').on('change', updateManageDeadlineModeFields);
 
         applyInitialState();
     }

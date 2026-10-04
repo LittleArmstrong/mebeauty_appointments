@@ -1,0 +1,11 @@
+# Geteilte Umbuchungs-/Stornierungsfrist und Service-Slot-Kapazität
+
+Der Salon will die Neubuchung von der Verwaltung bestehender Termine trennen und begrenzte Ressourcen (Räume/Geräte) abbilden. Deshalb werden zwei neue Konzepte eingeführt.
+
+Die Umbuchungs-/Stornierungsfrist gilt für Umbuchen und Stornieren **gemeinsam** und ist von der Buchungsfrist getrennt. Sie ist als drei Zustände modelliert: `inherit` (Standard — übernimmt exakt die Buchungsfrist, dadurch bleibt das bisherige Verhalten ohne Konfiguration erhalten), `minutes` (eigene Vorlaufzeit) oder `fixed_time` (eigene feste Uhrzeit plus Tagesabstand). Der Entweder/Oder-Charakter (Minuten oder feste Uhrzeit, nie beides) folgt der bestehenden Buchungsfrist (ADR 0002). Eine Aufteilung in zwei unabhängige Fristen (eine für Umbuchen, eine für Stornieren) wurde verworfen, weil der Salon nur zwischen „Neubuchung" und „Termin verwalten" unterscheiden will.
+
+Die Slot-Kapazität ist eine pro-Service-Zahl (0 = unbegrenzt), die die maximale Anzahl **paralleler Buchungen** dieses Services **über alle Dienstleister** begrenzt. Als Konflikt gilt jede zeitliche Überlappung. Gezählt werden Buchungen (nicht Personen), unabhängig von der bestehenden `attendants_number` (Personen pro Slot beim selben Dienstleister). Eine gemeinsame Ressource über mehrere Services hinweg (z. B. eine Maschine, die verschiedene Services nutzen) wurde bewusst nicht umgesetzt, um das Modell einfach zu halten.
+
+Alternativen: eine gemeinsame Ressourcen-Entität (eigene Tabelle) wurde zugunsten der einfacheren pro-Service-Zahl verworfen; eine Zählung von Teilnehmern statt Buchungen wurde verworfen, weil die Kapazität Geräte/Räume und nicht Personen abbildet.
+
+Consequences: Die Buchungsfrist sperrt nach dieser Änderung nur noch Neubuchungen; Umbuchen/Stornieren folgen ausschließlich der Manage-Frist (deren Default `inherit` das bisherige Verhalten erhält). Frist und Kapazität wirken nur kundenseitig — der Backend-Kalender behält die Override-Freiheit. Bei `slot_capacity > 0` entstehen zusätzliche Abfragen pro Slot in der Verfügbarkeits-Berechnung; der Zusatzaufwand ist bei Salongrößen unkritisch.

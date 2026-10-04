@@ -446,6 +446,43 @@ class Appointments_model extends EA_Model
     }
 
     /**
+     * Get the number of overlapping appointments of a service across all providers.
+     *
+     * Used to enforce a per-service slot capacity that spans providers (e.g. a limited number of rooms or devices).
+     *
+     * @param DateTime $start Period start.
+     * @param DateTime $end Period end.
+     * @param int $service_id Service ID.
+     * @param int|null $exclude_appointment_id Exclude an appointment from the result set.
+     *
+     * @return int Returns the number of overlapping appointments for the service.
+     */
+    public function get_service_slot_bookings_number(
+        DateTime $start,
+        DateTime $end,
+        int $service_id,
+        ?int $exclude_appointment_id = null,
+    ): int {
+        if ($exclude_appointment_id) {
+            $this->db->where('id !=', $exclude_appointment_id);
+        }
+
+        $result = $this->db
+            ->select('count(*) AS bookings_number')
+            ->from('appointments')
+            ->where('id_services', $service_id)
+            ->where('is_unavailability', false)
+            ->group_start()
+            ->where('start_datetime <', $end->format('Y-m-d H:i:s'))
+            ->where('end_datetime >', $start->format('Y-m-d H:i:s'))
+            ->group_end()
+            ->get()
+            ->row_array();
+
+        return (int) $result['bookings_number'];
+    }
+
+    /**
      * Get the query builder interface, configured for use with the appointments table.
      *
      * @return CI_DB_query_builder

@@ -24,6 +24,7 @@ App.Pages.Services = (function () {
     const $serviceCategoryId = $('#service-category-id');
     const $slotInterval = $('#slot-interval');
     const $attendantsNumber = $('#attendants-number');
+    const $slotCapacity = $('#slot-capacity');
     const $isPrivate = $('#is-private');
     const $location = $('#location');
     const $description = $('#description');
@@ -127,6 +128,7 @@ App.Pages.Services = (function () {
             $serviceCategoryId.val('');
             $slotInterval.val('15');
             $attendantsNumber.val('1');
+            $slotCapacity.val('0');
         });
 
         /**
@@ -159,6 +161,7 @@ App.Pages.Services = (function () {
                 color: App.Components.ColorSelection.getColor($color),
                 slot_interval: $slotInterval.val(),
                 attendants_number: $attendantsNumber.val(),
+                slot_capacity: $slotCapacity.val(),
                 is_private: Number($isPrivate.prop('checked')),
                 id_service_categories: $serviceCategoryId.val() || undefined,
             };
@@ -347,6 +350,7 @@ App.Pages.Services = (function () {
         $location.val(service.location);
         $slotInterval.val(service.slot_interval);
         $attendantsNumber.val(service.attendants_number);
+        $slotCapacity.val(service.slot_capacity);
         $isPrivate.prop('checked', service.is_private);
         App.Components.ColorSelection.setColor($color, service.color);
 

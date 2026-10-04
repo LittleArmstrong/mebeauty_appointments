@@ -120,6 +120,18 @@
             </div>
 
             <div class="mb-3">
+                <label class="form-label" for="slot-capacity">
+                    <?= lang('slot_capacity') ?>
+                </label>
+                <input id="slot-capacity" class="form-control" type="number" min="0">
+                <div class="form-text text-muted">
+                    <small>
+                        <?= lang('slot_capacity_hint') ?>
+                    </small>
+                </div>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label" for="location">
                     <?= lang('location') ?>
                 </label>

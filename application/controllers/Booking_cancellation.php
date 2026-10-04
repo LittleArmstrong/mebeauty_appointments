@@ -101,7 +101,7 @@ class Booking_cancellation extends EA_Controller
 
             // Make sure the appointment can still be cancelled.
 
-            $lock = $this->availability->get_appointment_lock($appointment['start_datetime'], $provider['timezone']);
+            $lock = $this->availability->get_appointment_lock($appointment['start_datetime'], $provider['timezone'], 'manage');
 
             if ($lock['locked']) {
                 html_vars([
