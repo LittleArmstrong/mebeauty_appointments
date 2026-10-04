@@ -21,6 +21,7 @@ Full command list: `docs/docker.md`.
 
 - Check `.scratch/` for a spec; `Status: resolved` = already committed, don't redo it.
 - Read `docs/agents/development-conventions.md` before substantial changes.
+- Before visual/layout measurement or Playwright work, read `docs/visual-measurement.md`.
 
 ## Commits
 
