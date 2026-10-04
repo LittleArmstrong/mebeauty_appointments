@@ -1,269 +1,39 @@
 # AGENTS.md
 
-## Git Safety
+mebeauty_appointments — a fork of Easy!Appointments 1.6.0 based on CodeIgniter 3.1.11.
+Repository code and `EA_*` overrides take precedence over generic Easy!Appointments or
+CodeIgniter documentation. For repository-specific implementation questions, use the
+`easyappointments-ci3` skill.
 
-### Commits and Pushes
-
-* NEVER create a git commit unless the user explicitly asks for a commit.
-* NEVER push to any remote unless the user explicitly asks for a push.
-* NEVER merge branches unless explicitly requested.
-* NEVER force-push.
-* NEVER amend, reset, rebase, cherry-pick, or otherwise rewrite git history unless explicitly requested.
-* The user must always make the final decision about committing and pushing changes.
-* You MAY suggest a commit message, but MUST NOT execute `git commit` without explicit user approval.
-
-### Existing User Changes
-
-Before modifying any files:
+## Validate every change
 
 ```bash
-git status
-git branch --show-current
-git diff
-git diff --cached
+docker compose exec -T php-fpm composer test          # PHPUnit suite
+docker compose exec -T php-fpm php -l <file>          # PHP syntax, per changed file
+node --check <file>                                    # JS syntax, per changed file
+bash tests/smoke/mebeauty-layout-smoke.sh             # public-page HTTP smoke (site must be up)
 ```
 
-* NEVER overwrite, discard, reset, clean, stash, or modify existing user changes.
-* If the working tree contains uncommitted user changes that are relevant or ambiguous, STOP and ask the user how to proceed.
-* Do not assume that existing uncommitted changes belong to the current task.
-* NEVER use `git reset --hard` or `git clean` unless explicitly requested.
+All PHP/Composer commands run inside the `php-fpm` container (host `php` is a ddev shim).
+Full command list: `docs/docker.md`.
 
-### Branches
+## Before changing code
 
-* Never make feature changes directly on `main` or `master`.
-* Before implementing a new task, create or use a dedicated task branch.
-* Prefer:
+- Check `.scratch/` for a spec; `Status: resolved` = already committed, don't redo it.
+- Read `docs/agents/development-conventions.md` before substantial changes.
 
-```bash
-git checkout -b agent/<short-task-name>
-```
+## Commits
 
-* If the current branch is `main` or `master`, create a task branch before editing.
-* If the repository already contains unrelated work, do not switch branches without confirming with the user.
+Two authorized commit checkpoints: (1) after a spec + ticket is created in `.scratch/`
+and is triage-ready, (2) after `/implement` or `/implement-spec` passes validation.
+Otherwise ask first. Never push or merge. See `docs/agents/git-workflow.md`.
 
-### Git Inspection
+## Load when relevant
 
-The following commands are always allowed without confirmation:
-
-```bash
-git status
-git branch --show-current
-git diff
-git diff --cached
-git diff --stat
-git log
-git remote -v
-```
-
----
-
-## Project
-
-This repository is `mebeauty_appointments`, a fork of Easy!Appointments 1.6.0 based on CodeIgniter 3.1.11.
-
-Repository-specific code and conventions take precedence over generic Easy!Appointments or CodeIgniter documentation.
-
-For repository-specific implementation questions, use the `easyappointments-ci3` skill.
-
-### Source of Truth
-
-When sources disagree, use this priority:
-
-1. Actual repository code
-2. Repository codebase analysis / API references
-3. Official Easy!Appointments / CodeIgniter documentation
-4. GitHub README and other generic documentation
-
-Never assume that generic CodeIgniter or Easy!Appointments behavior applies when the repository implements an `EA_*` override.
-
----
-
-## Before Changing Code
-
-Before implementing a change:
-
-1. Inspect the relevant existing implementation.
-2. Search for existing patterns and similar functionality.
-3. Identify the affected controller/model/service/library/view/migration.
-4. Check relevant tests.
-5. Check `.scratch/` for an existing spec on the same feature — a `Status: resolved`
-   spec means the work is already committed, so don't redo it.
-6. Check the `easyappointments-ci3` skill and repository references when applicable.
-7. Before changing image/logo/favicon assets, read `docs/assets.md` to verify asset roles and usages.
-8. Explain the planned approach before making substantial changes.
-
-Prefer:
-
-* Existing project conventions
-* Existing services over new business logic in controllers
-* Existing `EA_*` classes over generic CI3 classes
-* Existing models and helpers
-* Existing API patterns
-* Existing migration conventions
-
-Do NOT:
-
-* Introduce unnecessary abstractions.
-* Introduce new dependencies unless necessary.
-* Refactor unrelated code.
-* Rename or restructure unrelated files.
-* Modify generated files unless required.
-* Change configuration or secrets without explicit approval.
-
----
-
-## Scope Control
-
-Only modify files necessary for the requested task.
-
-If you discover a separate bug or improvement:
-
-* Do not silently fix it.
-* Mention it to the user.
-* Ask whether it should be handled separately.
-
-Avoid unrelated cleanup during feature work.
-
----
-
-## Database Changes
-
-For database schema changes:
-
-* Use the project's existing migration system.
-* Follow the existing numbered migration convention.
-* Inspect recent migrations before creating a new one.
-* Never modify the database schema manually when a migration is appropriate.
-* Do not modify existing migrations unless explicitly requested.
-
----
-
-## API Changes
-
-For API v1 changes:
-
-* Follow the existing `Api` library conventions.
-* Follow existing REST controller patterns.
-* Preserve bearer-token authentication.
-* Check the repository's OpenAPI definition when relevant.
-* Update API documentation/specification when required by the change.
-
----
-
-## Security
-
-Treat the following as sensitive:
-
-* API keys
-* Access tokens
-* Passwords
-* OAuth credentials
-* `.env` files
-* Database credentials
-* Private keys
-* Session secrets
-
-NEVER commit or expose secrets.
-
-If a task requires handling credentials, ask the user when the correct secure approach is unclear.
-
----
-
-## Validation
-
-After making changes:
-
-1. Inspect the diff.
-2. Run the PHPUnit suite and syntax checks. All PHP/Composer commands must run
-   inside the `php-fpm` container (the host `php` binary is a ddev shim and will
-   fail). See `docs/docker.md` for the full command list.
-
-   ```bash
-   docker compose exec -T php-fpm composer test          # PHPUnit suite
-   docker compose exec -T php-fpm php -l <file>          # PHP syntax, per changed file
-   node --check <file>                                    # JS syntax, per changed file
-   bash tests/smoke/mebeauty-layout-smoke.sh             # public-page HTTP smoke (site must be up)
-   ```
-
-3. Check for accidental modifications.
-4. Report exactly what was executed and the result.
-
-Do not claim a test passed unless it was actually executed.
-
-If validation fails:
-
-* Investigate failures caused by the current changes.
-* Fix them when appropriate.
-* Re-run validation.
-* Clearly report unresolved failures.
-
----
-
-## Completion
-
-Before finishing a task, show:
-
-```bash
-git status
-git diff --stat
-git diff
-```
-
-Then report:
-
-* Summary of changes
-* Files changed
-* Tests/checks executed
-* Test/check results
-* Remaining issues
-* Suggested next step
-* Optional suggested commit message
-
-STOP after reporting the result.
-
-Do not commit.
-Do not push.
-Do not merge.
-
-The user decides what happens next.
-
----
-
-## Agent Session Traceability
-
-For completed development sessions, export the OpenCode session when available:
-
-```bash
-opencode export
-```
-
-Create/update:
-
-```text
-docs/agent-sessions/<date>-session.md
-```
-
-The summary should contain:
-
-* Goal
-* Files changed
-* Important implementation decisions
-* Commands executed
-* Validation results
-* Remaining issues
-* Suggested next step
-
-Do not commit or push the session summary.
-
----
-
-## Agent Behavior
-
-* Prefer small, reviewable changes.
-* Ask when requirements are ambiguous.
-* Clearly distinguish verified facts from assumptions.
-
----
+- `docs/agents/git-workflow.md` — branches, existing user changes, inspection, commit discipline
+- `docs/agents/development-conventions.md` — code conventions, DB migrations, API v1, security, scope
+- `docs/agents/validation-and-completion.md` — full validation and completion report
+- `docs/agents/session-traceability.md` — session export and summary
 
 ## Agent skills
 
