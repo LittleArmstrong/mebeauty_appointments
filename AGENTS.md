@@ -89,7 +89,8 @@ Before implementing a change:
 5. Check `.scratch/` for an existing spec on the same feature — a `Status: resolved`
    spec means the work is already committed, so don't redo it.
 6. Check the `easyappointments-ci3` skill and repository references when applicable.
-7. Explain the planned approach before making substantial changes.
+7. Before changing image/logo/favicon assets, read `docs/assets.md` to verify asset roles and usages.
+8. Explain the planned approach before making substantial changes.
 
 Prefer:
 

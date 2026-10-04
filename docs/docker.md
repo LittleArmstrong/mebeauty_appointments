@@ -54,12 +54,23 @@ docker compose logs -f                     # follow the container logs
 docker compose down                        # stop the environment (DB data stays in ./docker/mysql)
 ```
 
-## Troubleshooting
+## Database
 
-If <http://localhost> is not reachable, nginx may have started before PHP-FPM (the Compose file does not define a startup order). Restart it:
+The application tables are prefixed with `ea_` (e.g. `ea_settings`, `ea_users`). Direct access:
 
 ```bash
-docker compose restart nginx
+docker compose exec mysql mysql -uuser -ppassword easyappointments -e "SHOW TABLES;"
+```
+
+Use `root` / `secret` for administrative access (e.g. via phpMyAdmin at http://localhost:8080).
+
+## Troubleshooting
+
+The Compose file orders nginx after PHP-FPM (`depends_on`) and gives it a `restart` policy, so the previous "nginx started before PHP-FPM" startup race is handled automatically. If <http://localhost> is still unreachable:
+
+```bash
+docker compose ps
+docker compose logs --tail=50 nginx php-fpm
 ```
 
 ## CalDAV Sync with Baikal

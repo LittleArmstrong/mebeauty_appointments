@@ -13,14 +13,85 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.5
           extensions: gd
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
 
       - name: Install Composer dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets (SCSS -> CSS)
+        run: npx gulp styles
 
       - name: PHP syntax check
         run: find application -name '*.php' -print0 | xargs -0 -n1 php -l
 
       - name: Run PHPUnit
         run: vendor/bin/phpunit --configuration phpunit.xml
+
+  smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v2
+
+      - name: Create config
+        run: cp config-sample.php config.php
+
+      - name: Start stack (only services the smoke tests need)
+        run: docker compose up -d --build php-fpm nginx mysql mailpit
+
+      - name: Wait for MySQL
+        run: |
+          for i in $(seq 1 90); do
+            if docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "SELECT 1" >/dev/null 2>&1; then
+              echo "MySQL is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL did not become ready" && docker compose logs --tail=50 mysql && exit 1
+
+      - name: Wait for PHP dependencies (composer install)
+        run: |
+          for i in $(seq 1 300); do
+            if docker compose exec -T php-fpm test -f vendor/autoload.php 2>/dev/null; then
+              echo "Composer dependencies ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Composer dependencies did not become ready" && docker compose logs --tail=50 php-fpm && exit 1
+
+      - name: Install application
+        run: docker compose exec -T php-fpm php index.php console install
+
+      - name: Configure smoke-test data (mebeauty theme + name + uploaded logo)
+        run: |
+          docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='mebeauty' WHERE name='theme';"
+          docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='MeBeauty' WHERE name='company_name';"
+          docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' WHERE name='company_logo';"
+
+      - name: Wait for application
+        run: |
+          for i in $(seq 1 180); do
+            if curl -fsS -o /dev/null http://localhost/ 2>/dev/null; then
+              echo "Application is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Application did not become ready" && docker compose logs --tail=50 nginx php-fpm && exit 1
+
+      - name: Run smoke tests
+        run: |
+          bash tests/smoke/mebeauty-layout-smoke.sh
+          bash tests/smoke/email-logo-smoke.sh
