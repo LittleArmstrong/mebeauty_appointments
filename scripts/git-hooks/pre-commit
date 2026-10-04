@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Pre-commit guardrail: syntax-check staged PHP and JS files.
+#
+# JS is checked on the host (`node --check`). PHP must be checked inside the
+# php-fpm container (the host `php` binary is a ddev shim); when the container is
+# not running, PHP checks are skipped with a warning instead of failing.
+
+set -u
+
+php_container_running() {
+    docker compose ps -q php-fpm >/dev/null 2>&1
+}
+
+fail=0
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+
+for file in $staged; do
+    case "$file" in
+        *.js)
+            if ! node --check "$file"; then
+                echo "pre-commit: JS syntax error in $file" >&2
+                fail=1
+            fi
+            ;;
+        *.php)
+            if php_container_running; then
+                if ! docker compose exec -T php-fpm php -l "$file"; then
+                    echo "pre-commit: PHP syntax error in $file" >&2
+                    fail=1
+                fi
+            else
+                echo "pre-commit: php-fpm not running — skipping PHP syntax check for $file" >&2
+            fi
+            ;;
+    esac
+done
+
+if [ "$fail" -ne 0 ]; then
+    echo "pre-commit: aborted due to syntax errors" >&2
+    exit 1
+fi
+
+exit 0
