@@ -48,14 +48,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --no-dev --optimize-autoloader --ignore-platform-reqs
-
       - name: Install NPM dependencies
         run: npm ci
 
-      - name: Build assets
-        run: npx gulp compile
+      - name: Build production artifact
+        run: npm run build
 
       - name: Configure SSH
         run: |
@@ -74,19 +71,13 @@ jobs:
       - name: Deploy files (rsync)
         run: |
           rsync -rlvz --delete \
-            --exclude '.git/' \
-            --exclude 'node_modules/' \
-            --exclude 'build/' \
-            --exclude '.github/' \
-            --exclude '.scratch/' \
-            --exclude 'docs/' \
-            --exclude 'tests/' \
-            --exclude '*.zip' \
-            --exclude 'config.php' \
-            --exclude 'config-sample.php' \
-            --exclude 'storage/' \
-            ./ "deploy:${TARGET_PATH}/"
+            --exclude '/.htaccess' \
+            --exclude '/.htpasswd' \
+            --exclude '/config.php' \
+            --exclude '/config-sample.php' \
+            --exclude '/storage/' \
+            build/ "deploy:${TARGET_PATH}/"
           rsync -rlvz \
             --exclude 'logs/*' --exclude 'cache/*' --exclude 'sessions/*' \
             --exclude 'uploads/*' --exclude 'backups/*' \
-            storage/ "deploy:${TARGET_PATH}/storage/"
+            build/storage/ "deploy:${TARGET_PATH}/storage/"
