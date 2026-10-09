@@ -9,6 +9,63 @@ Docker). Der Build passiert in GitHub Actions, das Ergebnis wird per
 | Test | `booking-test.mebeauty-koeln.de` | push auf `staging` (automatisch) |
 | Prod | `booking.mebeauty-koeln.de` | `workflow_dispatch` (manuell) |
 
+## Workflow
+
+Zwei Branches, zwei Umgebungen:
+
+- **`staging`** = Test. Jeder Push deployt automatisch auf `booking-test.mebeauty-koeln.de`.
+- **`main`** = Prod. Wird nur per Pull Request aus `staging` aktualisiert, wenn der Test gut ist.
+
+### Entwickeln & Testen
+
+1. Auf `staging` arbeiten (für größere Features: Feature-Branch aus `staging`, später per PR in `staging` zurückführen).
+2. Committen und pushen:
+
+   ```bash
+   git checkout staging
+   git push origin staging
+   ```
+
+   Der Test-Deploy läuft automatisch.
+3. Auf `https://booking-test.mebeauty-koeln.de` prüfen.
+
+### Checks
+
+Vor dem Push lokal prüfen:
+
+```bash
+docker compose exec -T php-fpm composer test    # PHPUnit
+docker compose exec -T php-fpm php -l <datei>   # PHP-Syntax (je geänderte Datei)
+node --check <datei>                             # JS-Syntax (je geänderte Datei)
+```
+
+CI (`ci.yml`) läuft zusätzlich automatisch bei jedem Push. Nach einem Deploy die
+Buchungsseite per Smoke gegen die Live-URL prüfen:
+
+```bash
+BASE_URL=https://booking-test.mebeauty-koeln.de bash tests/smoke/mebeauty-layout-smoke.sh
+```
+
+### Release zu Prod (Pull Request)
+
+Wenn der Test gut ist und die Änderungen nach Prod sollen:
+
+1. GitHub öffnen → Banner **„staging had recent pushes" → „Compare & pull request"** klicken
+   (oder Tab **Pull requests → New pull request**, `base: main` ← `compare: staging`).
+2. Titel/Beschreibung eintragen → **Create pull request**.
+3. **Merge pull request** klicken → die Commits aus `staging` landen in `main`.
+4. Vor dem Prod-Deploy ein Backup:
+
+   ```bash
+   ssh <benutzer>@<host> "php <prod-pfad>/index.php console backup"
+   ```
+
+5. Prod-Deploy auslösen: GitHub → **Actions → Deploy → Run workflow → environment: `prod`**.
+
+> **Was ist ein Pull Request?** Nur eine Übersicht „diese Commits aus `staging`
+> fehlen in `main`" mit einem Merge-Button. Bis zum Merge bleibt `main` unverändert.
+> Du machst das komplett im Browser — nichts auf der Kommandozeile nötig.
+
 ## GitHub-Secrets
 
 Alle Zugangs- und Pfad-Daten liegen als GitHub-Secrets (Repo → Settings →
