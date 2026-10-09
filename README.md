@@ -39,8 +39,6 @@
 
 ---
 
-![screenshot](screenshot.png)
-
 ## 🚀 Why Easy!Appointments
 
 **Easy!Appointments** is an open-source scheduling system that gives you full control over your booking workflow.
