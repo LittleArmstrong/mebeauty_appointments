@@ -1,6 +1,6 @@
 # Umbuchungs-/Stornierungsfrist & Service-Slot-Kapazität
 
-Status: ready-for-agent
+Status: resolved
 
 ## Problem Statement
 
