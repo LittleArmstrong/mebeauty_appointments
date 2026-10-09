@@ -1,0 +1,92 @@
+name: Deploy
+
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ziel-Umgebung'
+        required: true
+        type: choice
+        default: test
+        options:
+          - test
+          - prod
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      ENV: ${{ github.event_name == 'push' && 'test' || github.event.inputs.environment }}
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v4
+
+      - name: Resolve deploy target
+        env:
+          TEST_PATH: ${{ secrets.TEST_PATH }}
+          PROD_PATH: ${{ secrets.PROD_PATH }}
+        run: |
+          if [ "$ENV" = "prod" ]; then
+            echo "TARGET_PATH=$PROD_PATH" >> "$GITHUB_ENV"
+          else
+            echo "TARGET_PATH=$TEST_PATH" >> "$GITHUB_ENV"
+          fi
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gd
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --no-dev --optimize-autoloader --ignore-platform-reqs
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npx gulp compile
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf 'Host deploy\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile ~/.ssh/deploy_key\n  StrictHostKeyChecking accept-new\n' \
+            "$SSH_HOST" "$SSH_USER" "$SSH_PORT" > ~/.ssh/config
+          chmod 600 ~/.ssh/config
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+
+      - name: Deploy files (rsync)
+        run: |
+          rsync -rlvz --delete \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude 'build/' \
+            --exclude '.github/' \
+            --exclude '.scratch/' \
+            --exclude 'docs/' \
+            --exclude 'tests/' \
+            --exclude '*.zip' \
+            --exclude 'config.php' \
+            --exclude 'config-sample.php' \
+            --exclude 'storage/' \
+            ./ "deploy:${TARGET_PATH}/"
+          rsync -rlvz \
+            --exclude 'logs/*' --exclude 'cache/*' --exclude 'sessions/*' \
+            --exclude 'uploads/*' --exclude 'backups/*' \
+            storage/ "deploy:${TARGET_PATH}/storage/"

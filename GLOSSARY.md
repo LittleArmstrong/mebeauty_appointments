@@ -16,6 +16,10 @@ _Avoid_: Buchungsformular-Card, Book-Appointment-Wizard-Container
 Die Astro-Website unter mebeauty-koeln.de; Design-Quelle der Wahrheit für die App.
 _Avoid_: Website, Hauptdomain, Marketing-Site
 
+**Buchungs-Domain**:
+Die Subdomain, unter der die Terminbuchungs-App erreichbar ist (Test: booking-test.mebeauty-koeln.de, Prod: booking.mebeauty-koeln.de).
+_Avoid_: App-URL, Buchungsseite (das ist der Booking-Flow)
+
 **Firmenfarbe (Company Color)**:
 Die in den Business Settings gespeicherte Primärfarbe, die die feste Theme-Primärfarbe zur Laufzeit überschreibt (nur wenn sie vom Standard abweicht).
 _Avoid_: Markenfarbe, Theme-Farbe
