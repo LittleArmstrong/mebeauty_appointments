@@ -66,6 +66,26 @@ Wenn der Test gut ist und die Änderungen nach Prod sollen:
 > fehlen in `main`" mit einem Merge-Button. Bis zum Merge bleibt `main` unverändert.
 > Du machst das komplett im Browser — nichts auf der Kommandozeile nötig.
 
+## Versionen & Tags
+
+Ein Tag ist ein Etikett auf einem **Commit (Hash)**, kein Bestandteil eines Branches.
+Wird ein Commit auf `staging` getaggt und später per PR nach `main` gemergt, taucht
+der Tag automatisch auch in `main` auf — derselbe Commit, dasselbe Etikett.
+
+**Release-Tag setzen** (nach dem Merge in `main`):
+
+```bash
+git checkout main && git pull
+git tag v1.0.0
+git push origin v1.0.0        # Tags werden NICHT automatisch gepusht
+git checkout staging
+```
+
+Hinweise:
+
+- Tags werden nicht automatisch gepusht (`git push origin --tags` nötig).
+- Tags triggern aktuell **keinen** Deploy (Deploy läuft bei push auf `staging` oder manuell).
+
 ## GitHub-Secrets
 
 Alle Zugangs- und Pfad-Daten liegen als GitHub-Secrets (Repo → Settings →

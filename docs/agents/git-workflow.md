@@ -50,16 +50,38 @@ git diff --cached
 
 ## Branches
 
+- `staging` — active development/test branch. Every push auto-deploys to
+  `booking-test.mebeauty-koeln.de` via GitHub Actions (`deploy.yml`). Do day-to-day
+  work here.
+- `main` — production branch. Updated **only via pull request from `staging`**.
+  Never commit or push to it directly.
+
 - Never make feature changes directly on `main` or `master`.
-- Before implementing a new task, create or use a dedicated task branch.
-- Prefer:
+- Before implementing a new task, create a dedicated task branch from `staging`:
 
 ```bash
-git checkout -b agent/<short-task-name>
+git checkout staging && git checkout -b agent/<short-task-name>
 ```
 
-- If the current branch is `main` or `master`, create a task branch before editing.
+- Merge finished task branches back into `staging` (ff-merge or PR), then push
+  `staging` to trigger the test deploy.
+- Release to prod: PR `staging → main` (in the browser), then tag on `main`.
 - If the repository already contains unrelated work, do not switch branches without confirming with the user.
+
+## Releases & Tags
+
+- A tag points to a commit (hash), not a branch. After `staging` is merged into
+  `main`, the tagged commit is reachable from both, so the tag "follows" into `main`.
+- Tags are not pushed automatically:
+
+```bash
+git checkout main && git pull
+git tag v1.0.0
+git push origin v1.0.0
+git checkout staging
+```
+
+- Tags do not trigger deploys (deploy runs on push to `staging` or manual dispatch).
 
 ## Always-allowed inspection
 
