@@ -70,18 +70,11 @@ git checkout staging && git checkout -b agent/<short-task-name>
 
 ## Releases & Tags
 
-- A tag points to a commit (hash), not a branch. After `staging` is merged into
-  `main`, the tagged commit is reachable from both, so the tag "follows" into `main`.
-- Tags are not pushed automatically:
+The release/versioning workflow (PR `staging → main`, release tags) lives in
+`docs/deployment.md` (see "Versionen & Tags"). Agent-relevant invariants:
 
-```bash
-git checkout main && git pull
-git tag v1.0.0
-git push origin v1.0.0
-git checkout staging
-```
-
-- Tags do not trigger deploys (deploy runs on push to `staging` or manual dispatch).
+- `main` is updated only via PR — never commit or push to it directly.
+- A tag points to a commit, not a branch, and is not pushed automatically.
 
 ## Always-allowed inspection
 

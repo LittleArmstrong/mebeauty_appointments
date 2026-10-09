@@ -1,5 +1,11 @@
 name: Deploy
 
+# Deploy contract: this workflow deploys ONLY the `build/` directory that
+# `npm run build` (gulp build) produces — never the repository root. Dev-only
+# files (.opencode/, docker/, package.json, tests/, docs/, …) must not reach the
+# server. Server-specific files (config.php, .htaccess, .htpasswd, storage/
+# content) are protected from rsync --delete via the exclusions below.
+
 on:
   push:
     branches: [staging]

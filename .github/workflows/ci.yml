@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: Git clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -17,7 +17,7 @@ jobs:
           extensions: gd
 
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Git clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Create config
         run: cp config-sample.php config.php
