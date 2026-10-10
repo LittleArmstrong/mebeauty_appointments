@@ -77,7 +77,7 @@ Backend-Kalender und Admin-Freiheiten bleiben unverändert: Frist und Puffer wir
 
 ## Further Notes
 
-- Neueste Migration ist `070_…`; die neue Migration trägt die Nummer 071 und fügt ausschließlich Settings-Rows ein.
+- Die neue Migration trägt die Nummer 070 und fügt ausschließlich Settings-Rows ein. (Nach der Bereinigung der alten Theme-Migrationen, siehe ADR 0005.)
 - JS-Quellen haben `.min.js`-Gegenstücke — nach Änderungen muss `npm run build` laufen.
 - Gemäß AGENTS.md: keine Git-Commits ohne ausdrückliche Nutzer-Freigabe; Task-Branch anlegen.
 - Alle Details wurden in einer Grilling-Session mit dem Nutzer abgestimmt; es bestehen keine offenen Designfragen.

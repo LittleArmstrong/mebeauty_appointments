@@ -109,27 +109,80 @@ class Availability
             return $available_hours;
         }
 
-        $filtered_hours = [];
+        if (empty($available_hours)) {
+            return [];
+        }
+
+        $slots = [];
+        $window_start = null;
+        $window_end = null;
 
         foreach ($available_hours as $available_hour) {
             $slot_start = new DateTime($date . ' ' . $available_hour);
-
             $slot_end = clone $slot_start;
             $slot_end->add(new DateInterval('PT' . (int) $service['duration'] . 'M'));
 
-            $bookings_number = $this->CI->appointments_model->get_service_slot_bookings_number(
-                $slot_start,
-                $slot_end,
-                (int) $service['id'],
-                $exclude_appointment_id,
-            );
+            $slot_start_string = $slot_start->format('Y-m-d H:i:s');
+            $slot_end_string = $slot_end->format('Y-m-d H:i:s');
 
-            if ($bookings_number < $slot_capacity) {
-                $filtered_hours[] = $available_hour;
+            $slots[] = [
+                'hour' => $available_hour,
+                'start' => $slot_start_string,
+                'end' => $slot_end_string,
+            ];
+
+            if ($window_start === null || $slot_start_string < $window_start) {
+                $window_start = $slot_start_string;
+            }
+
+            if ($window_end === null || $slot_end_string > $window_end) {
+                $window_end = $slot_end_string;
+            }
+        }
+
+        // Fetch every appointment of the service that overlaps the whole slot window once, then count overlaps in PHP.
+        $bookings = $this->CI->appointments_model->get_service_slot_bookings(
+            (int) $service['id'],
+            $window_start,
+            $window_end,
+            $exclude_appointment_id,
+        );
+
+        $filtered_hours = [];
+
+        foreach ($slots as $slot) {
+            if (self::count_overlapping_bookings($bookings, $slot['start'], $slot['end']) < $slot_capacity) {
+                $filtered_hours[] = $slot['hour'];
             }
         }
 
         return $filtered_hours;
+    }
+
+    /**
+     * Count the bookings that overlap the given period.
+     *
+     * A booking overlaps when it starts before the period end and ends after the period start. Boundaries are
+     * exclusive: a booking that ends exactly at the period start, or starts exactly at the period end, does not
+     * overlap.
+     *
+     * @param array $bookings Bookings with `start_datetime` and `end_datetime` keys (Y-m-d H:i:s).
+     * @param string $start Period start (Y-m-d H:i:s).
+     * @param string $end Period end (Y-m-d H:i:s).
+     *
+     * @return int Returns the number of overlapping bookings.
+     */
+    public static function count_overlapping_bookings(array $bookings, string $start, string $end): int
+    {
+        $count = 0;
+
+        foreach ($bookings as $booking) {
+            if ($booking['start_datetime'] < $end && $booking['end_datetime'] > $start) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**

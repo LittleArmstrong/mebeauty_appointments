@@ -6,7 +6,10 @@
  */
 ?>
 <section class="site-intro">
-    <img src="<?= asset_url('assets/img/mebeauty/hero.jpg') ?>" alt="<?= e($title) ?>" class="site-intro-image">
+    <picture>
+        <source srcset="<?= asset_url('assets/img/mebeauty/hero.webp') ?>" type="image/webp">
+        <img src="<?= asset_url('assets/img/mebeauty/hero.jpg') ?>" alt="<?= e($title) ?>" class="site-intro-image">
+    </picture>
     <div class="site-intro-overlay"></div>
     <div class="site-intro-content">
         <h1 class="site-intro-title"><?= e($title) ?></h1>

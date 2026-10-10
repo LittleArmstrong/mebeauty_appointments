@@ -6,7 +6,7 @@
 
 **Status:** resolved
 
-- [ ] Migration 075 fügt `slot_capacity` (INT, Default `0`) auf `services` ein; `down()` entfernt sie
+- [ ] Migration 073 fügt `slot_capacity` (INT, Default `0`) auf `services` ein; `down()` entfernt sie
 - [ ] Services-Modell kennt `slot_capacity` (Cast, API-Mapping `slotCapacity`, Validierung `>= 0`)
 - [ ] Services-Controller und Service-Formular (Backend) speichern/laden `slot_capacity` (`min="0"`)
 - [ ] Neue Zählmethode zählt überlappende Buchungen desselben Services über alle Provider (optional mit Ausschluss einer Buchung)

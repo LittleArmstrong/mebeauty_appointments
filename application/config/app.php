@@ -9,7 +9,7 @@
 |
 */
 
-$config['version'] = '1.6.0'; // This must be changed manually.
+$config['version'] = '0.1.0'; // MeBeauty product version (independent of the Easy!Appointments upstream base, see UPSTREAM.md).
 
 $config['url'] = Config::BASE_URL;
 

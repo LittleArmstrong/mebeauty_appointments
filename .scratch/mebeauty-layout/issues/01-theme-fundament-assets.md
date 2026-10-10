@@ -14,6 +14,6 @@
 
 ## Comments
 
-Implemented on integration branch `agent/mebeauty-reskin-integration`. Commits: `9c9ef1c6` (Theme+Assets), `4d03d61a` (Theme als Option, Default mebeauty, Migration 070). Fonts als Variable Fonts (Karla 400-800, Dancing Script 400-700) konsolidiert — erfüllt die Gewichts-Anforderung des Tickets.
+Implemented on integration branch `agent/mebeauty-reskin-integration`. Commits: `9c9ef1c6` (Theme+Assets), `4d03d61a` (Theme als Option, Default mebeauty, Migration 070). Fonts als Variable Fonts (Karla 400-800, Dancing Script 400-700) konsolidiert — erfüllt die Gewichts-Anforderung des Tickets. (Hinweis: Migration 070 und ihre Umkehrung 072 wurden später entfernt — Theme-Default blieb `default`, siehe ADR 0005.)
 
 Follow-ups: Favicon-Branding später umgesetzt (`4f7aa26b` echtes MeBeauty-Icon aus Website-Historie, `00c8848b` Nutzerwahl via neue URL).

@@ -87,7 +87,7 @@ Backend-Kalender und Admin-Freiheiten bleiben unverändert: Frist und Kapazität
 
 ## Further Notes
 
-- Neueste Migration ist `073_…`; die neuen Migrationen tragen die Nummern 074 (Manage-Frist-Settings) und 075 (`slot_capacity`-Spalte).
+- Neueste Migration ist `071_…`; die neuen Migrationen tragen die Nummern 072 (Manage-Frist-Settings) und 073 (`slot_capacity`-Spalte). (Nach der Bereinigung der alten Theme-Migrationen, siehe ADR 0005.)
 - JS-Quellen haben `.min.js`-Gegenstücke — nach Änderungen muss `npm run build` laufen.
 - Die WhatsApp-Prüfung erfordert eine laufende Umgebung (`docker compose up -d --build` bzw. `ddev start mebeauty`); Playwright ist nicht installiert und wird als Wegwerf-Skript unter `/tmp` angelegt.
 - Branch-Löschliste: `agent/google-calendar-push-sync`, `integration/booking-deadline-buffer-timezone`, `integration/branding`, `ticket/01-add-deadline-buffer-timezone-settings`, `ticket/02-fixed-time-deadline-availability`, `ticket/03-deadline-reschedule-cancel-lock`, `ticket/04-buffer-time-availability`, `ticket/05-business-settings-ui`, `ticket/06-timezone-display-booking-wizard`, `ticket/07-language-glossary-adr`, `ticket/fix-code-review`.

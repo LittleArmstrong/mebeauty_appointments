@@ -6,7 +6,7 @@
 
 **Status:** resolved
 
-- [ ] Migration 074 fügt die vier Settings `manage_deadline_mode` (`inherit`), `manage_deadline_minutes` (`0`), `manage_deadline_time` (`18:00`), `manage_deadline_days` (`1`) ein; `down()` entfernt sie wieder
+- [ ] Migration 072 fügt die vier Settings `manage_deadline_mode` (`inherit`), `manage_deadline_minutes` (`0`), `manage_deadline_time` (`18:00`), `manage_deadline_days` (`1`) ein; `down()` entfernt sie wieder
 - [ ] Der Sperr-Check kennt einen Aktions-Parameter (`booking`|`manage`); `manage` nutzt die `manage_deadline_*`-Settings
 - [ ] `inherit` delegiert exakt an die bestehende Buchungsfrist-Logik (beide Modi)
 - [ ] `minutes` sperrt, sobald der Terminbeginn innerhalb von `manage_deadline_minutes` liegt; `0` = bis zum Beginn möglich

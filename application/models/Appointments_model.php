@@ -446,40 +446,39 @@ class Appointments_model extends EA_Model
     }
 
     /**
-     * Get the number of overlapping appointments of a service across all providers.
+     * Get the appointments of a service that overlap the given period across all providers.
      *
      * Used to enforce a per-service slot capacity that spans providers (e.g. a limited number of rooms or devices).
+     * Returns the raw booking boundaries so the caller can count overlaps for multiple slots in a single round trip.
      *
-     * @param DateTime $start Period start.
-     * @param DateTime $end Period end.
      * @param int $service_id Service ID.
+     * @param string $start Period start (Y-m-d H:i:s).
+     * @param string $end Period end (Y-m-d H:i:s).
      * @param int|null $exclude_appointment_id Exclude an appointment from the result set.
      *
-     * @return int Returns the number of overlapping appointments for the service.
+     * @return array Returns the overlapping bookings with their `start_datetime` and `end_datetime`.
      */
-    public function get_service_slot_bookings_number(
-        DateTime $start,
-        DateTime $end,
+    public function get_service_slot_bookings(
         int $service_id,
+        string $start,
+        string $end,
         ?int $exclude_appointment_id = null,
-    ): int {
+    ): array {
         if ($exclude_appointment_id) {
             $this->db->where('id !=', $exclude_appointment_id);
         }
 
-        $result = $this->db
-            ->select('count(*) AS bookings_number')
+        return $this->db
+            ->select('start_datetime, end_datetime')
             ->from('appointments')
             ->where('id_services', $service_id)
             ->where('is_unavailability', false)
             ->group_start()
-            ->where('start_datetime <', $end->format('Y-m-d H:i:s'))
-            ->where('end_datetime >', $start->format('Y-m-d H:i:s'))
+            ->where('start_datetime <', $end)
+            ->where('end_datetime >', $start)
             ->group_end()
             ->get()
-            ->row_array();
-
-        return (int) $result['bookings_number'];
+            ->result_array();
     }
 
     /**

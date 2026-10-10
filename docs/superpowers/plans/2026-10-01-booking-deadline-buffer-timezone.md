@@ -1,5 +1,7 @@
 # Booking-Frist, Pufferzeit & Timezone-Anzeige — Implementation Plan
 
+> **Hinweis (Migration-Nummerierung):** Dieser Plan nennt die Migrationen noch mit ihren historischen Nummern (`071`, `070_set_mebeauty_default_theme.php`). Nach der Bereinigung (siehe ADR 0005) ist `071_add_booking_deadline_and_buffer_settings.php` heute `070_…`, und die Theme-Migrationen `070_set_mebeauty_default_theme`/`072_revert_…` wurden entfernt.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Drei konfigurierbare Buchungssteuerungen ergänzen: Frist als Entweder/Oder (Minuten-Vorlaufzeit ODER feste Uhrzeit + Tagesabstand), globale Pufferzeit nach Terminen (optional am Tagesende) und eine konfigurierbare Zeitzonen-Anzeige im Buchungs-Wizard.

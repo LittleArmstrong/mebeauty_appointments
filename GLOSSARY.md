@@ -52,14 +52,18 @@ _Avoid_: Aufräumzeit, Abstandszeit
 Das rechteckige MeBeauty-Logo (`assets/img/mebeauty/logo.png`), verwendet in der Buchungs-Navbar und als Social-Vorschau (og:image).
 _Avoid_: quadratisches App-Logo, Icon
 
-**App-Logo (quadratisch)**:
-Die quadratischen MeBeauty-Logo-Dateien (`assets/img/mebeauty/logo-128.png`, `assets/img/mebeauty/logo-192.png`), verwendet für das E-Mail-Logo und den Backend-Header.
-_Avoid_: Wordmark, App-Logo (Wordmark)
-
 **Favicon**:
 Das Browser-Tab-Icon (`assets/img/favicon.ico`, 16×16).
 _Avoid_: App-Icon, Logo
 
 **Sekundäres Logo**:
-Das quadratische Standard-Logo (`assets/img/logo.png`), verwendet auf Login/Recovery/Logout/About und als 192er-Icon-Fallback.
+Das quadratische Standard-Logo (`assets/img/logo.png`), verwendet als App-Logo-Fallback (Backend-Header, E-Mail-Logo) und auf Login/Recovery/Logout/About.
 _Avoid_: App-Logo, Favicon
+
+**Fork-Version**:
+Die eigenständige MeBeauty-Produktversion (`application/config/app.php` → `version`), unabhängig von der Easy!Appointments-Versionsnummer.
+_Avoid_: Upstream-Version, EA-Version
+
+**Upstream-Basis**:
+Das integrierte Easy!Appointments-Release (Tag plus vollständige Commit-ID), dokumentiert in `UPSTREAM.md`.
+_Avoid_: Basis-Version (ohne Kontext), Master-Branch

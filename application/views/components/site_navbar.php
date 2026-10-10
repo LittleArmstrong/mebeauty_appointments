@@ -10,7 +10,10 @@ $site_url = 'https://mebeauty-koeln.de';
     <nav>
         <div class="site-navbar-inner">
             <a href="<?= $site_url ?>/" class="site-navbar-logo">
-                <img src="<?= asset_url('assets/img/mebeauty/logo.png') ?>" alt="MeBeauty logo">
+                <picture>
+                    <source srcset="<?= asset_url('assets/img/mebeauty/logo.webp') ?>" type="image/webp">
+                    <img src="<?= asset_url('assets/img/mebeauty/logo.png') ?>" alt="MeBeauty logo">
+                </picture>
             </a>
             <div class="site-navbar-toggle">
                 <button id="navbar-mobile-menu-btn" type="button" aria-controls="navbar-mobile-menu" aria-expanded="false">

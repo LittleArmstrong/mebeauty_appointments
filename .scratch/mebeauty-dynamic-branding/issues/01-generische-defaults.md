@@ -6,7 +6,7 @@
 
 **Status:** ready-for-agent
 
-- [ ] Das `theme`-Setting hat den Default `default`; `mebeauty` bleibt als Option wählbar (Umkehrung der Migration `070` über eine neue Migration, bestehende Migrationsdateien unverändert)
+- [ ] Das `theme`-Setting hat den Default `default`; `mebeauty` bleibt als Option wählbar (Umkehrung der Migration `070` über eine neue Migration; beide später entfernt — siehe ADR 0005)
 - [ ] `assets/img/logo.png` ist wieder das generische Easy!Appointments-Logo (nicht das MeBeauty-Logo); MeBeauty-Logos bleiben nur unter `assets/img/mebeauty/`
 - [ ] Eine Konfigurationskonstante (analog `DEFAULT_COMPANY_COLOR`) liefert den Marken-Namen-Fallback
 - [ ] Die bestehenden unkommittierten Änderungen an `assets/img/mebeauty/logo-128.png`/`logo-192.png` sowie `logo-128_old.png`/`logo-192_old.png` bleiben unangetastet

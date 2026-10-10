@@ -8,7 +8,7 @@ Der Fork hat die ursprünglichen Easy!Appointments-Oberflächen — Backend-Head
 
 Konkret hart verdrahtet bzw. mit „MeBeauty"-Fallback:
 
-- `theme`-Default ist `mebeauty` (Migration `070`) statt des 1.6.0-Standards `default`.
+- `theme`-Default ist `mebeauty` (Migration `070`) statt des 1.6.0-Standards `default`. (Migration 070 und ihre Umkehrung 072 wurden später entfernt — Theme-Default blieb `default`, siehe ADR 0005.)
 - `assets/img/logo.png` wurde per Datei-Ersatz durch ein MeBeauty-Logo ersetzt; das generische Logo fehlt.
 - Backend-Header: Fallback `assets/img/mebeauty/logo-128.png`, `setting('company_name', 'MeBeauty')`, Untertitel „Kosmetik & Beauty Studio" hart.
 - E-Mail-Logo: fest `assets/img/mebeauty/logo-192.png`; hochgeladenes `company_logo` wird in E-Mails ignoriert.
@@ -44,7 +44,7 @@ Die ursprünglichen EA-Oberflächen werden wieder settings-getrieben, mit 1.6.0-
 
 ## Implementation Decisions
 
-- **Theme-Default:** Der `theme`-Standard wird wieder `default`; `mebeauty` bleibt eine wählbare Option. Die Umkehrung der Migration `070` erfolgt über eine neue Migration (keine Änderung an der bestehenden Migrationsdatei).
+- **Theme-Default:** Der `theme`-Standard wird wieder `default`; `mebeauty` bleibt eine wählbare Option. Die Umkehrung der Migration `070` erfolgte über eine neue Migration. (Später wurden Migration 070 und ihre Umkehrung 072 entfernt — Theme-Default blieb `default`, siehe ADR 0005.)
 - **Generisches Logo:** `assets/img/logo.png` wird wieder das generische Easy!Appointments-Logo; MeBeauty-Logos bleiben nur unter `assets/img/mebeauty/`.
 - **Backend-Header:** Firmenname aus `company_name` (generischer Fallback), Logo aus `company_logo` mit Fallback auf das generische Logo; Untertitel zurück auf den 1.6.0-Text.
 - **E-Mail-Logo:** Wenn `company_logo` als Base64-Data-URI vorliegt, wird es per `addStringEmbeddedImage` (PHPMailer) direkt als `cid:logo.png` eingebettet (kein Temp-File); sonst Fallback auf die generische Logo-Datei. Die E-Mail-Templates referenzieren weiterhin `cid:logo.png`.
