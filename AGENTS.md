@@ -14,6 +14,9 @@ node --check <file>                                    # JS syntax, per changed 
 bash tests/smoke/mebeauty-layout-smoke.sh             # public-page HTTP smoke (site must be up)
 ```
 
+The smoke test needs the settings `theme=mebeauty` and `company_name=MeBeauty` in the
+site's database (not migration defaults); otherwise `booking-theme`/`booking-title` fail.
+
 All PHP/Composer commands run inside the `php-fpm` container (host `php` is a ddev shim).
 Full command list: `docs/docker.md`.
 

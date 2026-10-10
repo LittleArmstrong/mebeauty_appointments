@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+#
+# HTTP smoke test of the public booking page (curl + grep on the rendered HTML).
+#
+# Prerequisite: the database behind BASE_URL must have the settings
+#   theme=mebeauty and company_name=MeBeauty
+# (not migration defaults since 0e430c59). Otherwise booking-theme and booking-title fail.
 set -uo pipefail
 
 BASE="${BASE_URL:-http://localhost}"
