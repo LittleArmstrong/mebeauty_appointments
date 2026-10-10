@@ -96,6 +96,26 @@ docker compose up -d --build
 
 The `php-fpm` container automatically installs the Composer/NPM dependencies and compiles the assets on first start (see `docker/php-fpm/start-container`), so the initial startup can take a few minutes.
 
+### Docker user (UID/GID)
+
+The `php-fpm` container (startup script, PHP-FPM workers and every `docker compose exec`) runs as UID/GID `1000:1000`, so files it creates in the project belong to your host user and Git/Composer work without a `safe.directory` exception. If your host user has a different UID/GID, create a `.env` file (gitignored) and rebuild, because the image creates a matching user (needed for `HOME` and sendmail):
+
+```bash
+printf 'HOST_UID=%s\nHOST_GID=%s\n' "$(id -u)" "$(id -g)" > .env
+```
+
+```bash
+docker compose up -d --build php-fpm
+```
+
+Checkouts that were previously started with the old root container contain root/`www-data`-owned files (`storage`, `node_modules`, `assets/vendor`, `build`, …). Hand them over once, without deleting anything:
+
+```bash
+docker compose run --rm --no-deps --user root php-fpm chown -R "$(id -u):$(id -g)" storage node_modules assets/vendor build vendor assets/img
+```
+
+For administrative tasks inside the container (e.g. `apt-get`) use `docker compose exec --user root php-fpm bash`.
+
 ### Open the application
 
 * Booking page: <http://localhost>

@@ -4,7 +4,7 @@ echo "➜ Ignore Permission Changes"
 git config core.fileMode false
 
 echo "➜ Set Correct Permissions"
-chmod -R 777 storage
+chmod -R 777 storage 2>/dev/null || echo "⚠ storage contains files of another user, see README (Docker user)"
 
 echo "➜ Install Composer Dependencies"
 [[ -d vendor ]] || composer install
@@ -16,4 +16,5 @@ echo "➜ Build Project Assets"
 [[ -d assets/vendor ]] || npx gulp compile
 
 echo "➜ Listen To Incoming Requests"
+# Not running as root, php-fpm ignores user/group from www.conf: workers run as the container user.
 php-fpm

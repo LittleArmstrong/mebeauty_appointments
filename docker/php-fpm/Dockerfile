@@ -26,4 +26,12 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Passwd entry for the runtime user (docker-compose.yml `user:`): gives it a HOME and lets
+# ssmtp (sendmail) resolve the UID. IDs that already exist in the image are reused.
+ARG HOST_UID=1000
+ARG HOST_GID=1000
+RUN (getent group "$HOST_GID" || groupadd -g "$HOST_GID" app) \
+    && (getent passwd "$HOST_UID" || useradd -u "$HOST_UID" -g "$HOST_GID" -m -s /bin/bash app) \
+    && if [ -d /home/app ]; then tail -3 /root/.bashrc >> /home/app/.bashrc; fi
+
 CMD ["bash", "docker/php-fpm/start-container"]

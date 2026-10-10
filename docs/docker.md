@@ -54,6 +54,8 @@ docker compose logs -f                     # follow the container logs
 docker compose down                        # stop the environment (DB data stays in ./docker/mysql)
 ```
 
+The `php-fpm` container runs as `${HOST_UID:-1000}:${HOST_GID:-1000}`, not as root; see "Docker user (UID/GID)" in the [README](../README.md) for overriding the IDs and migrating root-owned files of older checkouts.
+
 ## Database
 
 The application tables are prefixed with `ea_` (e.g. `ea_migrations`, `ea_settings`, `ea_users`). The prefix comes from `application/config/database.php` (`$db['default']['dbprefix'] = 'ea_'`); CodeIgniter prepends it to every table name, so the CodeIgniter table `migrations` becomes `ea_migrations`.
