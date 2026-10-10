@@ -56,9 +56,12 @@ docker compose down                        # stop the environment (DB data stays
 
 ## Database
 
-The application tables are prefixed with `ea_` (e.g. `ea_settings`, `ea_users`). Direct access:
+The application tables are prefixed with `ea_` (e.g. `ea_migrations`, `ea_settings`, `ea_users`). The prefix comes from `application/config/database.php` (`$db['default']['dbprefix'] = 'ea_'`); CodeIgniter prepends it to every table name, so the CodeIgniter table `migrations` becomes `ea_migrations`.
+
+To check the configured prefix:
 
 ```bash
+grep dbprefix application/config/database.php   # -> $db['default']['dbprefix'] = 'ea_'
 docker compose exec mysql mysql -uuser -ppassword easyappointments -e "SHOW TABLES;"
 ```
 

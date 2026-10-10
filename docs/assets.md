@@ -35,8 +35,6 @@ The pattern is `setting('company_logo') ?: base_url('assets/img/logo.png')`.
 
 These are no longer wired anywhere — candidates for deletion, not for reuse:
 
-- `assets/img/mebeauty/logo-128.png` (was the backend-header fallback)
-- `assets/img/mebeauty/logo-192.png` (was the email logo)
 - `assets/img/mebeauty/icon-192.png` (was the booking 192×192 favicon)
 
 ## Gotchas

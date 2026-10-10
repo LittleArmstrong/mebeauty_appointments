@@ -33,6 +33,12 @@ jobs:
       - name: PHP syntax check
         run: find application -name '*.php' -print0 | xargs -0 -n1 php -l
 
+      - name: Validate migrations
+        run: php scripts/validate-migrations.php application/migrations
+
+      - name: Validate asset references
+        run: php scripts/validate-asset-references.php
+
       - name: Run PHPUnit
         run: vendor/bin/phpunit --configuration phpunit.xml
 

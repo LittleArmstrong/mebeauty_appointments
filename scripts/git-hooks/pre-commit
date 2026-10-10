@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Pre-commit guardrail: syntax-check staged PHP and JS files.
+# Pre-commit guardrail: syntax-check staged PHP and JS files, and block
+# accidentally staged backup/temporary files (.backup/.bak/.orig).
 #
 # JS is checked on the host (`node --check`). PHP must be checked inside the
 # php-fpm container (the host `php` binary is a ddev shim); when the container is
@@ -13,6 +14,17 @@ php_container_running() {
 
 fail=0
 staged=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Block accidentally staged backup / temporary files before anything else.
+for file in $staged; do
+    case "$file" in
+        *.backup|*.bak|*.orig)
+            echo "pre-commit: Backup-/Temporärdatei erkannt: $file" >&2
+            echo "pre-commit: Entferne sie aus dem Commit (git rm --cached "$file") und committe erneut." >&2
+            fail=1
+            ;;
+    esac
+done
 
 for file in $staged; do
     case "$file" in
@@ -36,7 +48,7 @@ for file in $staged; do
 done
 
 if [ "$fail" -ne 0 ]; then
-    echo "pre-commit: aborted due to syntax errors" >&2
+    echo "pre-commit: aborted due to validation errors" >&2
     exit 1
 fi
 

@@ -51,6 +51,8 @@
     "scripts": {
         "pre-autoload-dump": "Google\\Task\\Composer::cleanup",
         "test": "APP_ENV=testing php vendor/bin/phpunit",
+        "check:migrations": "php scripts/validate-migrations.php application/migrations",
+        "check:assets": "php scripts/validate-asset-references.php",
         "post-install-cmd": "@cleanup-vendor",
         "post-update-cmd": "@cleanup-vendor",
         "cleanup-vendor": [
