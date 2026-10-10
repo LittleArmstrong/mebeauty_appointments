@@ -67,6 +67,20 @@ docker compose exec mysql mysql -uuser -ppassword easyappointments -e "SHOW TABL
 
 Use `root` / `secret` for administrative access (e.g. via phpMyAdmin at http://localhost:8080).
 
+### Isolated migration tests
+
+Test migrations against a throwaway database instead of pointing `config.php` at it:
+
+```bash
+scripts/migration-test-db.sh fresh                                    # empty DB → console install
+scripts/migration-test-db.sh copy easyappointments --set-version 73   # copy, force tracker, console migrate
+```
+
+The script creates `ea_test_*`, runs the console command with `EA_DB_NAME=<test-db>`
+(honoured by `application/config/database.php` for CLI requests only), prints the
+resulting `ea_migrations.version` and drops the database on exit — also on failure.
+Pass `--keep` to inspect the database afterwards. `config.php` is never edited.
+
 ## Troubleshooting
 
 The Compose file orders nginx after PHP-FPM (`depends_on`) and gives it a `restart` policy, so the previous "nginx started before PHP-FPM" startup race is handled automatically. If <http://localhost> is still unreachable:

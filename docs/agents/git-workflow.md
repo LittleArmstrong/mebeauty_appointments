@@ -43,10 +43,19 @@ git diff
 git diff --cached
 ```
 
-- NEVER overwrite, discard, reset, clean, stash, or modify existing user changes.
-- If the working tree contains uncommitted user changes that are relevant or ambiguous, STOP and ask the user how to proceed.
-- Do not assume that existing uncommitted changes belong to the current task.
-- NEVER use `git reset --hard` or `git clean` unless explicitly requested.
+Treat every working-tree change you did not make yourself in this session as the
+user's work — including deletions, which look like "missing files" but are often
+deliberate. When you find such a change (at the start or mid-task):
+
+1. Identify whose it is: compare against what you changed this session and check the
+   handoff/spec for a mention.
+2. Leave it untouched and work around it: stage only your own paths
+   (`git add <path>`, never `git add -A`/`.`).
+3. If it blocks your task or you cannot tell whose it is, ask the user before acting.
+
+Restoring or discarding (`git checkout -- <path>`, `git restore`, `git reset --hard`,
+`git clean`, `git stash`) is a user decision — run it only when the user explicitly
+asks for that specific path.
 
 ## Branches
 

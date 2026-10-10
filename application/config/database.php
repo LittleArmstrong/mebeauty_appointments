@@ -52,7 +52,9 @@ $query_builder = TRUE;
 $db['default']['hostname'] = Config::DB_HOST;
 $db['default']['username'] = Config::DB_USERNAME;
 $db['default']['password'] = Config::DB_PASSWORD;
-$db['default']['database'] = Config::DB_NAME;
+// MeBeauty: CLI-only override for isolated migration tests (scripts/migration-test-db.sh),
+// so config.php never has to be edited temporarily. Ignored for web requests.
+$db['default']['database'] = is_cli() && getenv('EA_DB_NAME') ? getenv('EA_DB_NAME') : Config::DB_NAME;
 $db['default']['dbdriver'] = 'mysqli';
 $db['default']['dbprefix'] = 'ea_';
 $db['default']['pconnect'] = FALSE;
