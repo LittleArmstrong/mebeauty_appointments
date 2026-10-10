@@ -29,7 +29,7 @@ Where all sources agree, you can trust the fact without re-verification:
 - ✅ **MVC structure** — Confirmed both by the official docs (controllers/models/views conventions) and by codebase analysis (confidence 0.95, evidenced by `application/controllers/` 44 files, `application/models/` 20+, `application/views/`).
 - ✅ **Language stack** — PHP is the dominant language (89.2%), matching the PHP/CI3 stack the docs describe; JS 9.1%, SCSS 1.6%, HTML 0.2% (build tooling only).
 - ✅ **Helper conventions** — `$this->load->helper('...')` loading and `MY_`-prefix extension files appear in both the official docs and the repo's `application/helpers/` (40 helper files, incl. repo-specific `permission_helper.php`).
-- ✅ **Migration framework** — The docs describe CI3 migrations (`EA_Migration` extends `CI_Migration`); the codebase confirms 73 numbered migration classes (001–073) with `up()`/`down()`.
+- ✅ **Migration framework** — The docs describe CI3 migrations (`EA_Migration` extends `CI_Migration`); the codebase confirms 70 numbered migration classes (001–070) with `up()`/`down()`.
 - ✅ **Service Layer** — Detected by codebase analysis at confidence 0.75 (18 service classes); consistent with the architecture the docs describe for large CI3 apps.
 
 ### Source Priorities
@@ -80,7 +80,7 @@ MeBeauty Appointments forked from Easy!Appointments — Self Hosted Appointment 
 - **Understand Easy!Appointments 1.6.0 architecture** — the `EA_*` core classes, the service layer, the API v1 endpoints, the booking/calendar flow.
 - **Write or debug CodeIgniter 3 code in this project** — helpers, libraries, database query builder, sessions, form validation, email, migrations.
 - **Find concrete code examples before implementing** — real API signatures extracted from the actual codebase, not just framework theory.
-- **Create database migrations** — 73 numbered migrations (001–073) provide the exact template for how this project evolves its schema.
+- **Create database migrations** — 70 numbered migrations (001–070) provide the exact template for how this project evolves its schema.
 - **Consume or extend the REST API** — the API v1 controllers (`application/controllers/api/v1/*`) and the `Api` library (bearer-token auth).
 - **Gate controller actions by role** — the `can()`/`cannot()` permission helper.
 - **Check design patterns and architecture** — how the codebase is organized, where the service layer lives, which patterns the analysis detected.
@@ -159,7 +159,7 @@ class Appointments_api_v1 extends EA_Controller
 }
 ```
 
-**Pattern 5: Database migrations** — migrations define `up()`/`down()` and extend `EA_Migration` (three upstream files extend the base `CI_Migration` instead). 73 migrations (001–073) follow this shape (verified class names + inheritance in `api_reference/NNN_*.md`):
+**Pattern 5: Database migrations** — migrations define `up()`/`down()` and extend `EA_Migration` (three upstream files extend the base `CI_Migration` instead). 70 migrations (001–070) follow this shape (verified class names + inheritance in `api_reference/NNN_*.md`):
 
 ```php
 // application/migrations/002_add_google_analytics_setting.php
@@ -177,7 +177,7 @@ class Migration_Add_google_analytics_setting extends EA_Migration
 }
 ```
 
-*(Exact class shape verified from the migration references; the 001–073 series covers settings rows, table renames, new tables like `blocked_periods`/`webhooks`, and column additions. Naming convention: `NNN_snake_case_description.php`.)*
+*(Exact class shape verified from the migration references; the 001–070 series covers settings rows, table renames, new tables like `blocked_periods`/`webhooks`, and column additions. Naming convention: `NNN_snake_case_description.php`.)*
 
 **Pattern 6: Core controller (`EA_Controller` extends `CI_Controller`)** — every controller inherits session/language/timezone setup. From `references/codebase_analysis/.../api_reference/EA_Controller.md`:
 
@@ -537,7 +537,7 @@ Automated analysis of the actual repository code:
 2. **For a class/method signature**: search `references/codebase_analysis/LittleArmstrong_mebeauty_appointments/api_reference/` for `<ClassName>.md` (or `<file_name>.md`).
 3. **For how a feature *should* work**: read the relevant page in `references/documentation/easyappointments-ci3_docs/framework.md` or `libraries.md`.
 4. **For how this repo actually does it**: check `ARCHITECTURE.md` first, then look at the matching controller/model in the api_reference.
-5. **For migration history / schema evolution**: read the 001–073 migration references in order.
+5. **For migration history / schema evolution**: read the 001–070 migration references in order.
 6. **For the project overview and setup**: see the GitHub README reference.
 7. **For the machine-readable data**: `patterns/detected_patterns.json`, `architecture_details/architectural_patterns.json`, `configuration/config_patterns.json`.
 
