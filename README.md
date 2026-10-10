@@ -90,6 +90,9 @@ cd mebeauty_appointments
 # Only needed if config.php does not exist yet (it is gitignored)
 cp config-sample.php config.php
 
+# Only if `id -u`/`id -g` is not 1000: run the container as your user (see "Docker user" below)
+printf 'HOST_UID=%s\nHOST_GID=%s\n' "$(id -u)" "$(id -g)" >> .env
+
 # Start the Docker environment
 docker compose up -d --build
 ```
@@ -98,11 +101,13 @@ The `php-fpm` container automatically installs the Composer/NPM dependencies and
 
 ### Docker user (UID/GID)
 
-The `php-fpm` container (startup script, PHP-FPM workers and every `docker compose exec`) runs as UID/GID `1000:1000`, so files it creates in the project belong to your host user and Git/Composer work without a `safe.directory` exception. If your host user has a different UID/GID, create a `.env` file (gitignored) and rebuild, because the image creates a matching user (needed for `HOME` and sendmail):
+The `php-fpm` container (startup script, PHP-FPM workers and every `docker compose exec`) runs as UID/GID `1000:1000`, so files it creates in the project belong to your host user and Git/Composer work without a `safe.directory` exception. If your host user has a different UID/GID, set them in `.env` (gitignored) **before the first start**, otherwise the first start creates `vendor`, `node_modules` and `assets/vendor` as UID 1000. The command appends, so existing settings such as `NGINX_PORT` are kept; remove older `HOST_UID`/`HOST_GID` lines first:
 
 ```bash
-printf 'HOST_UID=%s\nHOST_GID=%s\n' "$(id -u)" "$(id -g)" > .env
+printf 'HOST_UID=%s\nHOST_GID=%s\n' "$(id -u)" "$(id -g)" >> .env
 ```
+
+Rebuild after every change of these values. The image creates a matching user; without the rebuild the container runs without one (`HOME=/`, sendmail fails):
 
 ```bash
 docker compose up -d --build php-fpm

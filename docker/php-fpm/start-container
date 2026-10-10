@@ -1,11 +1,5 @@
 #!/bin/bash
 
-echo "➜ Ignore Permission Changes"
-git config core.fileMode false
-
-echo "➜ Set Correct Permissions"
-chmod -R 777 storage 2>/dev/null || echo "⚠ storage contains files of another user, see README (Docker user)"
-
 echo "➜ Install Composer Dependencies"
 [[ -d vendor ]] || composer install
 
