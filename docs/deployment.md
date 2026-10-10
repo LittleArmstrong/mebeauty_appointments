@@ -107,6 +107,27 @@ Der Deploy überschreibt sie nie (rsync schließt `config.php` aus). Ebenso wird
 Inhalt von `storage/` (Logs, Uploads, Sessions) vom Deploy nicht angefasst — nur
 das Grundgerüst (`index.html`/`.htaccess`) wird beim ersten Deploy angelegt.
 
+## HTMLPurifier-Cache & rsync `--delete`
+
+HTMLPurifier (via `pure_html()` in `application/helpers/html_helper.php`) legt
+standardmäßig seinen Serializer-Cache **innerhalb von `vendor/`** an
+(`vendor/ezyang/htmlpurifier/library/HTMLPurifier/DefinitionCache/Serializer/HTML`
+und `…/CSS`). Das ist ein Problem für den Deploy: `vendor/` wird per
+`rsync --delete` als Build-Artefakt verwaltet, und die Cache-Dateien entstehen
+erst zur Laufzeit durch den PHP-Prozess. Auf manitu laufen Webserver/PHP und der
+Deploy-SSH-Nutzer unter **verschiedenen** Accounts (z. B. `site100033324` vs.
+`ssh300011177`). Die vom PHP-Nutzer angelegten Cache-Verzeichnisse (Modus `0755`,
+nur Owner schreibbar) kann der Deploy-Nutzer daher nicht löschen — `--delete`
+schlägt mit `cannot delete non-empty directory` und Exit-Code 23 fehl.
+
+Deshalb setzt `pure_html()` den Cache explizit auf
+`storage/cache/htmlpurifier/`. `storage/` ist vom ersten rsync ausgeschlossen
+(`--exclude '/storage/'`) und der `storage`-rsync hat kein `--delete`, daher
+kollidieren die Laufzeit-Cache-Dateien nicht mehr mit dem Deploy. Ist
+`storage/cache/htmlpurifier/` nicht anlegbar oder nicht beschreibbar, wird der
+Cache ersatzlos deaktiviert (`Cache.DefinitionImpl = null`), statt auf den alten
+`vendor/`-Pfad zurückzufallen.
+
 ## Erstinstallation (Test, einmalig)
 
 1. Deploy auslösen (push auf `staging`).

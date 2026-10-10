@@ -189,6 +189,14 @@ if (!function_exists('pure_html')) {
     {
         $config = HTMLPurifier_Config::createDefault();
 
+        $cache_path = rtrim(config('cache_path'), '/') . '/htmlpurifier';
+
+        if ((is_dir($cache_path) || @mkdir($cache_path, 0775, true)) && is_writable($cache_path)) {
+            $config->set('Cache.SerializerPath', $cache_path);
+        } else {
+            $config->set('Cache.DefinitionImpl', null);
+        }
+
         $purifier = new HTMLPurifier($config);
 
         return $purifier->purify($markup);
