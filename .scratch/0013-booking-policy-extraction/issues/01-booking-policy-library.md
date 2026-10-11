@@ -18,3 +18,5 @@
 
 - `application/libraries/Booking_policy.php` mit `get_lock()`, `get_booking_deadline()`, `get_earliest_booking_start()`; Uhr, Einstellungen und Datumsformatierer injizierbar (der Formatierer, weil `format_date_time()` das Datumsformat aus der Datenbank liest). Aus `Availability` entfernt: Buchungs-/Manage-Frist, Buchungs-/Manage-Sperre, Fristprüfung, Vorlauf-Normalisierung; Slot-Filter fragt `get_earliest_booking_start()` (Gleichheit erlaubt, vereinheitlicht).
 - 9 Unit-Tests mit fester Uhr (inkl. Berlin/UTC und Sommerzeitwechsel). Smoke (Absenden, Fristen) grün; Sperre beim Öffnen des Manage-Links und bei der Stornierung live geprüft.
+
+- Review (Opus): Sommerzeit-Test korrigiert (vorher ohne Wechsel zwischen Frist und Termintag), Rückfall nicht numerischer Tageswerte wieder 0 wie vorher, Arbeitsende-Ermittlung und Slot-Filter-Grenze als reine Funktionen mit Tests.

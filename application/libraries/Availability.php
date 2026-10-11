@@ -748,7 +748,11 @@ class Availability
 
             $end_hour = new DateTime($date . ' ' . $period['end']);
 
-            $buffer = self::end_of_day_buffer_for_period($end_hour->format('H:i'), $working_day_end, $end_of_day_buffer);
+            $buffer = self::end_of_day_buffer_for_period(
+                $end_hour->format('H:i'),
+                $working_day_end,
+                $end_of_day_buffer,
+            );
 
             $last_end = $end_hour->getTimestamp() - $buffer * 60;
 
@@ -789,10 +793,24 @@ class Availability
      */
     protected function get_working_day_end(string $date, array $provider): ?string
     {
-        $working_plan = json_decode($provider['settings']['working_plan'], true);
+        return self::working_day_end(
+            $date,
+            json_decode($provider['settings']['working_plan'], true) ?: [],
+            $this->CI->working_plan_exceptions_model->get_by_provider($provider['id']),
+        );
+    }
 
-        $working_plan_exceptions = $this->CI->working_plan_exceptions_model->get_by_provider($provider['id']);
-
+    /**
+     * Get the end of the effective working plan for a date: a working plan exception wins over the weekday plan.
+     *
+     * @param string $date Selected date (Y-m-d).
+     * @param array $working_plan Weekday working plan (e.g. ['monday' => ['start' => '09:00', 'end' => '18:00']]).
+     * @param array $working_plan_exceptions Working plan exceptions keyed by date (Y-m-d).
+     *
+     * @return string|null Returns the end time (H:i), or null when there is no working plan for the date.
+     */
+    public static function working_day_end(string $date, array $working_plan, array $working_plan_exceptions): ?string
+    {
         $date_working_plan = $working_plan[strtolower(date('l', strtotime($date)))] ?? null;
 
         if (array_key_exists($date, $working_plan_exceptions)) {
@@ -859,15 +877,31 @@ class Availability
             return [];
         }
 
-        foreach ($available_hours as $index => $value) {
-            $available_hour = new DateTime($date . ' ' . $value, $provider_timezone);
+        return self::filter_hours_from($date, $available_hours, $earliest_start, $provider_timezone);
+    }
 
-            if ($available_hour->getTimestamp() < $earliest_start->getTimestamp()) {
-                unset($available_hours[$index]);
-            }
-        }
-
-        $available_hours = array_values($available_hours);
+    /**
+     * Keep only the hours that start at or after the earliest allowed start (a start exactly at it is allowed).
+     *
+     * @param string $date Selected date (Y-m-d).
+     * @param array $available_hours Hours (H:i).
+     * @param DateTimeInterface $earliest_start Earliest allowed start.
+     * @param DateTimeZone $timezone Timezone of the hours.
+     *
+     * @return array Returns the remaining hours, sorted.
+     *
+     * @throws Exception
+     */
+    public static function filter_hours_from(
+        string $date,
+        array $available_hours,
+        DateTimeInterface $earliest_start,
+        DateTimeZone $timezone,
+    ): array {
+        $available_hours = array_filter(
+            $available_hours,
+            fn(string $hour) => (new DateTime($date . ' ' . $hour, $timezone)) >= $earliest_start,
+        );
 
         sort($available_hours, SORT_STRING);
 

@@ -82,3 +82,4 @@ Mit dem Umbau wird die Grenze **vereinheitlicht**: Ein Termin, der genau zur Min
 
 - Reihenfolge: nach `0009/02` und `0012/02`, damit die Fixes auf dem alten Stand klein bleiben.
 - Bezug: ADR 0002, ADR 0003, ADR 0005; Glossar „Vorlaufzeit“, „Buchungsfrist“, „Umbuchungs-/Stornierungsfrist“.
+- Umsetzung: Die Gleichheitsregel gilt auch für den Festzeit-Modus (ein Slot, der exakt zur aktuellen Sekunde beginnt, ist zulässig). Das betrifft nur diese eine Sekunde und hält Slot-Filter und Sperre einheitlich.

@@ -127,9 +127,10 @@ class AvailabilityTest extends TestCase
         $this->assertSame('15:00', current(array_slice($this->hours([['09:00', '16:00']]), -1)));
     }
 
-    public function testBufferAfterAppointmentIsNotAppliedTwice(): void
+    public function testSlotsStartAtThePeriodStartWithoutAnotherBuffer(): void
     {
-        // The period after an appointment ending at 10:00 already starts after its buffer (10:15).
+        // The buffer after an appointment is added when the free periods are built (appointment ending 10:00
+        // → period from 10:15). The slot generation must not add a buffer at the period start again.
         $hours = $this->hours([['10:15', '18:00']]);
 
         $this->assertSame('10:15', $hours[0]);
@@ -146,5 +147,34 @@ class AvailabilityTest extends TestCase
         $this->assertSame(15, \Availability::end_of_day_buffer_for_period('18:00', '18:00', 15));
         $this->assertSame(0, \Availability::end_of_day_buffer_for_period('12:00', '18:00', 15));
         $this->assertSame(0, \Availability::end_of_day_buffer_for_period('18:00', null, 15));
+    }
+
+    public function testWorkingDayEndPrefersTheExceptionAndNormalizesSeconds(): void
+    {
+        $plan = ['monday' => ['start' => '09:00', 'end' => '18:00:00', 'breaks' => []]];
+
+        $this->assertSame('18:00', \Availability::working_day_end('2026-01-05', $plan, []));
+        $this->assertSame(
+            '14:00',
+            \Availability::working_day_end('2026-01-05', $plan, [
+                '2026-01-05' => ['start' => '09:00', 'end' => '14:00']
+            ])
+        );
+        $this->assertNull(\Availability::working_day_end('2026-01-06', $plan, []));
+        $this->assertNull(\Availability::working_day_end('2026-01-05', $plan, ['2026-01-05' => null]));
+    }
+
+    public function testFilterHoursFromAllowsAStartExactlyAtTheEarliestStart(): void
+    {
+        $timezone = new \DateTimeZone('UTC');
+
+        $hours = \Availability::filter_hours_from(
+            '2026-01-05',
+            ['11:15', '10:45', '11:00'],
+            new \DateTimeImmutable('2026-01-05 11:00:00', $timezone),
+            $timezone
+        );
+
+        $this->assertSame(['11:00', '11:15'], $hours);
     }
 }

@@ -121,16 +121,28 @@ class BookingPolicyTest extends TestCase
 
     public function testDeadlineAcrossDaylightSavingTimeChange(): void
     {
-        // Summer time starts on 2026-03-29: the deadline 2026-03-29 18:00 Berlin (CEST) is 16:00 UTC.
+        // Summer time starts on 2026-03-29 at 02:00. For an appointment on 2026-03-29 the deadline is
+        // 2026-03-28 18:00 Berlin winter time (CET) = 17:00 UTC, not 16:00 UTC (24 h before 18:00 CEST).
+        $settings = self::FIXED;
+
         $this->assertFalse(
-            $this->policy('2026-03-29 15:59:00', self::FIXED)->get_lock('2026-03-30 10:00:00', 'Europe/Berlin')[
-                'locked'
-            ]
+            $this->policy('2026-03-28 16:59:59', $settings)->get_lock('2026-03-29 10:00:00', 'Europe/Berlin')['locked']
+        );
+        $this->assertFalse(
+            $this->policy('2026-03-28 17:00:00', $settings)->get_lock('2026-03-29 10:00:00', 'Europe/Berlin')['locked']
         );
         $this->assertTrue(
-            $this->policy('2026-03-29 16:00:01', self::FIXED)->get_lock('2026-03-30 10:00:00', 'Europe/Berlin')[
-                'locked'
-            ]
+            $this->policy('2026-03-28 17:00:01', $settings)->get_lock('2026-03-29 10:00:00', 'Europe/Berlin')['locked']
+        );
+    }
+
+    public function testNonNumericDaySettingCountsAsZeroLikeBeforeTheExtraction(): void
+    {
+        $settings = ['booking_deadline_days' => 'abc'] + self::FIXED;
+
+        // Day offset 0: the deadline is on the appointment day itself (2026-01-06 18:00).
+        $this->assertFalse(
+            $this->policy('2026-01-06 09:00:00', $settings)->get_lock('2026-01-06 20:00:00', 'UTC')['locked']
         );
     }
 

@@ -71,8 +71,10 @@ class Booking_policy
     {
         $start = new DateTimeImmutable($start_datetime, new DateTimeZone($timezone));
 
-        if ($kind === 'manage' && $this->setting('manage_deadline_mode', 'inherit') !== 'inherit') {
-            if ($this->setting('manage_deadline_mode', 'inherit') === 'fixed_time') {
+        $manage_mode = $kind === 'manage' ? $this->setting('manage_deadline_mode', 'inherit') : 'inherit';
+
+        if ($manage_mode !== 'inherit') {
+            if ($manage_mode === 'fixed_time') {
                 return $this->deadline_lock(
                     $this->deadline($start->format('Y-m-d'), $timezone, 'manage_deadline_time', 'manage_deadline_days'),
                     $timezone,
@@ -280,7 +282,8 @@ class Booking_policy
     {
         $value = $this->setting($name, $default);
 
-        return is_numeric($value) ? max(0, (int) $value) : $default;
+        // Same normalization as before the extraction: non-numeric values count as 0.
+        return max(0, (int) $value);
     }
 
     /**
