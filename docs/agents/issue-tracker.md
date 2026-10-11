@@ -9,6 +9,7 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Implementation issues are one file per ticket at `.scratch/<NNNN>-<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- Every statement about current behaviour in a spec's problem section cites its evidence as `path:line` (e.g. `application/controllers/Booking.php:489`), checked against the code before the spec is published.
 - Cross-references: a spec is referenced by its number (`0009`), a ticket in another spec as `NNNN/NN` (e.g. `0009/02`), a ticket in the same spec by `NN`.
 
 ## Spec header

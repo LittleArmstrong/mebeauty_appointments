@@ -25,6 +25,11 @@ Single checks run inside the `php-fpm` container (host `php` is a ddev shim):
 - Read `docs/agents/development-conventions.md` before substantial changes.
 - Before visual/layout measurement or Playwright work, read `docs/visual-measurement.md`.
 
+## Durable knowledge
+
+Sessions and handoffs are disposable. Anything worth keeping lands in a spec, a ticket
+comment, an ADR or `docs/` before the session ends.
+
 ## Commits
 
 Two authorized commit checkpoints: (1) after a spec + ticket is created in `.scratch/`
@@ -36,7 +41,6 @@ Otherwise ask first. Never push or merge. See `docs/agents/git-workflow.md`.
 - `docs/agents/git-workflow.md` — branches, existing user changes, inspection, commit discipline
 - `docs/agents/development-conventions.md` — code conventions, DB migrations, API v1, security, scope
 - `docs/agents/validation-and-completion.md` — full validation and completion report
-- `docs/agents/session-traceability.md` — session export and summary
 
 ## Agent skills
 

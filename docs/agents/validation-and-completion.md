@@ -74,6 +74,8 @@ If this is an authorized workflow commit point:
 5. Show the commit hash and message.
 6. Show the remaining working-tree status.
 
-Do not push unless explicitly requested.
+Do not push unless explicitly requested. After a requested push, check the CI result
+with `gh run list --branch <branch>` (and `gh run view <id> --log-failed` on a failure)
+and report it.
 
 Do not merge unless explicitly requested.

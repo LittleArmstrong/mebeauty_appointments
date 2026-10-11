@@ -25,3 +25,20 @@ settings-driven.
 Verify the target asset's role in `docs/assets.md` before replacing or re-wiring
 it. In particular: `assets/img/logo.png` is a fallback, not the favicon; the
 favicon is `assets/img/favicon.ico` only.
+
+## View output goes through `e()`
+
+Fork-owned views print variables, `setting()`, `vars()` and `html_vars()` values via `e()`;
+`composer check:views` enforces this. Upstream layouts print some view variables raw
+(`page_title` in `application/views/layouts/*_layout.php`), and the check does not cover
+upstream views: a value passed into such a variable is escaped where it is set, e.g.
+`'page_title' => lang('page_title') . ' ' . e($company_name)` (`application/controllers/Booking.php:144`).
+
+## Tests go red
+
+A new test in a ticket that changes behaviour (feat/fix) is red against the old
+behaviour before it turns green with the change. Its test data produces exactly the
+edge case the test name claims (a test about breaks has a break in its working plan).
+The ticket comment records the evidence: `Rot vor Fix: <test(s)> – <failure message>`,
+from running the test against the old code or a simulated old behaviour. Refactors and
+docs-only tickets keep their existing tests green instead.
