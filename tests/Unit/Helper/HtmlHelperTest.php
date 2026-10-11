@@ -4,7 +4,8 @@ namespace Tests\Unit\Helper;
 
 use Tests\TestCase;
 
-class HtmlHelperTest extends TestCase {
+class HtmlHelperTest extends TestCase
+{
     public function testPureHtmlStripsJavaScript(): void
     {
         $this->assertSame('<p>Hello</p>', pure_html('<script>alert(1)</script><p>Hello</p>'));
@@ -54,10 +55,7 @@ class HtmlHelperTest extends TestCase {
         config(['cache_path' => $blocker . '/']);
 
         try {
-            $this->assertSame(
-                '<p>Hello</p>',
-                pure_html('<script>alert(1)</script><p>Hello</p>'),
-            );
+            $this->assertSame('<p>Hello</p>', pure_html('<script>alert(1)</script><p>Hello</p>'));
         } finally {
             config(['cache_path' => $originalCachePath]);
             @unlink($blocker);

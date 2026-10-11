@@ -1,6 +1,6 @@
 # Upstream-Diff klein halten: Formatter-Strategie, Whitespace-Bereinigung, Kleinkram
 
-Status: ready-for-agent
+Status: in-progress
 Created: 2026-10-11
 Closed: –
 Priority: P3

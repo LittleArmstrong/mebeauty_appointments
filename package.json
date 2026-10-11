@@ -63,6 +63,7 @@
     "start": "npx --yes gulp",
     "build": "npx gulp build",
     "docs": "npx gulp docs",
-    "check:format": "npx prettier --check \"application/**/*.php\" \"tests/**/*.php\" \"assets/**/*.js\" \"assets/**/*.scss\""
+    "check:format": "bash scripts/check-format.sh",
+    "format": "bash scripts/check-format.sh --write"
   }
 }

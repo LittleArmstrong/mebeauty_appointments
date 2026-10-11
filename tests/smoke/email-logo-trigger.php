@@ -15,7 +15,7 @@ $_SERVER['argv'] = ['email-logo-trigger', 'test'];
 
 require __DIR__ . '/../../index.php';
 
-$CI =& get_instance();
+$CI = &get_instance();
 $CI->load->library('email_messages');
 
 $recipient = getenv('EMAIL_RECIPIENT') ?: 'smoke-test@example.com';
@@ -26,7 +26,7 @@ $settings = [
     'company_name' => setting('company_name'),
     'company_link' => setting('company_link'),
     'company_email' => setting('company_email'),
-    'company_color' => !empty($company_color) && $company_color != DEFAULT_COMPANY_COLOR ? $company_color : null,
+    'company_color' => !empty($company_color) && $company_color != DEFAULT_COMPANY_COLOR ? $company_color : null
 ];
 
 $CI->email_messages->send_password('smoke-test-password', $recipient, $settings);

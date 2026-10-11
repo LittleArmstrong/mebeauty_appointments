@@ -4,8 +4,7 @@
  *
  * None.
  */
-$site_url = 'https://mebeauty-koeln.de';
-?>
+$site_url = 'https://mebeauty-koeln.de'; ?>
 <header class="site-navbar">
     <nav>
         <div class="site-navbar-inner">

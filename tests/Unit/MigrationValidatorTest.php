@@ -4,7 +4,8 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
-class MigrationValidatorTest extends TestCase {
+class MigrationValidatorTest extends TestCase
+{
     private string $tmpDir;
 
     public static function setUpBeforeClass(): void
@@ -75,7 +76,10 @@ class MigrationValidatorTest extends TestCase {
         $errors = \validate_migrations($this->tmpDir);
 
         $this->assertNotEmpty($errors);
-        $this->assertStringContainsString('Klasse Migration_WrongName — erwartet Migration_First', implode("\n", $errors));
+        $this->assertStringContainsString(
+            'Klasse Migration_WrongName — erwartet Migration_First',
+            implode("\n", $errors)
+        );
     }
 
     public function testMissingClass(): void
@@ -92,7 +96,7 @@ class MigrationValidatorTest extends TestCase {
     {
         file_put_contents(
             $this->tmpDir . '/' . $name,
-            "<?php\n\nclass $class extends EA_Migration {\n    public function up(): void {}\n    public function down(): void {}\n}\n",
+            "<?php\n\nclass $class extends EA_Migration {\n    public function up(): void {}\n    public function down(): void {}\n}\n"
         );
     }
 

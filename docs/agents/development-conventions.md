@@ -32,6 +32,17 @@ Do NOT:
 - Modify generated files unless required.
 - Change configuration or secrets without explicit approval.
 
+## Formatting
+
+The repository has a Prettier configuration (`.prettierrc.json`, PHP plugin) and `.editorconfig`, but
+Easy!Appointments itself is not Prettier-formatted. Rules:
+
+- **Fork-owned files** (added since the upstream base commit in `UPSTREAM.md`) must be Prettier-clean.
+  `npm run check:format` checks exactly these files (CI runs it); `npm run format` formats them.
+- **Upstream files are never formatted as a whole** — no Prettier/IDE "reformat file". Changes follow the
+  surrounding upstream style, and pure whitespace changes against the upstream base are reverted. This keeps
+  the upstream diff and future sync conflicts small (ADR 0005).
+
 ## Scope control
 
 Only modify files necessary for the requested task.

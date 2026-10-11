@@ -4,7 +4,8 @@ namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 
-class AssetReferenceValidatorTest extends TestCase {
+class AssetReferenceValidatorTest extends TestCase
+{
     private string $tmpRoot;
 
     public static function setUpBeforeClass(): void

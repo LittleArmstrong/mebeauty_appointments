@@ -59,7 +59,16 @@ $min-contrast-ratio: 4.5 !default;
 // Typography
 //
 
-$font-family-sans-serif: 'Karla', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif !default;
+$font-family-sans-serif:
+    'Karla',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    'Noto Sans',
+    sans-serif !default;
 $font-family-base: $font-family-sans-serif !default;
 
 $link-color: $gold !default;

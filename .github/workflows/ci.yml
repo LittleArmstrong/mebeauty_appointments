@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: Git clone
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # check:format compares against the upstream base commit (UPSTREAM.md)
 
       # Tests run on PHP 8.3 (= production web server, Docker). PHP 8.2 compatibility of the
       # runtime code is checked separately in the php82-runtime job (ADR 0007).
@@ -28,6 +30,9 @@ jobs:
 
       - name: Install NPM dependencies
         run: npm ci
+
+      - name: Check formatting of fork-owned files
+        run: npm run check:format
 
       - name: Build assets (SCSS -> CSS)
         run: npx gulp styles

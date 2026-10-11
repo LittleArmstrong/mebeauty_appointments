@@ -10,7 +10,7 @@
 | [0012](0012-buffer-end-of-day/spec.md) Tagesende-Puffer nur vor dem effektiven Arbeitsende | ready-for-agent | P1 | 2026-10-11 | – | 2/2 |
 | [0013](0013-booking-policy-extraction/spec.md) Fristen und Sperren in eine eigene Booking-Policy auslagern | ready-for-agent | P2 | 2026-10-11 | 0009, 0012 | 3/3 |
 | [0014](0014-theme-site-chrome/spec.md) Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte | ready-for-agent | P2 | 2026-10-11 | 0010 | 4/4 |
-| [0011](0011-upstream-diff-hygiene/spec.md) Upstream-Diff klein halten: Formatter-Strategie, Whitespace-Bereinigung, Kleinkram | ready-for-agent | P3 | 2026-10-11 | – | 4/4 |
+| [0011](0011-upstream-diff-hygiene/spec.md) Upstream-Diff klein halten: Formatter-Strategie, Whitespace-Bereinigung, Kleinkram | in-progress | P3 | 2026-10-11 | – | 3/4 |
 
 ## Abgeschlossen
 

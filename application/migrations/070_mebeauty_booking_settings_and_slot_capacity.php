@@ -23,7 +23,7 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
             'manage_deadline_mode' => 'inherit',
             'manage_deadline_minutes' => '0',
             'manage_deadline_time' => '18:00',
-            'manage_deadline_days' => '1',
+            'manage_deadline_days' => '1'
         ];
 
         foreach ($settings as $name => $value) {
@@ -38,8 +38,8 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                     'type' => 'INT',
                     'constraint' => 11,
                     'default' => 0,
-                    'after' => 'attendants_number',
-                ],
+                    'after' => 'attendants_number'
+                ]
             ]);
         }
     }
@@ -65,7 +65,7 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                 'manage_deadline_mode',
                 'manage_deadline_minutes',
                 'manage_deadline_time',
-                'manage_deadline_days',
+                'manage_deadline_days'
             ])
             ->delete('settings');
 
