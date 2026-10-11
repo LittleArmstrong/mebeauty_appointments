@@ -3,7 +3,8 @@
 mebeauty_appointments — a fork of Easy!Appointments 1.6.0 based on CodeIgniter 3.1.11.
 Repository code and `EA_*` overrides take precedence over generic Easy!Appointments or
 CodeIgniter documentation. For repository-specific implementation questions, use the
-`easyappointments-ci3` skill.
+`easyappointments-ci3` skill
+(`.claude/skills/easyappointments-ci3/`, loaded by Claude Code and OpenCode).
 
 ## Validate every change
 
