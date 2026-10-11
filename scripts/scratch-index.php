@@ -44,6 +44,18 @@ function scratch_is_none(string $value): bool
 }
 
 /**
+ * Check whether a spec or ticket status counts as closed.
+ *
+ * @param string|null $status Status value.
+ *
+ * @return bool
+ */
+function scratch_is_closed(?string $status): bool
+{
+    return in_array($status, SCRATCH_CLOSED_STATUSES, true);
+}
+
+/**
  * Parse the title and header lines of a spec file.
  *
  * The header is the block of "Key: value" lines that follows the first "# " title line.
@@ -169,9 +181,7 @@ function scratch_collect(string $directory): array
  */
 function scratch_open_tickets(array $spec): int
 {
-    return count(
-        array_filter($spec['tickets'], fn(?string $status) => !in_array($status, SCRATCH_CLOSED_STATUSES, true))
-    );
+    return count(array_filter($spec['tickets'], fn(?string $status) => !scratch_is_closed($status)));
 }
 
 /**
@@ -233,7 +243,7 @@ function scratch_validate(array $specs): array
         }
 
         $status = $header['Status'] ?? null;
-        $closed_status = in_array($status, SCRATCH_CLOSED_STATUSES, true);
+        $closed_status = scratch_is_closed($status);
 
         if ($status !== null && !in_array($status, SCRATCH_STATUSES, true)) {
             $errors[] = sprintf('%s: unbekannter Status "%s"', $label, $status);
@@ -281,8 +291,10 @@ function scratch_validate(array $specs): array
             }
         }
 
-        if ($status === 'resolved' && scratch_open_tickets($spec) > 0) {
-            $errors[] = sprintf('%s: Status resolved, aber %d Ticket(s) offen', $label, scratch_open_tickets($spec));
+        $open_tickets = scratch_open_tickets($spec);
+
+        if ($status === 'resolved' && $open_tickets > 0) {
+            $errors[] = sprintf('%s: Status resolved, aber %d Ticket(s) offen', $label, $open_tickets);
         }
     }
 
@@ -302,7 +314,7 @@ function scratch_render_index(array $specs): string
     $closed = [];
 
     foreach ($specs as $spec) {
-        if (in_array($spec['header']['Status'] ?? null, SCRATCH_CLOSED_STATUSES, true)) {
+        if (scratch_is_closed($spec['header']['Status'] ?? null)) {
             $closed[] = $spec;
         } else {
             $open[] = $spec;
@@ -321,7 +333,7 @@ function scratch_render_index(array $specs): string
         return [$rank_a, $a['number']] <=> [$rank_b, $b['number']];
     });
 
-    $link = fn(array $spec) => sprintf(
+    $spec_link = fn(array $spec) => sprintf(
         '[%s](%s/%s) %s',
         str_pad((string) $spec['number'], 4, '0', STR_PAD_LEFT),
         $spec['dir'],
@@ -329,9 +341,9 @@ function scratch_render_index(array $specs): string
         str_replace('|', '\|', $spec['title'])
     );
 
-    $tickets = fn(array $spec) => sprintf('%d/%d', scratch_open_tickets($spec), count($spec['tickets']));
+    $ticket_summary = fn(array $spec) => sprintf('%d/%d', scratch_open_tickets($spec), count($spec['tickets']));
 
-    $value = fn(array $spec, string $key) => $spec['header'][$key] ?? '?';
+    $header_value = fn(array $spec, string $key) => $spec['header'][$key] ?? '?';
 
     $lines = [
         '# Spec-Index',
@@ -351,12 +363,12 @@ function scratch_render_index(array $specs): string
         foreach ($open as $spec) {
             $lines[] = sprintf(
                 '| %s | %s | %s | %s | %s | %s |',
-                $link($spec),
-                $value($spec, 'Status'),
-                $value($spec, 'Priority'),
-                $value($spec, 'Created'),
-                $value($spec, 'Depends-on'),
-                $tickets($spec)
+                $spec_link($spec),
+                $header_value($spec, 'Status'),
+                $header_value($spec, 'Priority'),
+                $header_value($spec, 'Created'),
+                $header_value($spec, 'Depends-on'),
+                $ticket_summary($spec)
             );
         }
     }
@@ -374,10 +386,10 @@ function scratch_render_index(array $specs): string
         foreach ($closed as $spec) {
             $lines[] = sprintf(
                 '| %s | %s | %s | %s | %d |',
-                $link($spec),
-                $value($spec, 'Status'),
-                $value($spec, 'Created'),
-                $value($spec, 'Closed'),
+                $spec_link($spec),
+                $header_value($spec, 'Status'),
+                $header_value($spec, 'Created'),
+                $header_value($spec, 'Closed'),
                 count($spec['tickets'])
             );
         }
