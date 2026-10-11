@@ -260,7 +260,12 @@ class Availability
 
             $buffer_time = $this->get_buffer_time();
 
-            $end_of_day_buffer = $this->get_end_of_day_buffer();
+            // The end-of-day buffer only applies to the period that ends at the working day end.
+            $end_of_day_buffer = self::end_of_day_buffer_for_period(
+                $period['end']->format('H:i'),
+                date('H:i', strtotime($date_working_plan['end'])),
+                $this->get_end_of_day_buffer(),
+            );
 
             while ($slot_end->getTimestamp() + $end_of_day_buffer * 60 <= $period['end']->getTimestamp()) {
                 // The buffer after existing appointments shifts the conflict window backwards.
