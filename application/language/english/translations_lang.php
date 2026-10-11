@@ -607,4 +607,21 @@ $lang['about_app_premium'] = 'We offer end-to-end services for self-hosted softw
 $lang['go_premium'] = 'Go Premium';
 $lang['notify_users_on_create_question'] = 'Would you like to send out a notification about this change?';
 $lang['notify_users_on_delete_question'] = 'Would you like to send out a notification about this change?';
+// Site chrome of the themes (ADR 0006)
+$lang['site_booking'] = 'Booking';
+$lang['site_book_online'] = 'Book an appointment online';
+$lang['site_open_menu'] = 'Open menu';
+$lang['site_nav_home'] = 'Home';
+$lang['site_nav_treatments'] = 'Treatments';
+$lang['site_nav_prices'] = 'Prices';
+$lang['site_nav_contact'] = 'Contact';
+$lang['site_treatments'] = 'Treatments';
+$lang['site_phone'] = 'Phone';
+$lang['site_email'] = 'Email';
+$lang['site_address'] = 'Address';
+$lang['site_phone_hours'] = 'Phone hours';
+$lang['site_by_appointment'] = 'By appointment only!';
+$lang['site_imprint'] = 'Imprint';
+$lang['site_privacy'] = 'Privacy';
+$lang['site_whatsapp_chat'] = 'Chat with us on WhatsApp';
 // End

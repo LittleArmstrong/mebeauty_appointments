@@ -16,7 +16,7 @@ $site_url = 'https://mebeauty-koeln.de'; ?>
             </a>
             <div class="site-navbar-toggle">
                 <button id="navbar-mobile-menu-btn" type="button" aria-controls="navbar-mobile-menu" aria-expanded="false">
-                    <span class="visually-hidden">Menü öffnen</span>
+                    <span class="visually-hidden"><?= lang('site_open_menu') ?></span>
                     <svg class="svg-burger" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
                     </svg>
@@ -27,10 +27,10 @@ $site_url = 'https://mebeauty-koeln.de'; ?>
             </div>
             <div id="navbar-mobile-menu" class="site-navbar-menu">
                 <ul>
-                    <li><a href="<?= $site_url ?>/">Home</a></li>
-                    <li><a href="<?= $site_url ?>/Behandlungen">Behandlungen</a></li>
-                    <li><a href="<?= $site_url ?>/Preise">Preise</a></li>
-                    <li><a href="<?= $site_url ?>/Kontakt">Kontakt</a></li>
+                    <li><a href="<?= $site_url ?>/"><?= lang('site_nav_home') ?></a></li>
+                    <li><a href="<?= $site_url ?>/Behandlungen"><?= lang('site_nav_treatments') ?></a></li>
+                    <li><a href="<?= $site_url ?>/Preise"><?= lang('site_nav_prices') ?></a></li>
+                    <li><a href="<?= $site_url ?>/Kontakt"><?= lang('site_nav_contact') ?></a></li>
                 </ul>
             </div>
         </div>

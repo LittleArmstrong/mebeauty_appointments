@@ -26,7 +26,7 @@ $imprint_url = vars('imprint_url') ?: $site_url . '/Impressum';
             </div>
         </div>
         <div>
-            <h3>Behandlungen</h3>
+            <h3><?= lang('site_treatments') ?></h3>
             <ul class="site-footer-treatments">
                 <li><a href="<?= $site_url ?>/Behandlungen#01_Gesichtsbehandlungen">Gesichtsbehandlungen</a></li>
                 <li><a href="<?= $site_url ?>/Behandlungen#02_Haarentfernung">Haarentfernung</a></li>
@@ -39,27 +39,27 @@ $imprint_url = vars('imprint_url') ?: $site_url . '/Impressum';
             </ul>
         </div>
         <div>
-            <h3>Telefon</h3>
+            <h3><?= lang('site_phone') ?></h3>
             <p><a href="tel:+4917619256689">+49 176 192 566 89</a></p>
             <p><a href="tel:+491786827117">+49 178 682 71 17 (Olga)</a></p>
-            <h3>E-Mail</h3>
+            <h3><?= lang('site_email') ?></h3>
             <p><a href="mailto:info@mebeauty-koeln.de">info@mebeauty-koeln.de</a></p>
             <p><a href="mailto:olga@rebirth-of-shakti.de">olga@rebirth-of-shakti.de</a></p>
-            <h3>Adresse</h3>
+            <h3><?= lang('site_address') ?></h3>
             <a href="https://maps.apple.com/?q=Mebeauty+K%C3%B6ln+51109" target="_blank">
                 <p>Fußfallstr. 25a</p>
                 <p>51109 Köln</p>
             </a>
         </div>
         <div>
-            <h3>Telefonsprechzeiten</h3>
+            <h3><?= lang('site_phone_hours') ?></h3>
             <p>10:00 - 19:00 Uhr</p>
-            <p class="site-footer-note"><em>Termin nach Vereinbarung!</em></p>
+            <p class="site-footer-note"><em><?= lang('site_by_appointment') ?></em></p>
         </div>
     </div>
     <ul class="site-footer-legal">
         <li>MeBeauty Köln</li>
-        <li><a href="<?= e($imprint_url) ?>">Impressum</a></li>
-        <li><a href="<?= e($legal_notice_url) ?>">Datenschutz</a></li>
+        <li><a href="<?= e($imprint_url) ?>"><?= lang('site_imprint') ?></a></li>
+        <li><a href="<?= e($legal_notice_url) ?>"><?= lang('site_privacy') ?></a></li>
     </ul>
 </footer>

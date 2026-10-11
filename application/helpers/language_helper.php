@@ -30,6 +30,15 @@ if (!function_exists('lang')) {
 
         $result = $CI->lang->line($line);
 
+        // Fork translations are maintained in German and English only: other languages fall back to English.
+        if ($result === false) {
+            static $english = null;
+
+            $english ??= $CI->lang->load('translations', 'english', true) ?: [];
+
+            $result = $english[$line] ?? false;
+        }
+
         if ($for !== '') {
             $result = '<label for="' . $for . '"' . _stringify_attributes($attributes) . '>' . $result . '</label>';
         }

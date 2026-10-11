@@ -610,4 +610,21 @@ $lang['about_app_premium'] = 'Wir bieten umfassende Dienstleistungen für selbst
 $lang['go_premium'] = 'Premium erwerben';
 $lang['notify_users_on_create_question'] = 'Möchten Sie den Kunden über diesen neuen Termin informieren?';
 $lang['notify_users_on_delete_question'] = 'Möchten Sie den Kunden über die Stornierung des Termins informieren?';
+// Site chrome of the themes (ADR 0006)
+$lang['site_booking'] = 'Buchung';
+$lang['site_book_online'] = 'Termin online buchen';
+$lang['site_open_menu'] = 'Menü öffnen';
+$lang['site_nav_home'] = 'Home';
+$lang['site_nav_treatments'] = 'Behandlungen';
+$lang['site_nav_prices'] = 'Preise';
+$lang['site_nav_contact'] = 'Kontakt';
+$lang['site_treatments'] = 'Behandlungen';
+$lang['site_phone'] = 'Telefon';
+$lang['site_email'] = 'E-Mail';
+$lang['site_address'] = 'Adresse';
+$lang['site_phone_hours'] = 'Telefonsprechzeiten';
+$lang['site_by_appointment'] = 'Termin nach Vereinbarung!';
+$lang['site_imprint'] = 'Impressum';
+$lang['site_privacy'] = 'Datenschutz';
+$lang['site_whatsapp_chat'] = 'Chatte mit uns auf WhatsApp';
 // End
