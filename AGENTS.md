@@ -9,17 +9,15 @@ CodeIgniter documentation. For repository-specific implementation questions, use
 ## Validate every change
 
 ```bash
-docker compose exec -T php-fpm composer test          # PHPUnit suite
-docker compose exec -T php-fpm php -l <file>          # PHP syntax, per changed file
-node --check <file>                                    # JS syntax, per changed file
-bash tests/smoke/mebeauty-layout-smoke.sh             # public-page HTTP smoke (site must be up)
+bash scripts/test.sh    # starts the stack, waits for MySQL + site, runs PHPUnit, all checks, all smokes
 ```
 
-The smoke test needs the settings `theme=mebeauty` and `company_name=MeBeauty` in the
-site's database (not migration defaults); otherwise `booking-theme`/`booking-title` fail.
+Syntax and format of staged files are checked by the pre-commit hook. The smoke tests need
+the settings `theme=mebeauty` and `company_name=MeBeauty` in the site's database (not
+migration defaults); otherwise `booking-theme`/`booking-title` fail.
 
-All PHP/Composer commands run inside the `php-fpm` container (host `php` is a ddev shim).
-Full command list: `docs/docker.md`.
+Single checks run inside the `php-fpm` container (host `php` is a ddev shim):
+`docker compose exec -T php-fpm composer test` etc., full list in `docs/docker.md`.
 
 ## Before changing code
 

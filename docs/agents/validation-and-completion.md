@@ -17,16 +17,22 @@ re-enabled on a fresh clone (the config is local, not committed).
 After making changes:
 
 1. Inspect the diff.
-2. Run the PHPUnit suite and syntax checks. All PHP/Composer commands must run
-   inside the `php-fpm` container (the host `php` binary is a ddev shim and will
-   fail). See `docs/docker.md` for the full command list.
+2. Run the full validation on the host:
 
    ```bash
-   docker compose exec -T php-fpm composer test          # PHPUnit suite
-   docker compose exec -T php-fpm php -l <file>          # PHP syntax, per changed file
-   node --check <file>                                    # JS syntax, per changed file
-   bash tests/smoke/mebeauty-layout-smoke.sh             # public-page HTTP smoke (site must be up)
+   bash scripts/test.sh
    ```
+
+   It starts the stack, waits until it responds, runs PHPUnit, every check and every smoke test,
+   and ends with a summary (exit 1 on any failure; the script header lists the steps).
+   Prerequisites it cannot provide itself:
+
+   - `config.php` in the repository root (`cp config-sample.php config.php`); PHPUnit boots the
+     framework and needs it plus MySQL.
+   - The smoke tests run against the site served from the main checkout. A git worktree outside
+     the repository directory is not mounted into the containers and cannot be tested.
+
+   Stop the stack afterwards with `docker compose down` when it is no longer needed.
 
 3. Check for accidental modifications.
 4. Report exactly what was executed and the result.
