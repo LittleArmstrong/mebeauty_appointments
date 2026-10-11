@@ -50,6 +50,13 @@ if [ "$STAGED" -eq 1 ] && [ "${#FILES[@]}" -gt 0 ]; then
     )
 fi
 
+if [ "$STAGED" -eq 1 ]; then
+    for file in "${FILES[@]}"; do
+        git diff --quiet -- "$file" ||
+            echo "check-format: $file is partially staged, the working-tree version is checked" >&2
+    done
+fi
+
 if [ "${#FILES[@]}" -eq 0 ]; then
     echo "check-format: no fork-owned files to check"
     exit 0

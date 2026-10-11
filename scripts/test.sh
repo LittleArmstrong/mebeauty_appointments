@@ -8,7 +8,8 @@
 #   bash scripts/test.sh
 #
 # The stack stays up afterwards; stop it with `docker compose down`. The smoke tests expect the settings
-# theme=mebeauty and company_name=MeBeauty in the site's database (AGENTS.md).
+# theme=mebeauty and company_name=MeBeauty in the site's database (AGENTS.md). BASE_URL is the same override
+# the smoke tests use. Only `set -u`: a failing check is recorded and the run continues.
 
 set -u
 
@@ -37,8 +38,8 @@ wait_for "MySQL antwortet nicht nach 60 s (docker compose logs mysql)" 30 \
     docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "SELECT 1"
 wait_for "vendor/autoload.php fehlt nach 120 s – Composer-Installation im php-fpm-Container prüfen" 60 \
     docker compose exec -T php-fpm test -f vendor/autoload.php
-wait_for "http://localhost:${NGINX_PORT:-80}/ antwortet nicht nach 120 s (docker compose logs nginx php-fpm)" 60 \
-    curl -fsS -o /dev/null "http://localhost:${NGINX_PORT:-80}/"
+wait_for "${BASE_URL:-http://localhost}/ antwortet nicht nach 120 s (docker compose logs nginx php-fpm)" 60 \
+    curl -fsS -o /dev/null "${BASE_URL:-http://localhost}/"
 
 results=()
 failed=0

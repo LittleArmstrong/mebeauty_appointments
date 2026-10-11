@@ -32,7 +32,7 @@ Fork-owned views print variables, `setting()`, `vars()` and `html_vars()` values
 `composer check:views` enforces this. Upstream layouts print some view variables raw
 (`page_title` in `application/views/layouts/*_layout.php`), and the check does not cover
 upstream views: a value passed into such a variable is escaped where it is set, e.g.
-`'page_title' => lang('page_title') . ' ' . e($company_name)` (`application/controllers/Booking.php:144`).
+`'page_title' => lang('page_title') . ' ' . e($company_name)` (`Booking::index()`).
 
 ## Tests go red
 

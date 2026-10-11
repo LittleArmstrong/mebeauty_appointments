@@ -4,9 +4,7 @@
 
 ## Offen
 
-| Spec | Status | Priorität | Erstellt | Abhängig von | Tickets offen/gesamt |
-|---|---|---|---|---|---|
-| [0016](0016-retro-guardrails/spec.md) Retro-Guardrails: Testskript, Pre-commit, View-Escaping, Regeln | ready-for-agent | P2 | 2026-10-11 | – | 0/5 |
+Keine offenen Specs.
 
 ## Abgeschlossen
 
@@ -27,3 +25,4 @@
 | [0013](0013-booking-policy-extraction/spec.md) Fristen und Sperren in eine eigene Booking-Policy auslagern | resolved | 2026-10-11 | 2026-10-11 | 3 |
 | [0014](0014-theme-site-chrome/spec.md) Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte | resolved | 2026-10-11 | 2026-10-11 | 4 |
 | [0015](0015-scratch-tracking/spec.md) Nachvollziehbares lokales Tracking: Nummern, Kopfzeilen, INDEX | resolved | 2026-10-11 | 2026-10-11 | 4 |
+| [0016](0016-retro-guardrails/spec.md) Retro-Guardrails: Testskript, Pre-commit, View-Escaping, Regeln | resolved | 2026-10-11 | 2026-10-11 | 5 |

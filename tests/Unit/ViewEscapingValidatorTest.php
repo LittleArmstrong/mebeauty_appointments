@@ -40,4 +40,11 @@ class ViewEscapingValidatorTest extends TestCase
             \find_unescaped_view_output('<?=$whatsapp_url?>')
         );
     }
+
+    public function testMultiLineOutputIsReportedAtItsOpeningLine(): void
+    {
+        $content = "<p>\n<?=\n    \$company_logo\n?>\n</p>\n";
+
+        $this->assertSame([2], array_column(\find_unescaped_view_output($content), 'line'));
+    }
 }

@@ -1,8 +1,8 @@
 # Retro-Guardrails: Testskript, Pre-commit, View-Escaping, Regeln
 
-Status: ready-for-agent
+Status: resolved
 Created: 2026-10-11
-Closed: –
+Closed: 2026-10-11
 Priority: P2
 Depends-on: –
 
@@ -65,3 +65,9 @@ Die Retro nach 0008–0015 hat wiederkehrende Reibungen gefunden:
 
 - Herkunft: Retro nach 0014, entschieden per Grilling am 2026-10-11.
 - Branch: `agent/retro-guardrails` (von `agent/review-followups`), damit die Review-Branch unverändert in die CI gehen kann.
+
+## Review (Standards + Spec, gegen `agent/review-followups`)
+
+- Behoben: `test.sh` wartet auf `${BASE_URL:-http://localhost}` wie die Smoke-Tests (statt `NGINX_PORT`); `check-format.sh --staged` warnt bei teilweise gestagten Dateien (geprüft wird der Arbeitsbaum); Hook-Helfer `staged_matches` statt doppeltem `printf | grep` mit Wortaufspaltung; Grenze des Validators (nur Ausdrucksanfang) im Docblock; `CODING_STANDARDS.md` nennt `Booking::index()` statt Zeilennummer; Voraussetzungen in `validation-and-completion.md` positiv formuliert, doppelter `down`-Hinweis entfernt; Test für mehrzeilige Ausgabe (sichert Bestehendes, sofort grün).
+- Bewusst belassen: Fork-Dateiliste existiert in `check-format.sh` und `validate-view-escaping.php` doppelt (Bash/PHP; Zusammenlegen wäre ein eigener Umbau); MySQL-Zugangsdaten im Testskript wie im CI-Job `smoke`; „Tests go red“ bleibt in `CODING_STANDARDS.md` (Review-Regel, so entschieden).
+- Abschluss: `bash scripts/test.sh` 10/10 grün, PHPUnit 113 Tests.

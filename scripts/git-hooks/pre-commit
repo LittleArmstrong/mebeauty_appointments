@@ -16,6 +16,10 @@ php_container_running() {
 fail=0
 staged=$(git diff --cached --name-only --diff-filter=ACM)
 
+staged_matches() {
+    printf '%s\n' "$staged" | grep -q -E "$1"
+}
+
 # Block accidentally staged backup / temporary files before anything else.
 for file in $staged; do
     case "$file" in
@@ -49,7 +53,7 @@ for file in $staged; do
 done
 
 # Format of staged fork-owned files (check-format.sh filters to fork-owned PHP/JS/SCSS itself).
-if printf '%s\n' $staged | grep -q -E '\.(php|js|scss)$'; then
+if staged_matches '\.(php|js|scss)$'; then
     if command -v npx >/dev/null 2>&1; then
         bash scripts/check-format.sh --staged
         status=$?
@@ -65,7 +69,7 @@ if printf '%s\n' $staged | grep -q -E '\.(php|js|scss)$'; then
 fi
 
 # Spec tracker: headers, numbering and generated INDEX.md (docs/agents/issue-tracker.md).
-if printf '%s\n' $staged | grep -q '^\.scratch/'; then
+if staged_matches '^\.scratch/'; then
     if php_container_running; then
         if ! docker compose exec -T php-fpm php scripts/scratch-index.php check; then
             echo "pre-commit: .scratch ungültig – composer scratch:index ausführen bzw. Kopfzeilen korrigieren" >&2

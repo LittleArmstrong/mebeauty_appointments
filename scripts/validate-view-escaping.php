@@ -4,8 +4,10 @@
  * Validator for unescaped output in fork-owned views.
  *
  * Reports every `<?= … ?>` in application/views/ whose expression starts with a variable, setting(), vars() or
- * html_vars() instead of going through e(). Only fork-owned views are checked (added since the upstream base commit
- * in UPSTREAM.md, plus untracked files); upstream views keep their upstream form (ADR 0005).
+ * html_vars() instead of going through e(). Only the start of the expression is inspected (`<?= e($a) . $b ?>`
+ * passes): the check catches the common case, review covers the rest. Only fork-owned views are checked (added
+ * since the upstream base commit in UPSTREAM.md, plus untracked files); upstream views keep their upstream form
+ * (ADR 0005).
  *
  * Run directly:
  *     php scripts/validate-view-escaping.php [repo-root]

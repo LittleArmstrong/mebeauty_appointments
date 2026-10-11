@@ -25,14 +25,12 @@ After making changes:
 
    It starts the stack, waits until it responds, runs PHPUnit, every check and every smoke test,
    and ends with a summary (exit 1 on any failure; the script header lists the steps).
-   Prerequisites it cannot provide itself:
+   Prerequisites you provide:
 
    - `config.php` in the repository root (`cp config-sample.php config.php`); PHPUnit boots the
      framework and needs it plus MySQL.
-   - The smoke tests run against the site served from the main checkout. A git worktree outside
-     the repository directory is not mounted into the containers and cannot be tested.
-
-   Stop the stack afterwards with `docker compose down` when it is no longer needed.
+   - Run it from the main checkout: the containers mount the repository directory, so the smoke
+     tests see only that checkout (a worktree elsewhere stays untested).
 
 3. Check for accidental modifications.
 4. Report exactly what was executed and the result.
