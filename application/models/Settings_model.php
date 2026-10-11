@@ -79,6 +79,28 @@ class Settings_model extends EA_Model
         if (empty($setting['name'])) {
             throw new InvalidArgumentException('Not all required fields are provided: ' . print_r($setting, true));
         }
+
+        $this->validate_values([$setting]);
+    }
+
+    /**
+     * Validate the values of several settings against their server-side rules before any of them is saved.
+     *
+     * Settings pages call this first so that one invalid value does not leave a partially saved configuration.
+     *
+     * @param array $settings List of settings ("name" and "value").
+     *
+     * @throws InvalidArgumentException
+     */
+    public function validate_values(array $settings): void
+    {
+        foreach ($settings as $setting) {
+            $error = validate_setting_value((string) ($setting['name'] ?? ''), $setting['value'] ?? null);
+
+            if ($error !== null) {
+                throw new InvalidArgumentException($error);
+            }
+        }
     }
 
     /**

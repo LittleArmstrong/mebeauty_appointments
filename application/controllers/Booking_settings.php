@@ -105,6 +105,8 @@ class Booking_settings extends EA_Controller
 
             $settings = request('booking_settings', []);
 
+            $this->settings_model->validate_values($settings);
+
             foreach ($settings as $setting) {
                 $existing_setting = $this->settings_model->query()->where('name', $setting['name'])->get()->row_array();
 

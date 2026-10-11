@@ -103,6 +103,8 @@ class Business_settings extends EA_Controller
 
             $settings = request('business_settings', []);
 
+            $this->settings_model->validate_values($settings);
+
             foreach ($settings as $setting) {
                 $existing_setting = $this->settings_model->query()->where('name', $setting['name'])->get()->row_array();
 
