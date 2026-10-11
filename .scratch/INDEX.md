@@ -4,7 +4,9 @@
 
 ## Offen
 
-Keine offenen Specs.
+| Spec | Status | Priorität | Erstellt | Abhängig von | Tickets offen/gesamt |
+|---|---|---|---|---|---|
+| [0016](0016-retro-guardrails/spec.md) Retro-Guardrails: Testskript, Pre-commit, View-Escaping, Regeln | ready-for-agent | P2 | 2026-10-11 | – | 5/5 |
 
 ## Abgeschlossen
 
