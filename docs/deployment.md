@@ -109,7 +109,8 @@ Verbindlich laut ADR 0007: **Mindestversion PHP 8.2** (wegen der Prod-CLI).
 | Prod/Test-CLI (SSH: `console migrate`, `console backup`) | 8.2 | bei manitu fest, bestimmt die Mindestversion |
 | Prod/Test-Webserver | 8.3 | bei manitu 8.2–8.5 wählbar; bewusst gleich der Testversion halten |
 | Docker (lokal) | 8.3 | `docker/php-fpm/Dockerfile` |
-| CI-Tests (`build-test`) | 8.3 | PHPUnit 12 braucht ≥ 8.3 |
+| CI-Tests (PHPUnit im `smoke`-Job, Docker) | 8.3 | PHPUnit 12 braucht ≥ 8.3; Bootstrap braucht MySQL |
+| CI-Statikchecks (`build-test`) | 8.3 | Syntax, Format, Validatoren |
 | CI-Laufzeitcheck (`php82-runtime`) | 8.2 | `composer check-platform-reqs --no-dev --lock` + `php -l` |
 | Deploy-Build | 8.2 | `composer install --no-dev` **mit** Plattformprüfung |
 

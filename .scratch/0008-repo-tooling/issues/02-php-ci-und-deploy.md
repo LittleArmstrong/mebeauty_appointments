@@ -19,3 +19,5 @@
 - Die echten CI-Läufe sind erst nach einem Push sichtbar (nicht Teil dieses Auftrags).
 - Nebenbefund: `composer` meldet 18 Sicherheitshinweise in 3 Paketen (`composer audit`), außerhalb dieser Spec.
 - Review-Korrektur: `composer update --lock` hat neben dem content-hash auch Metadaten geändert (Quell-URL `firebase/php-jwt` → `googleapis/php-jwt` bei gleichem Commit, `plugin-api-version` 2.6.0 → 2.9.0); keine Paketversion geändert. Offen nach dem ersten Push: CI-Jobs (build-test 8.3, php82-runtime, smoke) und ein echter Deploy-Build grün.
+
+- Nachtrag 0013-Arbeit: Der CI-Schritt „Run PHPUnit“ im Job `build-test` konnte nie laufen – der Bootstrap (`index.php`) braucht `config.php` und lädt die Datenbank automatisch, beides fehlt dort (lokal mit Image ohne DB reproduziert: Bootstrap-Fehler). PHPUnit läuft jetzt im `smoke`-Job (Docker, PHP 8.3, MySQL); Doku-Tabelle angepasst.

@@ -12,8 +12,8 @@ jobs:
         with:
           fetch-depth: 0 # check:format compares against the upstream base commit (UPSTREAM.md)
 
-      # Tests run on PHP 8.3 (= production web server, Docker). PHP 8.2 compatibility of the
-      # runtime code is checked separately in the php82-runtime job (ADR 0007).
+      # Static checks on PHP 8.3 (= production web server, Docker). PHPUnit runs in the smoke job (needs MySQL);
+      # PHP 8.2 compatibility of the runtime code is checked in the php82-runtime job (ADR 0007).
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -48,9 +48,6 @@ jobs:
 
       - name: Validate spec tracker (.scratch)
         run: php scripts/scratch-index.php check
-
-      - name: Run PHPUnit
-        run: vendor/bin/phpunit --configuration phpunit.xml
 
   php82-runtime:
     # Production CLI (SSH: migrations, backups) runs PHP 8.2: runtime packages and code must stay 8.2-compatible.
@@ -116,6 +113,11 @@ jobs:
           docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='mebeauty' WHERE name='theme';"
           docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='MeBeauty' WHERE name='company_name';"
           docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' WHERE name='company_logo';"
+
+      # PHPUnit boots the framework, which autoloads the database: it needs config.php and MySQL, so it runs
+      # here in the Docker stack (PHP 8.3, ADR 0007) and not in the build-test job.
+      - name: Run PHPUnit
+        run: docker compose exec -T php-fpm composer test
 
       - name: Wait for application
         run: |
