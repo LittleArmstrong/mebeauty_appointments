@@ -4,10 +4,14 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Die Validierung des Service-Models lehnt `abc`, `1.5` und `-1` ab; `0`, `3` und leer/nicht gesetzt sind gültig
-- [ ] Backend-Speichern und Service-API liefern denselben Fehler (manuelle Probe)
-- [ ] Die OpenAPI-Beschreibung enthält `slotCapacity` im Service-Schema
-- [ ] Unit-Test der Regel
-- [ ] `composer test` und `php -l` grün
+- [x] Die Validierung des Service-Models lehnt `abc`, `1.5` und `-1` ab; `0`, `3` und leer/nicht gesetzt sind gültig
+- [x] Backend-Speichern und Service-API liefern denselben Fehler (manuelle Probe)
+- [x] Die OpenAPI-Beschreibung enthält `slotCapacity` im Service-Schema
+- [x] Unit-Test der Regel
+- [x] `composer test` und `php -l` grün
+
+## Comments
+
+- Gemeinsame Prüffunktion `validate_non_negative_integer()` (auch von den Einstellungsregeln genutzt). Service-API geprüft: `"abc"`, `1.5`, `-1` → Validierungsfehler, `2` → gespeichert. OpenAPI: `slotCapacity` in ServiceRecord und ServicePayload.

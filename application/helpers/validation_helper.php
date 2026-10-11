@@ -26,6 +26,18 @@ function validate_datetime(string $value): bool
 }
 
 /**
+ * Check whether a value is a whole number of 0 or more (integer or digit-only string).
+ *
+ * @param mixed $value Validation value.
+ *
+ * @return bool Returns the validation result.
+ */
+function validate_non_negative_integer(mixed $value): bool
+{
+    return (is_int($value) && $value >= 0) || (is_string($value) && ctype_digit($value));
+}
+
+/**
  * Validate the value of a setting that has a server-side rule (settings introduced by the MeBeauty fork and the
  * company color, see .scratch/0010-input-hardening).
  *
@@ -65,7 +77,7 @@ function validate_setting_value(string $name, mixed $value): ?string
     }
 
     if (in_array($name, $non_negative_integer, true)) {
-        return $string !== null && ctype_digit($string)
+        return validate_non_negative_integer($value)
             ? null
             : sprintf('Invalid value for setting "%s": expected a whole number of 0 or more.', $name);
     }

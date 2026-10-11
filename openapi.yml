@@ -2408,6 +2408,10 @@ components:
           type: integer
         attendantsNumber:
           type: integer
+        slotCapacity:
+          type: integer
+          minimum: 0
+          description: Maximum number of parallel bookings of this service across all providers (0 = unlimited).
         isPrivate:
           type: boolean
         serviceCategoryId:
@@ -2423,6 +2427,7 @@ components:
         color: '#7cbae8'
         slotInterval: 30
         attendantsNumber: 1
+        slotCapacity: 0
         isPrivate: false
         serviceCategoryId: null
     ServicePayload:
@@ -2446,6 +2451,10 @@ components:
           type: integer
         attendantsNumber:
           type: integer
+        slotCapacity:
+          type: integer
+          minimum: 0
+          description: Maximum number of parallel bookings of this service across all providers (0 = unlimited).
         isPrivate:
           type: boolean
         serviceCategoryId:
@@ -2460,6 +2469,7 @@ components:
         color: '#7cbae8'
         slotInterval: 30
         attendantsNumber: 1
+        slotCapacity: 0
         isPrivate: false
         serviceCategoryId: null
     ServiceCategoryRecord:
