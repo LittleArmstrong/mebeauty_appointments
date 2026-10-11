@@ -1,9 +1,9 @@
 # PHPUnit-CLI-Bootstrap
 
-Status: ready-for-agent
+Status: resolved
 Created: 2026-09-30
-Closed: –
-Priority: P2
+Closed: 2026-10-11
+Priority: –
 Depends-on: –
 
 ## Problem Statement

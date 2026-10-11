@@ -4,9 +4,13 @@
 
 **Blocked by:** 01 Generische Defaults wiederherstellen
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Ist `company_logo` gesetzt (Data-URI), wird es als `cid:logo.png` in E-Mails eingebettet (MIME aus der Data-URI abgeleitet)
-- [ ] Ist kein `company_logo` gesetzt, wird das generische Standard-Logo eingebettet (nicht `assets/img/mebeauty/logo-192.png`)
-- [ ] E-Mail-Titel/Betreffzeilen verwenden den Firmennamen mit generischem Fallback (nicht „MeBeauty")
-- [ ] Die E-Mail-Templates referenzieren weiterhin `cid:logo.png` (keine Template-Änderung nötig)
+- [x] Ist `company_logo` gesetzt (Data-URI), wird es als `cid:logo.png` in E-Mails eingebettet (MIME aus der Data-URI abgeleitet)
+- [x] Ist kein `company_logo` gesetzt, wird das generische Standard-Logo eingebettet (nicht `assets/img/mebeauty/logo-192.png`)
+- [x] E-Mail-Titel/Betreffzeilen verwenden den Firmennamen mit generischem Fallback (nicht „MeBeauty")
+- [x] Die E-Mail-Templates referenzieren weiterhin `cid:logo.png` (keine Template-Änderung nötig)
+
+## Comments
+
+- Umgesetzt in a6dba558. `Email_messages` bettet `company_logo` (Data-URI) per `addStringEmbeddedImage` als `cid:logo.png` ein, sonst `assets/img/logo.png`; belegt durch `tests/smoke/email-logo-smoke.sh` (grün am 2026-10-11).

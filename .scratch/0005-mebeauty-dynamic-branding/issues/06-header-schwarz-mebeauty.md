@@ -4,10 +4,14 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Das `mebeauty`-Theme setzt eine explizite Header-Farbe (reines Schwarz)
-- [ ] Die Header-Hintergrundfarbe folgt `var(--ea-header-bg, var(--bs-primary))` (Theme-explizit → Firmenfarbe → Theme-Primärfarbe)
-- [ ] Die Firmenfarbe (`company_color_style`) überschreibt den Header nicht mehr, so dass Theme-Vorrang gilt
-- [ ] Unter anderen Themes folgt der Header weiterhin Firmenfarbe bzw. Theme-Primärfarbe
-- [ ] CSS wird via `npx gulp styles` neu gebaut
+- [x] Das `mebeauty`-Theme setzt eine explizite Header-Farbe (reines Schwarz)
+- [x] Die Header-Hintergrundfarbe folgt `var(--ea-header-bg, var(--bs-primary))` (Theme-explizit → Firmenfarbe → Theme-Primärfarbe)
+- [x] Die Firmenfarbe (`company_color_style`) überschreibt den Header nicht mehr, so dass Theme-Vorrang gilt
+- [x] Unter anderen Themes folgt der Header weiterhin Firmenfarbe bzw. Theme-Primärfarbe
+- [x] CSS wird via `npx gulp styles` neu gebaut
+
+## Comments
+
+- Umgesetzt in a6dba558. `backend.scss` nutzt `var(--ea-header-bg, var(--bs-primary))`, das Theme `mebeauty` setzt `--ea-header-bg` auf Schwarz; `company_color_style` färbt den Header nicht.

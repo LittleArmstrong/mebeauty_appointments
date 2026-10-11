@@ -4,10 +4,14 @@
 
 **Blocked by:** 01 Generische Defaults wiederherstellen
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Der Wizard-Card-Kopf (Logo + Name, dynamisch via `company_logo`/`company_name`) ist wieder vorhanden
-- [ ] Ein neues Setting steuert das Anzeigen des Kopfes (Default = anzeigen, 1.6.0-Verhalten)
-- [ ] Bei „ausblenden" erscheint nur der Schritt-Indikator (aktueller kompakter Look)
-- [ ] Das Setting wird per Migration seedet und ist in der Buchungs-Settings-UI pflegbar
-- [ ] Farben (Schritt-Indikator, Auswahl-Highlights) bleiben über `--bs-primary` dynamisch
+- [x] Der Wizard-Card-Kopf (Logo + Name, dynamisch via `company_logo`/`company_name`) ist wieder vorhanden
+- [x] Ein neues Setting steuert das Anzeigen des Kopfes (Default = anzeigen, 1.6.0-Verhalten)
+- [x] Bei „ausblenden" erscheint nur der Schritt-Indikator (aktueller kompakter Look)
+- [x] Das Setting wird per Migration seedet und ist in der Buchungs-Settings-UI pflegbar
+- [x] Farben (Schritt-Indikator, Auswahl-Highlights) bleiben über `--bs-primary` dynamisch
+
+## Comments
+
+- Umgesetzt in a6dba558. Setting `booking_show_company_header` (Migration, Buchungseinstellungen), Kopf im Booking-Layout schaltbar.

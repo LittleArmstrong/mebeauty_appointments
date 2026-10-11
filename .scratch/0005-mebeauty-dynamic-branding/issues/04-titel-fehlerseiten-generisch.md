@@ -4,9 +4,13 @@
 
 **Blocked by:** 01 Generische Defaults wiederherstellen
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Backend-, Account-, Message- und Booking-Layout-Titel sowie `og:title` verwenden den Firmennamen mit generischem Fallback (nicht „MeBeauty")
-- [ ] Die vier E-Mail-Templates verwenden denselben generischen Firmennamen-Fallback
-- [ ] Die drei Fehlerseiten (404, db, general) lesen die Marken-Namen-Konstante statt hart „MeBeauty"
-- [ ] Kein hartes „MeBeauty" verbleibt in Titeln/Fehlerseiten; der Wert ist über Settings bzw. Konfiguration steuerbar
+- [x] Backend-, Account-, Message- und Booking-Layout-Titel sowie `og:title` verwenden den Firmennamen mit generischem Fallback (nicht „MeBeauty")
+- [x] Die vier E-Mail-Templates verwenden denselben generischen Firmennamen-Fallback
+- [x] Die drei Fehlerseiten (404, db, general) lesen die Marken-Namen-Konstante statt hart „MeBeauty"
+- [x] Kein hartes „MeBeauty" verbleibt in Titeln/Fehlerseiten; der Wert ist über Settings bzw. Konfiguration steuerbar
+
+## Comments
+
+- Umgesetzt in a6dba558. Titel und Fehlerseiten nutzen `setting('company_name', DEFAULT_COMPANY_NAME)` bzw. die Konstante. Escaping der Titel folgt in 0010/03.

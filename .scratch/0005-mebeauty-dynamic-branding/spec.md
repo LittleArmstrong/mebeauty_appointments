@@ -1,9 +1,9 @@
 # MeBeauty-Branding dynamisieren: ursprüngliche Easy!Appointments-Oberflächen wieder settings-getrieben
 
-Status: ready-for-agent
+Status: resolved
 Created: 2026-10-03
-Closed: –
-Priority: P2
+Closed: 2026-10-03
+Priority: –
 Depends-on: –
 
 ## Problem Statement
