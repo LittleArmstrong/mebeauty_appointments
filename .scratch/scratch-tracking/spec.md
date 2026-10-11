@@ -1,6 +1,6 @@
 # Nachvollziehbares lokales Tracking: Nummern, Kopfzeilen, INDEX
 
-Status: ready-for-agent
+Status: in-progress
 Created: 2026-10-11
 Closed: –
 Priority: P2

@@ -10,6 +10,15 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 | `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
 | `wontfix`                  | `wontfix`            | Will not be actioned                     |
 
+Besides the triage labels, specs and tickets use two lifecycle values:
+
+| Value         | Meaning                                         |
+| ------------- | ----------------------------------------------- |
+| `in-progress` | Work has started but is not finished            |
+| `resolved`    | Implemented (or answered) and verified          |
+
+No other values (e.g. `done`) are allowed; `composer check:scratch` rejects them for specs.
+
 When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
 
 Edit the right-hand column to match whatever vocabulary you actually use.

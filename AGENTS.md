@@ -43,7 +43,9 @@ Otherwise ask first. Never push or merge. See `docs/agents/git-workflow.md`.
 
 ### Issue tracker
 
-Issues and specs are tracked as local markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+Issues and specs are tracked as local markdown files under `.scratch/<NNNN>-<feature>/`; overview in the
+generated `.scratch/INDEX.md` (`composer scratch:index`, validated by `composer check:scratch`).
+See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

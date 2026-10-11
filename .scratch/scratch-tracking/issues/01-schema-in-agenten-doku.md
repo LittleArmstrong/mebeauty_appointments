@@ -4,9 +4,9 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Die Tracker-Doku beschreibt: Ordner `NNNN-<slug>` (nächste freie Nummer, nie wiederverwendet), Kopfzeilen Status/Created/Closed/Priority/Depends-on mit erlaubten Werten, Ticket-Verweise `NNNN/NN`, INDEX als generierte Datei, Befehle zum Erzeugen und Prüfen
-- [ ] Die Triage-Label-Doku nennt die Lebenszyklus-Werte `in-progress` und `resolved` (zusätzlich zu den fünf Triage-Labels); `done` ist nicht mehr zulässig
-- [ ] AGENTS.md verweist knapp auf `.scratch/INDEX.md` und den Prüfbefehl
-- [ ] Die Wayfinding-Abschnitte der Tracker-Doku widersprechen dem Schema nicht
+- [x] Die Tracker-Doku beschreibt: Ordner `NNNN-<slug>` (nächste freie Nummer, nie wiederverwendet), Kopfzeilen Status/Created/Closed/Priority/Depends-on mit erlaubten Werten, Ticket-Verweise `NNNN/NN`, INDEX als generierte Datei, Befehle zum Erzeugen und Prüfen
+- [x] Die Triage-Label-Doku nennt die Lebenszyklus-Werte `in-progress` und `resolved` (zusätzlich zu den fünf Triage-Labels); `done` ist nicht mehr zulässig
+- [x] AGENTS.md verweist knapp auf `.scratch/INDEX.md` und den Prüfbefehl
+- [x] Die Wayfinding-Abschnitte der Tracker-Doku widersprechen dem Schema nicht
