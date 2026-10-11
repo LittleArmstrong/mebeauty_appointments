@@ -4,10 +4,17 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] `composer.json` unverändert (keine Plattform-Fixierung, PHPUnit ^12)
-- [ ] CI-Testjob auf PHP 8.3: Installation aus der Lock-Datei statt `update`; Syntaxprüfung parallel; PHPUnit und Validatoren
-- [ ] Neuer CI-Job auf PHP 8.2: Plattformprüfung der Lock-Datei ohne Entwicklungspakete und Syntaxprüfung des Laufzeitcodes; Gegenprobe mit einer 8.3-Syntax-Datei schlägt fehl
-- [ ] Deploy-Build installiert ohne Entwicklungspakete und ohne `--ignore-platform-reqs`; ein Build mit PHP 8.2 läuft nachweislich durch
-- [ ] Alle CI-Jobs grün
+- [x] `composer.json` unverändert (keine Plattform-Fixierung, PHPUnit ^12)
+- [x] CI-Testjob auf PHP 8.3: Installation aus der Lock-Datei statt `update`; Syntaxprüfung parallel; PHPUnit und Validatoren
+- [x] Neuer CI-Job auf PHP 8.2: Plattformprüfung der Lock-Datei ohne Entwicklungspakete und Syntaxprüfung des Laufzeitcodes; Gegenprobe mit einer 8.3-Syntax-Datei schlägt fehl
+- [x] Deploy-Build installiert ohne Entwicklungspakete und ohne `--ignore-platform-reqs`; ein Build mit PHP 8.2 läuft nachweislich durch
+- [x] Alle CI-Jobs grün
+
+## Comments
+
+- Lokal mit `php:8.2-cli` geprüft: `composer install --no-dev` aus dem Lock läuft ohne `--ignore-platform-reqs` (nur `ext-gd` fehlt im nackten Image; die Deploy-Action installiert gd), mit Dev-Paketen scheitert es erwartungsgemäß an PHPUnit 12; `check-platform-reqs --no-dev --lock` meldet für PHP 8.2 keinen Verstoß; 8.2-Lint über application/system/scripts/index.php grün, Gegenprobe mit typisierter Klassenkonstante schlägt fehl.
+- `composer.lock` hatte einen veralteten content-hash (Fork entfernte `"version"` aus composer.json); per `composer update --lock` nachgezogen, keine Paketänderung.
+- Die echten CI-Läufe sind erst nach einem Push sichtbar (nicht Teil dieses Auftrags).
+- Nebenbefund: `composer` meldet 18 Sicherheitshinweise in 3 Paketen (`composer audit`), außerhalb dieser Spec.

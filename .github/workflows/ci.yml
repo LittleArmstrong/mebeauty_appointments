@@ -10,10 +10,12 @@ jobs:
       - name: Git clone
         uses: actions/checkout@v4
 
+      # Tests run on PHP 8.3 (= production web server, Docker). PHP 8.2 compatibility of the
+      # runtime code is checked separately in the php82-runtime job (ADR 0007).
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.5
+          php-version: '8.3'
           extensions: gd
 
       - name: Set up Node
@@ -22,7 +24,7 @@ jobs:
           node-version: 20
 
       - name: Install Composer dependencies
-        run: composer update --prefer-dist --no-interaction --no-progress
+        run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Install NPM dependencies
         run: npm ci
@@ -31,7 +33,7 @@ jobs:
         run: npx gulp styles
 
       - name: PHP syntax check
-        run: find application -name '*.php' -print0 | xargs -0 -n1 php -l
+        run: find application -name '*.php' -print0 | xargs -0 -n1 -P"$(nproc)" php -l > /dev/null
 
       - name: Validate migrations
         run: php scripts/validate-migrations.php application/migrations
@@ -44,6 +46,27 @@ jobs:
 
       - name: Run PHPUnit
         run: vendor/bin/phpunit --configuration phpunit.xml
+
+  php82-runtime:
+    # Production CLI (SSH: migrations, backups) runs PHP 8.2: runtime packages and code must stay 8.2-compatible.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v4
+
+      - name: Set up PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gd
+          tools: composer
+
+      - name: Check runtime platform requirements (lock file, without dev packages)
+        run: composer check-platform-reqs --no-dev --lock
+
+      - name: PHP 8.2 syntax check of the runtime code
+        run: find application system scripts index.php -name '*.php' -print0 | xargs -0 -n1 -P"$(nproc)" php -l > /dev/null
 
   smoke:
     runs-on: ubuntu-latest
