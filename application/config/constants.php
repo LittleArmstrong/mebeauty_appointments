@@ -96,6 +96,9 @@ const DEFAULT_COMPANY_COLOR = '#ffffff';
 
 const DEFAULT_COMPANY_NAME = 'MeBeauty';
 
+// Upstream email colors, used when neither a company color nor a theme default color is set (ADR 0006).
+const UPSTREAM_EMAIL_COLORS = ['primary' => '#429A82', 'hover' => '#34495e'];
+
 const LDAP_DEFAULT_FILTER = '(&(objectClass=*)(|(cn={{KEYWORD}})(sn={{KEYWORD}})(mail={{KEYWORD}})(givenName={{KEYWORD}})(uid={{KEYWORD}})))';
 
 const LDAP_WHITELISTED_ATTRIBUTES = [

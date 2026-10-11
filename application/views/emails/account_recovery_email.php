@@ -8,7 +8,7 @@
  */
 
 // Company color → theme default color → upstream colors (ADR 0006).
-$colors = brand_colors($settings['company_color'] ?? null, null, ['primary' => '#429A82', 'hover' => '#34495e']);
+$colors = brand_colors($settings['company_color'] ?? null, null, UPSTREAM_EMAIL_COLORS);
 $primary_color = $colors['primary'];
 $primary_color_hover = $colors['hover'];
 ?>

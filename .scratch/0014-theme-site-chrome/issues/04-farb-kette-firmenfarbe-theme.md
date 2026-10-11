@@ -16,3 +16,5 @@
 
 - `application/views/themes/mebeauty/theme.php` deklariert `primary_color`/`primary_color_hover`; Helper `theme_config()` und `brand_colors()` (Firmenfarbe → Theme-Standardfarbe → Upstream-Farbe). Upstream-Rückfall je Verwendung exakt wie bisher upstream: Browserleiste `#35A768`, E-Mails `#429A82`/Hover `#34495e`. Gold-Konstanten `DEFAULT_PRIMARY_COLOR(_HOVER)` entfernt.
 - Geprüft: Browserleiste mebeauty `#d1ae5e`, `?theme=default` `#35A768`, mit Firmenfarbe `#123456`; Passwort-E-Mail (Mailpit) mit Firmenfarbe `#123456`, ohne Gold + Hover `#b8943f`. Unit-Tests für die Kette.
+
+- Review: Site-Chrome-Erkennung über alle vier Bausteine, Theme-Namen-Bereinigung in `theme_name()` zusammengeführt, Upstream-E-Mail-Farben als Konstante, neues Smoke-Skript `tests/smoke/language-selector-smoke.sh` (0/1, auch in der CI), Abweichungen in der Spec dokumentiert.

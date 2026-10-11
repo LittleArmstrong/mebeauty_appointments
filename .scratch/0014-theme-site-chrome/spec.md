@@ -82,3 +82,8 @@ Ein Theme deklariert seine **Standardfarbe** serverseitig lesbar. Browserleiste 
 - Bezug: ADR 0001 (Theme als SCSS-Nachbau), ADR 0006 (Site-Chrome pro Theme), Glossar „Theme“ und „Site-Chrome“.
 - Ersetzt Review-Punkt 8 (hartcodierte Geschäftsdaten). Die Daten bleiben bewusst im Theme.
 - Der Smoke-Test setzt `theme=mebeauty` in der Datenbank voraus (siehe AGENTS.md). Die Prüfung mit einem Upstream-Theme nutzt den URL-Parameter, damit die Datenbank nicht umgestellt werden muss.
+- **Umsetzung, bewusste Abweichungen:**
+  - Für fehlende Übersetzungen fällt `lang()` jetzt generell auf Englisch zurück (statt die neuen Schlüssel in alle 40 Sprachdateien zu kopieren). Das gilt für alle Schlüssel, also auch für die bisherigen Fork-Schlüssel, die vorher in 38 Sprachen als Schlüsselname erschienen.
+  - Der Upstream-Rückfall der Farb-Kette ist pro Verwendung der jeweilige Upstream-Wert: Browserleiste `#35A768`, E-Mails `#429A82` mit Hover `#34495e` (Konstante `UPSTREAM_EMAIL_COLORS`).
+  - Weiß als Firmenfarbe gilt nun auch in E-Mails als „nicht gesetzt“ (vorher erzeugte es weiße Akzente).
+  - Ein Theme hat Site-Chrome, sobald es mindestens einen der vier Bausteine mitbringt.

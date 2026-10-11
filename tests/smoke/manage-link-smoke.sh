@@ -189,13 +189,15 @@ available_hours() {
 VICTIM_HOUR="${VICTIM_START:11:5}"
 OWNER_HOUR="${TARGET:11:5}"
 
-if available_hours --data-urlencode "appointment_id=$VICTIM_ID" | grep -q "\"$VICTIM_HOUR\""; then
+HOURS=$(available_hours --data-urlencode "appointment_id=$VICTIM_ID")
+if grep -q "\"$VICTIM_HOUR\"" <<<"$HOURS"; then
     fail "available hours: foreign appointment $VICTIM_ID excluded via appointment_id"
 else
     ok "available hours: foreign appointment id is ignored (slot $VICTIM_HOUR stays taken)"
 fi
 
-if available_hours --data-urlencode "appointment_hash=$OWNER_HASH" | grep -q "\"$OWNER_HOUR\""; then
+HOURS=$(available_hours --data-urlencode "appointment_hash=$OWNER_HASH")
+if grep -q "\"$OWNER_HOUR\"" <<<"$HOURS"; then
     ok "available hours: own appointment excluded via manage hash (slot $OWNER_HOUR free)"
 else
     fail "available hours: own appointment not excluded via manage hash"

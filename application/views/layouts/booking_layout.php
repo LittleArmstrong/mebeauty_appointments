@@ -35,7 +35,10 @@
 <?php
 // Site chrome (navbar, intro, footer, …) belongs to the theme (ADR 0006). Without it the booking page keeps the
 // upstream layout: wizard centered on the page.
-$has_site_chrome = theme_view('site_navbar') !== null || theme_view('site_intro') !== null;
+$has_site_chrome = array_filter(
+    ['site_navbar', 'site_intro', 'site_footer', 'site_whatsapp'],
+    fn(string $component) => theme_view($component) !== null,
+) !== [];
 ?>
 
 <body<?= $has_site_chrome ? ' class="site-page"' : '' ?>>

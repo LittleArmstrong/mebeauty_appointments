@@ -209,6 +209,20 @@ if (!function_exists('pure_html')) {
     }
 }
 
+if (!function_exists('theme_name')) {
+    /**
+     * Sanitize a theme name so it can be used as a directory name (no path traversal).
+     *
+     * @param mixed $theme Theme name.
+     *
+     * @return string
+     */
+    function theme_name(mixed $theme): string
+    {
+        return preg_replace('/[^a-zA-Z0-9_\-]/', '', is_scalar($theme) ? (string) $theme : '');
+    }
+}
+
 if (!function_exists('theme_view')) {
     /**
      * Get the view path of a component provided by the active theme.
@@ -222,7 +236,7 @@ if (!function_exists('theme_view')) {
      */
     function theme_view(string $component): ?string
     {
-        $theme = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) (vars('theme') ?? ''));
+        $theme = theme_name(vars('theme'));
 
         if ($theme === '' || !preg_match('/^[a-z0-9_]+$/', $component)) {
             return null;
@@ -270,7 +284,7 @@ if (!function_exists('theme_config')) {
      */
     function theme_config(?string $theme = null): array
     {
-        $theme = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) ($theme ?? setting('theme', 'default')));
+        $theme = theme_name($theme ?? setting('theme', 'default'));
 
         $path = VIEWPATH . 'themes/' . $theme . '/theme.php';
 
