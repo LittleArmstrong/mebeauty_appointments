@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="theme-color" content="#d1ae5e">
+    <meta name="theme-color"
+          content="<?= e(brand_colors(vars('company_color'), vars('theme'), ['primary' => '#35A768', 'hover' => '#35A768'])['primary']) ?>">
     <meta name="google" content="notranslate">
 
     <meta property="og:title" content="<?= lang('site_booking') ?> | <?= e(setting('company_name', DEFAULT_COMPANY_NAME)) ?>"/>

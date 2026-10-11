@@ -8,8 +8,10 @@
  * @var array $settings
  */
 
-$primary_color = $settings['company_color'] ?: DEFAULT_PRIMARY_COLOR;
-$primary_color_hover = $primary_color === DEFAULT_PRIMARY_COLOR ? DEFAULT_PRIMARY_COLOR_HOVER : $primary_color;
+// Company color → theme default color → upstream colors (ADR 0006).
+$colors = brand_colors($settings['company_color'] ?? null, null, ['primary' => '#429A82', 'hover' => '#34495e']);
+$primary_color = $colors['primary'];
+$primary_color_hover = $colors['hover'];
 ?>
 
 <!doctype html>

@@ -1,8 +1,8 @@
 # Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte
 
-Status: in-progress
+Status: resolved
 Created: 2026-10-11
-Closed: –
+Closed: 2026-10-11
 Priority: P2
 Depends-on: 0010
 

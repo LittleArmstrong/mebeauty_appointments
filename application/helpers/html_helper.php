@@ -259,3 +259,67 @@ if (!function_exists('theme_component')) {
         return true;
     }
 }
+
+if (!function_exists('theme_config')) {
+    /**
+     * Get the server-side defaults declared by a theme (application/views/themes/<theme>/theme.php).
+     *
+     * @param string|null $theme Theme name (null: the "theme" setting).
+     *
+     * @return array Returns the declared values, or an empty array when the theme declares none.
+     */
+    function theme_config(?string $theme = null): array
+    {
+        $theme = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) ($theme ?? setting('theme', 'default')));
+
+        $path = VIEWPATH . 'themes/' . $theme . '/theme.php';
+
+        if ($theme === '' || !is_file($path)) {
+            return [];
+        }
+
+        $config = include $path;
+
+        return is_array($config) ? $config : [];
+    }
+}
+
+if (!function_exists('brand_colors')) {
+    /**
+     * Resolve the main color for server-rendered output (browser theme color, emails).
+     *
+     * Order: a valid company color → the theme's default color → the given upstream fallback (ADR 0006).
+     *
+     * @param string|null $company_color Company color setting (white means "no company color").
+     * @param string|null $theme Theme name (null: the "theme" setting).
+     * @param array $fallback Upstream colors: ['primary' => '#…', 'hover' => '#…'].
+     *
+     * @return array Returns ['primary' => '#…', 'hover' => '#…'].
+     */
+    function brand_colors(?string $company_color, ?string $theme, array $fallback): array
+    {
+        $company_color = (string) $company_color;
+
+        if (
+            $company_color !== '' &&
+            strtolower($company_color) !== DEFAULT_COMPANY_COLOR &&
+            validate_setting_value('company_color', $company_color) === null
+        ) {
+            return ['primary' => $company_color, 'hover' => $company_color];
+        }
+
+        $config = theme_config($theme);
+        $theme_color = (string) ($config['primary_color'] ?? '');
+
+        if ($theme_color !== '' && validate_setting_value('company_color', $theme_color) === null) {
+            $hover = (string) ($config['primary_color_hover'] ?? '');
+
+            return [
+                'primary' => $theme_color,
+                'hover' => validate_setting_value('company_color', $hover) === null ? $hover : $theme_color,
+            ];
+        }
+
+        return $fallback;
+    }
+}
