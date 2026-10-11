@@ -38,7 +38,8 @@ check "booking-footer-legal"       "$BASE/index.php/booking" 'mebeauty-koeln\.de
 check "booking-whatsapp"           "$BASE/index.php/booking" 'wa\.me/4917619256689'
 check "booking-steps"      "$BASE/index.php/booking" 'id="step-1"'
 check "booking-title"      "$BASE/index.php/booking" 'Buchung | MeBeauty'
-check "booking-lang-badge" "$BASE/index.php/booking" 'id="select-language"'
+# The language selector depends on the setting display_language_selector (MeBeauty: 0), so only the footer is checked.
+check "booking-footer" "$BASE/index.php/booking" 'id="frame-footer"'
 check_missing "booking-no-ea-brand" "$BASE/index.php/booking" 'Easy!Appointments'
 check_missing "booking-no-header"   "$BASE/index.php/booking" 'id="company-name"'
 

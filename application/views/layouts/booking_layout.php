@@ -61,6 +61,7 @@ $has_site_chrome = theme_view('site_navbar') !== null || theme_view('site_intro'
 
             <?php component('booking_footer', [
                 'display_login_button' => vars('display_login_button'),
+                'display_language_selector' => setting('display_language_selector', '1') === '1',
                 'legal_notice_url' => vars('legal_notice_url'),
                 'imprint_url' => vars('imprint_url'),
             ]); ?>

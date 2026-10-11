@@ -6,7 +6,7 @@
 
 | Spec | Status | Priorität | Erstellt | Abhängig von | Tickets offen/gesamt |
 |---|---|---|---|---|---|
-| [0014](0014-theme-site-chrome/spec.md) Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte | in-progress | P2 | 2026-10-11 | 0010 | 2/4 |
+| [0014](0014-theme-site-chrome/spec.md) Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte | in-progress | P2 | 2026-10-11 | 0010 | 1/4 |
 
 ## Abgeschlossen
 

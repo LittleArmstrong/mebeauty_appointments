@@ -66,6 +66,7 @@ function validate_setting_value(string $name, mixed $value): ?string
         'booking_timezone_source' => ['company', 'browser'],
         'appointment_buffer_end_of_day' => ['0', '1'],
         'booking_show_company_header' => ['0', '1'],
+        'display_language_selector' => ['0', '1'],
     ];
 
     $string = is_scalar($value) ? (string) $value : null;

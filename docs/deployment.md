@@ -118,6 +118,14 @@ Manuell bei manitu prüfen (nach Versionswechsel oder neuer Extension in `compos
 `phpinfo()`, CLI-Extensions per `ssh <benutzer>@<host> "php -m"` gegen die `ext-*`-Anforderungen in
 `composer.json` (curl, json, mbstring, gd, simplexml, fileinfo).
 
+## Einstellungen pro Kunde nach Migrationen
+
+Migrationen setzen Upstream-kompatible Defaults. Kundenspezifische Werte stellt der Betreiber nach dem Update im
+Backend ein:
+
+- **MeBeauty, ab Migration 071:** Buchungseinstellungen → „Sprachauswahl im Buchungsformular anzeigen“ ausschalten,
+  solange die mebeauty-Site nur deutsch ist (Setting `display_language_selector = 0`).
+
 ## Umgebungs-spezifische Dateien
 
 `config.php` ist gitignored und liegt **nur auf dem Server** (eine pro Umgebung).
