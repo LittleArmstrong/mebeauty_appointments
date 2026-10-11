@@ -31,13 +31,22 @@
     <?php slot('styles'); ?>
 </head>
 
-<body class="site-page">
-<?php component('site_navbar'); ?>
-<?php component('site_intro', ['title' => 'Buchung']); ?>
+<?php
+// Site chrome (navbar, intro, footer, …) belongs to the theme (ADR 0006). Without it the booking page keeps the
+// upstream layout: wizard centered on the page.
+$has_site_chrome = theme_view('site_navbar') !== null || theme_view('site_intro') !== null;
+?>
 
-<div id="main" class="container my-5">
-    <div class="row wrapper justify-content-center">
-        <div id="book-appointment-wizard" class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0">
+<body<?= $has_site_chrome ? ' class="site-page"' : '' ?>>
+<?php theme_component('site_navbar'); ?>
+<?php theme_component('site_intro', ['title' => 'Buchung']); ?>
+
+<div id="main" class="<?= $has_site_chrome ? 'container my-5' : 'container min-vh-100' ?>">
+    <div class="<?= $has_site_chrome
+        ? 'row wrapper justify-content-center'
+        : 'row wrapper min-vh-100 justify-content-center align-items-center py-0 py-md-3' ?>">
+        <div id="book-appointment-wizard"
+             class="col-12 col-lg-10 col-xl-8 col-xxl-7 bg-body overflow-hidden p-0<?= $has_site_chrome ? '' : ' my-auto' ?>">
 
             <?php if (setting('booking_show_company_header', '1') === '1'): ?>
                 <?php component('booking_company_header', [
@@ -60,8 +69,8 @@
     </div>
 </div>
 
-<?php component('site_footer'); ?>
-<?php component('site_whatsapp'); ?>
+<?php theme_component('site_footer'); ?>
+<?php theme_component('site_whatsapp'); ?>
 
 <?php if (vars('display_cookie_notice') === '1'): ?>
     <?php component('cookie_notice_modal', ['cookie_notice_content' => vars('cookie_notice_content')]); ?>

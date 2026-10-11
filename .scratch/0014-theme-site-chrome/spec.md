@@ -1,6 +1,6 @@
 # Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte
 
-Status: ready-for-agent
+Status: in-progress
 Created: 2026-10-11
 Closed: –
 Priority: P2

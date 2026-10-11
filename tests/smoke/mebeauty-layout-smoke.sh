@@ -42,4 +42,11 @@ check "booking-lang-badge" "$BASE/index.php/booking" 'id="select-language"'
 check_missing "booking-no-ea-brand" "$BASE/index.php/booking" 'Easy!Appointments'
 check_missing "booking-no-header"   "$BASE/index.php/booking" 'id="company-name"'
 
+# Site chrome belongs to the theme (ADR 0006): an upstream theme shows no MeBeauty chrome.
+check_missing "default-theme-no-navbar"   "$BASE/index.php/booking?theme=default" 'site-navbar'
+check_missing "default-theme-no-intro"    "$BASE/index.php/booking?theme=default" 'site-intro'
+check_missing "default-theme-no-footer"   "$BASE/index.php/booking?theme=default" 'site-footer'
+check_missing "default-theme-no-whatsapp" "$BASE/index.php/booking?theme=default" 'wa\.me/'
+check "default-theme-wizard"              "$BASE/index.php/booking?theme=default" 'id="book-appointment-wizard"'
+
 exit $FAIL

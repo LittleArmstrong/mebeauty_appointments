@@ -208,3 +208,54 @@ if (!function_exists('pure_html')) {
         return $purifier->purify($markup);
     }
 }
+
+if (!function_exists('theme_view')) {
+    /**
+     * Get the view path of a component provided by the active theme.
+     *
+     * Themes may ship their own site chrome (navbar, intro, footer, …) in application/views/themes/<theme>/
+     * (ADR 0006). The active theme is the sanitized "theme" view variable.
+     *
+     * @param string $component Component name (e.g. "site_navbar").
+     *
+     * @return string|null Returns the view path, or null when the active theme does not provide the component.
+     */
+    function theme_view(string $component): ?string
+    {
+        $theme = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) (vars('theme') ?? ''));
+
+        if ($theme === '' || !preg_match('/^[a-z0-9_]+$/', $component)) {
+            return null;
+        }
+
+        $view = 'themes/' . $theme . '/' . $component;
+
+        return is_file(VIEWPATH . $view . '.php') ? $view : null;
+    }
+}
+
+if (!function_exists('theme_component')) {
+    /**
+     * Render a component of the active theme when the theme provides it.
+     *
+     * @param string $component Component name (e.g. "site_footer").
+     * @param array $vars Additional variables passed to the component.
+     *
+     * @return bool Returns whether the component was rendered.
+     */
+    function theme_component(string $component, array $vars = []): bool
+    {
+        $view = theme_view($component);
+
+        if ($view === null) {
+            return false;
+        }
+
+        /** @var EA_Controller $CI */
+        $CI = get_instance();
+
+        $CI->load->view($view, $vars);
+
+        return true;
+    }
+}

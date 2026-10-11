@@ -16,8 +16,8 @@ settings and never hardcode a literal brand:
 No literal `"MeBeauty"`/`"Easy!Appointments"` strings or literal logo paths
 belong in these views.
 
-Exception: the website components (`site_navbar`, `site_intro`, `site_footer`,
-`site_whatsapp`) are per-customer marketing assets and are intentionally not
+Exception: the site chrome of a theme (`application/views/themes/<theme>/site_navbar.php`, `site_intro`,
+`site_footer`, `site_whatsapp`; ADR 0006) is a per-customer marketing asset and is intentionally not
 settings-driven.
 
 ## Image/logo/favicon changes
