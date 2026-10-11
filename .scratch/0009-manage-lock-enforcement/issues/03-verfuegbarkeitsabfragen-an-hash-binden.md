@@ -16,3 +16,5 @@
 ## Comments
 
 - `find_managed_appointment_id()` löst den Hash auf; `appointment_id` wird von beiden Abfragen nicht mehr gelesen. Smoke-Fälle 8/9; Gegenprobe gegen den vorherigen Controller: beide rot.
+
+- Review (Opus, Sicherheitsfokus): kein verbleibender ID-Umgehungsweg. Spec korrigiert: `get_unavailable_dates` ist GET (Hash in der Query, wie beim Manage-Link selbst); Hash-Stärke ≈ 2⁶² wegen Vergleich ohne Groß-/Kleinschreibung; Restrisiko „Zuordnung per E-Mail überschreibt fremde Stammdaten“ (Upstream) dokumentiert. Kein eigener Smoke-Fall für gesperrte Tage: Der Ausschluss eines einzelnen Termins ändert die Tagesliste praktisch nie, ein solcher Test würde den alten Code nicht unterscheiden.

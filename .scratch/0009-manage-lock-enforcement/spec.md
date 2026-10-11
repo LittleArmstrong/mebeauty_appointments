@@ -56,8 +56,8 @@ Der vorhandene Termin-Hash (Bestandteil jedes Manage-Links) wird beim Absenden u
 - Die Verfügbarkeitsabfragen (freie Zeiten, gesperrte Tage) erwarten im Manage-Modus den Hash statt der Termin-ID. Ohne gültigen Hash rechnen sie ohne Ausschluss.
 - Keine Schemaänderung.
 - **Bewusst beibehalten (Upstream):**
-  - Termin-Hashes bleiben 12 alphanumerische Zeichen (≈ 2⁷⁰ Möglichkeiten). Kollisionen und Erraten sind bei Salon-Volumen praktisch ausgeschlossen. Eine Umstellung auf kryptografischen Zufall wurde erwogen und zurückgestellt.
-  - Die Verfügbarkeitsabfragen bleiben POST-Anfragen. Damit wird nicht gecacht, und der Hash erscheint nicht in URLs oder Server-Logs.
+  - Termin-Hashes bleiben 12 alphanumerische Zeichen. Weil die Datenbank den Hash ohne Groß-/Kleinschreibung vergleicht, liegt die effektive Stärke bei ≈ 2⁶² (statt ≈ 2⁷⁰). Kollisionen und Erraten sind bei Salon-Volumen und den vorhandenen Ratenbegrenzungen praktisch ausgeschlossen. Eine Umstellung auf kryptografischen Zufall wurde erwogen und zurückgestellt.
+  - Die Abfrage freier Zeiten ist eine POST-Anfrage, die Abfrage gesperrter Tage eine GET-Anfrage (beides Upstream). Bei der GET-Abfrage steht der Hash in der Query; das ist keine neue Offenlegung, denn der Manage-Link selbst (`/booking/reschedule/<hash>`) ist ebenfalls eine GET-URL und steht genauso in Zugriffs-Logs. Eine Umstellung auf POST wurde deshalb nicht vorgenommen (kleiner Upstream-Diff).
   - Die veraltete Weiterleitungsroute für Links aus Versionen vor 1.5 bleibt unverändert. Sie antwortet heute auf jede Eingabe mit 400 bzw. 404 und greift nicht auf Daten zu.
 
 ## Testing Decisions
@@ -79,10 +79,12 @@ Der vorhandene Termin-Hash (Bestandteil jedes Manage-Links) wird beim Absenden u
 - Änderungen an Stornierung und Backend-Bearbeitung.
 - Weitere frei übergebbare Felder (Status, Unavailability-Flag), die der Server heute schon überschreibt.
 - Neues Token-System oder längere Hashes.
-- Umstellung der Verfügbarkeitsabfragen auf GET.
+- Umstellung der Verfügbarkeitsabfragen auf eine andere HTTP-Methode.
 - Ausschluss des eigenen Termins bei „beliebiger Dienstleister“ (Upstream-Verhalten).
 
 ## Further Notes
+
+- **Bekanntes Restrisiko (Upstream, nicht Teil dieser Spec):** Kunden werden weiterhin über die E-Mail-Adresse zugeordnet. Wer bei einer Neubuchung (ohne Hash) oder bei der eigenen Umbuchung die E-Mail-Adresse eines anderen Kunden einträgt, wird diesem Kunden zugeordnet und überschreibt dessen Stammdaten (Name, Telefon, Adresse, Notizen, Sprache); dieser Kunde erhält die Benachrichtigung. Der ID-Weg ist mit dieser Spec geschlossen, der E-Mail-Weg nicht. Empfehlung: eigene Spec (z. B. Stammdaten bestehender Kunden bei öffentlicher Buchung nicht überschreiben).
 
 - Die Schwächen stammen aus Easy!Appointments 1.6.0. Die Änderungen bleiben lokal im Buchungs-Controller und im Booking-Flow (ADR 0005, kleiner Upstream-Diff).
 - Bezug: ADR 0003, Glossar „Manage-Link“, „Umbuchung“, „Umbuchungs-/Stornierungsfrist“.

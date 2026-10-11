@@ -645,8 +645,11 @@ class Booking extends EA_Controller
      *
      * @throws RuntimeException
      */
-    protected function resolve_managed_appointment(mixed $appointment_hash, mixed $requested_id, bool $manage_mode): ?array
-    {
+    protected function resolve_managed_appointment(
+        mixed $appointment_hash,
+        mixed $requested_id,
+        bool $manage_mode,
+    ): ?array {
         if (!$manage_mode && empty($requested_id)) {
             return null;
         }
@@ -671,7 +674,13 @@ class Booking extends EA_Controller
     {
         $provider = $this->providers_model->find($appointment['id_users_provider']);
 
-        $lock = $this->availability->get_appointment_lock($appointment['start_datetime'], $provider['timezone'], 'manage');
+        // Same check as when the manage link is opened (index()), repeated here because the deadline may pass
+        // between opening the page and submitting it.
+        $lock = $this->availability->get_appointment_lock(
+            $appointment['start_datetime'],
+            $provider['timezone'],
+            'manage',
+        );
 
         if ($lock['locked']) {
             throw new RuntimeException(strtr($lock['message'], ['{$limit}' => $lock['limit_text']]));
