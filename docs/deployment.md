@@ -100,6 +100,23 @@ Secrets and variables → Actions). Die Werte selbst stehen nicht im Repo.
 | `TEST_PATH` | Dokument-Root der Test-Subdomain (manitu-Panel → Subdomain, oder per SSH `pwd` im Zielordner) |
 | `PROD_PATH` | Dokument-Root der Prod-Subdomain (wie oben, für `booking.mebeauty-koeln.de`) |
 
+## PHP-Versionen
+
+Verbindlich laut ADR 0007: **Mindestversion PHP 8.2** (wegen der Prod-CLI).
+
+| Umgebung | PHP | Hinweis |
+|---|---|---|
+| Prod/Test-CLI (SSH: `console migrate`, `console backup`) | 8.2 | bei manitu fest, bestimmt die Mindestversion |
+| Prod/Test-Webserver | 8.3 | bei manitu 8.2–8.5 wählbar; bewusst gleich der Testversion halten |
+| Docker (lokal) | 8.3 | `docker/php-fpm/Dockerfile` |
+| CI-Tests (`build-test`) | 8.3 | PHPUnit 12 braucht ≥ 8.3 |
+| CI-Laufzeitcheck (`php82-runtime`) | 8.2 | `composer check-platform-reqs --no-dev --lock` + `php -l` |
+| Deploy-Build | 8.2 | `composer install --no-dev` **mit** Plattformprüfung |
+
+Manuell bei manitu prüfen (nach Versionswechsel oder neuer Extension in `composer.json`): Web-Extensions per
+`phpinfo()`, CLI-Extensions per `ssh <benutzer>@<host> "php -m"` gegen die `ext-*`-Anforderungen in
+`composer.json` (curl, json, mbstring, gd, simplexml, fileinfo).
+
 ## Umgebungs-spezifische Dateien
 
 `config.php` ist gitignored und liegt **nur auf dem Server** (eine pro Umgebung).

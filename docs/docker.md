@@ -20,6 +20,8 @@ The sample file already contains the correct Docker values (`BASE_URL=http://loc
 docker compose up -d --build
 ```
 
+The `php-fpm` image uses PHP 8.3, the same version as the production web server and the CI tests (version overview: `docs/deployment.md`, section „PHP-Versionen“). After changing the PHP version in `docker/php-fpm/Dockerfile`, rebuild with `docker compose up -d --build php-fpm`.
+
 The `php-fpm` container automatically installs the Composer/NPM dependencies and compiles the assets on first start (`docker/php-fpm/start-container`), so the initial startup can take a few minutes.
 
 5. Open <http://localhost> and complete the setup wizard (the database is empty on the first run).
