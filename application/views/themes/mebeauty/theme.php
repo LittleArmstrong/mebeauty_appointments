@@ -5,5 +5,5 @@
  */
 return [
     'primary_color' => '#d1ae5e',
-    'primary_color_hover' => '#b8943f',
+    'primary_color_hover' => '#b8943f'
 ];
