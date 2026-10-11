@@ -6,7 +6,7 @@
 
 | Spec | Status | Priorität | Erstellt | Abhängig von | Tickets offen/gesamt |
 |---|---|---|---|---|---|
-| [0013](0013-booking-policy-extraction/spec.md) Fristen und Sperren in eine eigene Booking-Policy auslagern | in-progress | P2 | 2026-10-11 | 0009, 0012 | 2/3 |
+| [0013](0013-booking-policy-extraction/spec.md) Fristen und Sperren in eine eigene Booking-Policy auslagern | in-progress | P2 | 2026-10-11 | 0009, 0012 | 1/3 |
 | [0014](0014-theme-site-chrome/spec.md) Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte | ready-for-agent | P2 | 2026-10-11 | 0010 | 4/4 |
 
 ## Abgeschlossen

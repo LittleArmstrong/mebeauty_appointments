@@ -26,6 +26,16 @@ class Availability
     protected EA_Controller|CI_Controller $CI;
 
     /**
+     * @var int|null Global buffer time in minutes (read once per instance).
+     */
+    protected ?int $buffer_time = null;
+
+    /**
+     * @var bool|null Whether the buffer also applies before the working day end (read once per instance).
+     */
+    protected ?bool $end_of_day_buffer_enabled = null;
+
+    /**
      * Availability constructor.
      */
     public function __construct()
@@ -799,9 +809,14 @@ class Availability
      */
     protected function get_buffer_time(): int
     {
-        $buffer_time = setting('appointment_buffer_time', 0);
+        // Read once per instance: the availability calculation asks for every period, day and provider.
+        if ($this->buffer_time === null) {
+            $buffer_time = setting('appointment_buffer_time', 0);
 
-        return is_numeric($buffer_time) ? max(0, (int) $buffer_time) : 0;
+            $this->buffer_time = is_numeric($buffer_time) ? max(0, (int) $buffer_time) : 0;
+        }
+
+        return $this->buffer_time;
     }
 
     /**
@@ -813,7 +828,9 @@ class Availability
      */
     protected function get_end_of_day_buffer(): int
     {
-        return setting('appointment_buffer_end_of_day', '1') === '1' ? $this->get_buffer_time() : 0;
+        $this->end_of_day_buffer_enabled ??= setting('appointment_buffer_end_of_day', '1') === '1';
+
+        return $this->end_of_day_buffer_enabled ? $this->get_buffer_time() : 0;
     }
 
     /**
