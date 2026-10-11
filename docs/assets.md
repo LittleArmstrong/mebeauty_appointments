@@ -26,7 +26,7 @@ The pattern is `setting('company_logo') ?: base_url('assets/img/logo.png')`.
 | `assets/img/logo.png` | App-logo **fallback** (square). Not the favicon. | `backend_header`, `booking_company_header`, `Email_messages`, `login`, `recovery`, `password_reset`, `logout`, `about` |
 | `company_logo` (setting, base64) | Uploaded logo; overrides `logo.png`. | same surfaces as `logo.png` (via `setting('company_logo') ?: …`) |
 | `assets/img/mebeauty/logo.png` | Marketing wordmark (rectangular); `logo.webp` is the WebP variant (lossless). | `site_navbar` (website navbar) |
-| `assets/img/mebeauty/hero.jpg` | Booking intro hero image; `hero.webp` is the WebP variant (quality 85). | `site_intro` |
+| `assets/img/mebeauty/hero.jpg` | Booking intro hero image (3400×2240, JPEG quality 70, progressive, ≈ 290 KB fallback); `hero.webp` is the WebP variant (quality 85). | `site_intro` |
 | `assets/img/mebeauty/instagram.png` `tiktok.png` `whatsapp.png` | Footer social icons. | `site_footer` |
 | `assets/img/social-card.png` | Open-Graph preview (`og:image`). | `booking_layout` |
 | `assets/img/logo-16x16.png` + `alextselegidis-logo-16x16.png` | License attribution logos. | `backend_footer` |

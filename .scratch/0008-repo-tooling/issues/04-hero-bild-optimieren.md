@@ -4,9 +4,13 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Das JPG ist ≤ 300 KB bei gleichen Abmessungen
-- [ ] Das Bild-Element hat die echten Pixelmaße als Breite/Höhe und hohe Lade-Priorität
-- [ ] Die WebP-Quelle bleibt unverändert
-- [ ] Sichtprüfung der Qualität; Layout-Smoke-Test grün
+- [x] Das JPG ist ≤ 300 KB bei gleichen Abmessungen
+- [x] Das Bild-Element hat die echten Pixelmaße als Breite/Höhe und hohe Lade-Priorität
+- [x] Die WebP-Quelle bleibt unverändert
+- [x] Sichtprüfung der Qualität; Layout-Smoke-Test grün
+
+## Comments
+
+- Mit PHP-GD neu komprimiert (Qualität 70, progressiv): 1,8 MB → 290 KB bei 3400×2240. Sichtvergleich eines 100-%-Ausschnitts ohne erkennbaren Unterschied. `width`/`height`/`fetchpriority` gesetzt; das CSS (`width/height: 100%`, `object-fit: cover`) bestimmt weiter die Darstellung.
