@@ -7,9 +7,8 @@
 # Usage (on the host, from anywhere):
 #   bash scripts/test.sh
 #
-# The stack stays up afterwards; stop it with `docker compose down`. The smoke tests expect the settings
-# theme=mebeauty and company_name=MeBeauty in the site's database (AGENTS.md). BASE_URL is the same override
-# the smoke tests use. Only `set -u`: a failing check is recorded and the run continues.
+# The stack stays up afterwards; stop it with `docker compose down`. BASE_URL is the same override the smoke
+# tests use. Only `set -u`: a failing check is recorded and the run continues.
 
 set -u
 

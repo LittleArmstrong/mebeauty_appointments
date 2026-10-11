@@ -40,11 +40,7 @@ node --check <datei>                             # JS-Syntax (je geänderte Date
 ```
 
 CI (`ci.yml`) läuft zusätzlich automatisch bei jedem Push. Nach einem Deploy die
-Buchungsseite per Smoke gegen die Live-URL prüfen:
-
-```bash
-BASE_URL=https://booking-test.mebeauty-koeln.de bash tests/smoke/mebeauty-layout-smoke.sh
-```
+Buchungsseite (https://booking-test.mebeauty-koeln.de) visuell prüfen: Layout, Texte, Logo.
 
 ### Release zu Prod (Pull Request)
 

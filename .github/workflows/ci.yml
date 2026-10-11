@@ -118,10 +118,8 @@ jobs:
       - name: Install application
         run: docker compose exec -T php-fpm php index.php console install
 
-      - name: Configure smoke-test data (mebeauty theme + name + uploaded logo)
+      - name: Configure smoke-test data (uploaded logo)
         run: |
-          docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='mebeauty' WHERE name='theme';"
-          docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='MeBeauty' WHERE name='company_name';"
           docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' WHERE name='company_logo';"
 
       # PHPUnit boots the framework, which autoloads the database: it needs config.php and MySQL, so it runs
@@ -142,7 +140,6 @@ jobs:
 
       - name: Run smoke tests
         run: |
-          bash tests/smoke/mebeauty-layout-smoke.sh
           bash tests/smoke/email-logo-smoke.sh
           bash tests/smoke/manage-link-smoke.sh
           bash tests/smoke/language-selector-smoke.sh

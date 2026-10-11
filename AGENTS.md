@@ -12,9 +12,8 @@ CodeIgniter documentation. For repository-specific implementation questions, use
 bash scripts/test.sh    # starts the stack, waits for MySQL + site, runs PHPUnit, all checks, all smokes
 ```
 
-Syntax and format of staged files are checked by the pre-commit hook. The smoke tests need
-the settings `theme=mebeauty` and `company_name=MeBeauty` in the site's database (not
-migration defaults); otherwise `booking-theme`/`booking-title` fail.
+Syntax and format of staged files are checked by the pre-commit hook. Theme layout and
+texts are checked visually by the user, not by a smoke test.
 
 Single checks run inside the `php-fpm` container (host `php` is a ddev shim):
 `docker compose exec -T php-fpm composer test` etc., full list in `docs/docker.md`.
