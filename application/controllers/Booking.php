@@ -252,11 +252,7 @@ class Booking extends EA_Controller
                 html_vars([
                     'show_message' => true,
                     'page_title' => lang('page_title') . ' ' . e($company_name),
-                    'message_title' => lang('appointment_locked'),
-                    'message_text' => strtr($lock['message'], [
-                        '{$limit}' => $lock['limit_text'],
-                    ]),
-                    'message_icon' => base_url('assets/img/error.png'),
+                    ...Booking_policy::lock_page_vars($lock),
                     'google_analytics_code' => $google_analytics_code,
                     'matomo_analytics_url' => $matomo_analytics_url,
                     'matomo_analytics_site_id' => $matomo_analytics_site_id,
@@ -684,7 +680,7 @@ class Booking extends EA_Controller
         );
 
         if ($lock['locked']) {
-            throw new RuntimeException(strtr($lock['message'], ['{$limit}' => $lock['limit_text']]));
+            throw new RuntimeException(Booking_policy::lock_message($lock));
         }
     }
 

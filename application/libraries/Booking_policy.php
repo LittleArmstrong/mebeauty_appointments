@@ -103,6 +103,38 @@ class Booking_policy
     }
 
     /**
+     * Get the customer-facing text of a lock (limit inserted into the message).
+     *
+     * Presentation only: it neither evaluates deadlines nor checks permissions.
+     *
+     * @param array $lock Lock returned by get_lock().
+     *
+     * @return string
+     */
+    public static function lock_message(array $lock): string
+    {
+        return strtr($lock['message'], ['{$limit}' => $lock['limit_text']]);
+    }
+
+    /**
+     * Get the message page variables shared by every "appointment locked" page.
+     *
+     * Presentation only: callers add their page-specific variables (title, analytics, links …).
+     *
+     * @param array $lock Lock returned by get_lock().
+     *
+     * @return array
+     */
+    public static function lock_page_vars(array $lock): array
+    {
+        return [
+            'message_title' => lang('appointment_locked'),
+            'message_text' => self::lock_message($lock),
+            'message_icon' => base_url('assets/img/error.png')
+        ];
+    }
+
+    /**
      * Get the booking deadline of a day in fixed time mode.
      *
      * The deadline of day D is (D - deadline days) at the deadline time.

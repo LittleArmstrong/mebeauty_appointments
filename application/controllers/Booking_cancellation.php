@@ -108,11 +108,7 @@ class Booking_cancellation extends EA_Controller
                 html_vars([
                     'page_title' => lang('appointment_locked'),
                     'company_color' => setting('company_color'),
-                    'message_title' => lang('appointment_locked'),
-                    'message_text' => strtr($lock['message'], [
-                        '{$limit}' => $lock['limit_text'],
-                    ]),
-                    'message_icon' => base_url('assets/img/error.png'),
+                    ...Booking_policy::lock_page_vars($lock),
                     'google_analytics_code' => setting('google_analytics_code'),
                     'matomo_analytics_url' => setting('matomo_analytics_url'),
                     'matomo_analytics_site_id' => setting('matomo_analytics_site_id'),

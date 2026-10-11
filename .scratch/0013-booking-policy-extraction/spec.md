@@ -1,8 +1,8 @@
 # Fristen und Sperren in eine eigene Booking-Policy auslagern
 
-Status: in-progress
+Status: resolved
 Created: 2026-10-11
-Closed: –
+Closed: 2026-10-11
 Priority: P2
 Depends-on: 0009, 0012
 

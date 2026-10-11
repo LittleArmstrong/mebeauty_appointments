@@ -145,4 +145,12 @@ class BookingPolicyTest extends TestCase
         // No minimum lead time in fixed time mode: only the past is excluded.
         $this->assertSame('2026-01-05 17:00:00', $earliest->format('Y-m-d H:i:s'));
     }
+
+    public function testLockMessageInsertsTheLimitOnly(): void
+    {
+        $lock = ['locked' => true, 'limit_text' => '02:00', 'message' => 'Not less than {$limit} before.'];
+
+        $this->assertSame('Not less than 02:00 before.', \Booking_policy::lock_message($lock));
+        $this->assertSame('Not less than 02:00 before.', \Booking_policy::lock_page_vars($lock)['message_text']);
+    }
 }
