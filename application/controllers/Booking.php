@@ -223,7 +223,7 @@ class Booking extends EA_Controller
             if (empty($results)) {
                 html_vars([
                     'show_message' => true,
-                    'page_title' => lang('page_title') . ' ' . $company_name,
+                    'page_title' => lang('page_title') . ' ' . e($company_name),
                     'message_title' => lang('appointment_not_found'),
                     'message_text' => lang('appointment_does_not_exist_in_db'),
                     'message_icon' => base_url('assets/img/error.png'),
@@ -250,7 +250,7 @@ class Booking extends EA_Controller
             if ($lock['locked']) {
                 html_vars([
                     'show_message' => true,
-                    'page_title' => lang('page_title') . ' ' . $company_name,
+                    'page_title' => lang('page_title') . ' ' . e($company_name),
                     'message_title' => lang('appointment_locked'),
                     'message_text' => strtr($lock['message'], [
                         '{$limit}' => $lock['limit_text'],

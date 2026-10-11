@@ -7,15 +7,15 @@
     <meta name="theme-color" content="#d1ae5e">
     <meta name="google" content="notranslate">
 
-    <meta property="og:title" content="Buchung | <?= setting('company_name', DEFAULT_COMPANY_NAME) ?>"/>
-    <meta property="og:description" content="Termin online buchen – <?= setting('company_name', DEFAULT_COMPANY_NAME) ?>"/>
+    <meta property="og:title" content="Buchung | <?= e(setting('company_name', DEFAULT_COMPANY_NAME)) ?>"/>
+    <meta property="og:description" content="Termin online buchen – <?= e(setting('company_name', DEFAULT_COMPANY_NAME)) ?>"/>
     <meta property="og:url" content="<?= base_url() ?>">
     <meta property="og:image" content="<?= base_url('assets/img/social-card.png') ?>"/>
     <meta property="og:type" content="website">
 
     <?php slot('meta'); ?>
 
-    <title>Buchung | <?= setting('company_name', DEFAULT_COMPANY_NAME) ?></title>
+    <title>Buchung | <?= e(setting('company_name', DEFAULT_COMPANY_NAME)) ?></title>
 
     <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/favicon.ico') ?>">
 

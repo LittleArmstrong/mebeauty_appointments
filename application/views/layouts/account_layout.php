@@ -9,7 +9,7 @@
 
     <?php slot('meta'); ?>
 
-    <title><?= vars('page_title') ?? lang('account') ?> | <?= setting('company_name', DEFAULT_COMPANY_NAME) ?></title>
+    <title><?= vars('page_title') ?? lang('account') ?> | <?= e(setting('company_name', DEFAULT_COMPANY_NAME)) ?></title>
 
     <link rel="icon" type="image/x-icon" href="<?= asset_url('assets/img/favicon.ico') ?>">
 
