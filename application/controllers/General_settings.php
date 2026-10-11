@@ -121,12 +121,12 @@ class General_settings extends EA_Controller
 
             $settings = request('general_settings', []);
 
-            $this->settings_model->validate_values($settings);
-
             // Validate settings is an array
             if (!is_array($settings)) {
                 throw new InvalidArgumentException('Invalid settings data format.');
             }
+
+            $this->settings_model->validate_values($settings);
 
             foreach ($settings as $setting) {
                 // Validate each setting has required fields

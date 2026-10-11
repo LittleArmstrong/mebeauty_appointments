@@ -15,3 +15,5 @@
 ## Comments
 
 - Gemeinsame Prüffunktion `validate_non_negative_integer()` (auch von den Einstellungsregeln genutzt). Service-API geprüft: `"abc"`, `1.5`, `-1` → Validierungsfehler, `2` → gespeichert. OpenAPI: `slotCapacity` in ServiceRecord und ServicePayload.
+
+- Review: technische Obergrenze 2147483647 (Spaltentyp INT) ergänzt; vorher führte z. B. `99999999999` zu einem DB-Fehler statt einer Validierungsmeldung.

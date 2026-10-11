@@ -71,7 +71,7 @@ function validate_setting_value(string $name, mixed $value): ?string
     $string = is_scalar($value) ? (string) $value : null;
 
     if (in_array($name, $time, true)) {
-        return $string !== null && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $string)
+        return $string !== null && preg_match('/^([01]\d|2[0-3]):[0-5]\d$/D', $string)
             ? null
             : sprintf('Invalid value for setting "%s": expected a time HH:MM between 00:00 and 23:59.', $name);
     }
@@ -89,7 +89,7 @@ function validate_setting_value(string $name, mixed $value): ?string
     }
 
     if ($name === 'company_color') {
-        return $string !== null && preg_match('/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $string)
+        return $string !== null && preg_match('/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/D', $string)
             ? null
             : sprintf('Invalid value for setting "%s": expected a hex color (#RGB or #RRGGBB).', $name);
     }

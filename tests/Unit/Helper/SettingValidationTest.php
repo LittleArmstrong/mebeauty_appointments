@@ -45,6 +45,9 @@ class SettingValidationTest extends TestCase
             ['appointment_buffer_end_of_day', 'yes'],
             ['company_color', 'red;}'],
             ['company_color', '#12345'],
+            ['company_color', "#fff\n"],
+            ['booking_deadline_time', "18:30\n"],
+            ['manage_deadline_days', "1\n"],
             ['booking_deadline_days', ['1']]
         ];
     }

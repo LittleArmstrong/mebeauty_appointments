@@ -134,7 +134,8 @@ class Services_model extends EA_Model
         if (
             isset($service['slot_capacity']) &&
             $service['slot_capacity'] !== '' &&
-            !validate_non_negative_integer($service['slot_capacity'])
+            (!validate_non_negative_integer($service['slot_capacity']) ||
+                (int) $service['slot_capacity'] > 2147483647) // Column limit (INT), not a business limit.
         ) {
             throw new InvalidArgumentException(
                 'The provided slot capacity is invalid: ' . $service['slot_capacity'],

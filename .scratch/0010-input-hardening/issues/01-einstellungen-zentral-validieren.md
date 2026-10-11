@@ -17,3 +17,5 @@
 
 - Regel-Funktion `validate_setting_value()` im (autogeladenen) Validierungs-Helper; `Settings_model::validate()` prüft jede Einstellung, `Settings_model::validate_values()` prüft vorab alle Werte in den Speicher-Aktionen der Buchungs-, Business- und allgemeinen Einstellungen (Firmenfarbe liegt in den allgemeinen Einstellungen).
 - Settings-API geprüft: `25:99` → Fehler mit Feldbezug, `17:30` → gespeichert (Token und Wert danach zurückgesetzt). Unit-Tests inkl. Migrations-Defaults und Batch-Ablehnung.
+
+- Review: Zeitformat- und Farbregel mit `/D` verschärft (abschließender Zeilenumbruch wurde akzeptiert), Prüfreihenfolge in den allgemeinen Einstellungen korrigiert (erst Array-Prüfung). Leere Werte bleiben bewusst ungültig (Fehlermeldung nennt das Feld).
