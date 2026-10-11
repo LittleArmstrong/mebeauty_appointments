@@ -72,7 +72,12 @@ class Availability
         } else {
             $available_periods = $this->get_available_periods($date, $provider, $exclude_appointment_id);
 
-            $available_hours = $this->generate_available_hours($date, $service, $available_periods);
+            $available_hours = $this->generate_available_hours(
+                $date,
+                $service,
+                $available_periods,
+                $this->get_working_day_end($date, $provider),
+            );
         }
 
         $available_hours = $this->consider_slot_capacity($date, $service, $available_hours, $exclude_appointment_id);
@@ -672,41 +677,113 @@ class Availability
      * @param string $date Selected date (Y-m-d).
      * @param array $service Service data.
      * @param array $empty_periods Empty periods array.
+     * @param string|null $working_day_end End of the provider's effective working plan of the day (H:i).
      *
      * @return array Returns an array with the available hours for the appointment.
      *
      * @throws Exception
      */
-    protected function generate_available_hours(string $date, array $service, array $empty_periods): array
-    {
+    protected function generate_available_hours(
+        string $date,
+        array $service,
+        array $empty_periods,
+        ?string $working_day_end = null,
+    ): array {
+        return self::generate_hours_for_periods(
+            $date,
+            $empty_periods,
+            (int) $service['duration'],
+            !empty($service['slot_interval']) ? (int) $service['slot_interval'] : 15,
+            $this->get_end_of_day_buffer(),
+            $working_day_end,
+        );
+    }
+
+    /**
+     * Generate the slot start times that fit into the given free periods.
+     *
+     * A slot fits when it ends no later than its period. The end-of-day buffer additionally applies only to the
+     * period that ends at the effective working day end — never before breaks, appointments, unavailabilities or
+     * blocked periods (ADR 0002, glossary "Arbeitsende").
+     *
+     * @param string $date Selected date (Y-m-d).
+     * @param array $periods Free periods with "start"/"end" (H:i).
+     * @param int $duration Service duration in minutes.
+     * @param int $interval Slot interval in minutes.
+     * @param int $end_of_day_buffer Buffer in minutes before the working day end (0 = disabled).
+     * @param string|null $working_day_end End of the effective working plan of the day (H:i), if known.
+     *
+     * @return array Returns the slot start times (H:i).
+     *
+     * @throws Exception
+     */
+    public static function generate_hours_for_periods(
+        string $date,
+        array $periods,
+        int $duration,
+        int $interval,
+        int $end_of_day_buffer,
+        ?string $working_day_end,
+    ): array {
         $available_hours = [];
 
-        foreach ($empty_periods as $period) {
-            $start_hour = new DateTime($date . ' ' . $period['start']);
+        foreach ($periods as $period) {
+            $current_hour = new DateTime($date . ' ' . $period['start']);
 
             $end_hour = new DateTime($date . ' ' . $period['end']);
 
-            $interval = !empty($service['slot_interval']) ? (int) $service['slot_interval'] : 15;
+            $buffer = self::end_of_day_buffer_for_period($end_hour->format('H:i'), $working_day_end, $end_of_day_buffer);
 
-            $current_hour = $start_hour;
+            $last_end = $end_hour->getTimestamp() - $buffer * 60;
 
-            $diff = $current_hour->diff($end_hour);
-
-            $end_of_day_buffer = $this->get_end_of_day_buffer();
-
-            while (
-                $diff->h * 60 + $diff->i >= (int) $service['duration'] + $end_of_day_buffer &&
-                $diff->invert === 0
-            ) {
+            while ($current_hour->getTimestamp() + $duration * 60 <= $last_end) {
                 $available_hours[] = $current_hour->format('H:i');
 
                 $current_hour->add(new DateInterval('PT' . $interval . 'M'));
-
-                $diff = $current_hour->diff($end_hour);
             }
         }
 
         return $available_hours;
+    }
+
+    /**
+     * Get the end-of-day buffer that applies to a free period.
+     *
+     * @param string $period_end End of the free period (H:i).
+     * @param string|null $working_day_end End of the effective working plan of the day (H:i).
+     * @param int $end_of_day_buffer Configured end-of-day buffer in minutes.
+     *
+     * @return int Returns the buffer in minutes, or 0 when the period does not end at the working day end.
+     */
+    public static function end_of_day_buffer_for_period(
+        string $period_end,
+        ?string $working_day_end,
+        int $end_of_day_buffer,
+    ): int {
+        return $working_day_end !== null && $period_end === $working_day_end ? $end_of_day_buffer : 0;
+    }
+
+    /**
+     * Get the end of the provider's effective working plan for a date (working plan exception or weekday plan).
+     *
+     * @param string $date Selected date (Y-m-d).
+     * @param array $provider Provider data.
+     *
+     * @return string|null Returns the end time (H:i), or null when the provider does not work on that date.
+     */
+    protected function get_working_day_end(string $date, array $provider): ?string
+    {
+        $working_plan = json_decode($provider['settings']['working_plan'], true);
+
+        $working_plan_exceptions = $this->CI->working_plan_exceptions_model->get_by_provider($provider['id']);
+
+        $date_working_plan = $working_plan[strtolower(date('l', strtotime($date)))] ?? null;
+
+        if (array_key_exists($date, $working_plan_exceptions)) {
+            $date_working_plan = $working_plan_exceptions[$date];
+        }
+
+        return !empty($date_working_plan['end']) ? date('H:i', strtotime($date_working_plan['end'])) : null;
     }
 
     /**
