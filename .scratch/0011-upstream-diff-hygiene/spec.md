@@ -1,8 +1,8 @@
 # Upstream-Diff klein halten: Formatter-Strategie, Whitespace-Bereinigung, Kleinkram
 
-Status: in-progress
+Status: resolved
 Created: 2026-10-11
-Closed: –
+Closed: 2026-10-11
 Priority: P3
 Depends-on: –
 

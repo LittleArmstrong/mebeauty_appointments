@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Local variables.
  *
@@ -43,9 +42,9 @@
                             </button>
                         </label>
                         <img class="captcha-image float-start float-md-end mb-4 rounded" src="<?= site_url(
-                                                                                                    'captcha',
-                                                                                                ) ?>" alt="CAPTCHA">
-                        <input id="captcha-text" class="captcha-text form-control w-100 mb-4" type="text" value="" />
+                            'captcha',
+                        ) ?>" alt="CAPTCHA">
+                        <input id="captcha-text" class="captcha-text form-control w-100 mb-4" type="text" value=""/>
                         <span id="captcha-hint" class="help-block" style="opacity:0">&nbsp;</span>
                     </div>
                 </div>
@@ -83,7 +82,7 @@
 
     <div class="command-buttons text-center my-3 mx-auto d-md-flex justify-content-md-between">
         <button type="button" id="button-back-4" class="btn button-back btn-outline-secondary" style="min-width: 120px; margin-right: 10px;"
-            data-step_index="4">
+                data-step_index="4">
             <i class="fas fa-chevron-left me-2"></i>
             <?= lang('back') ?>
         </button>
@@ -92,8 +91,8 @@
                 <i class="fas fa-check-square me-2"></i>
                 <?= $manage_mode ? lang('update') : lang('confirm') ?>
             </button>
-            <input type="hidden" name="csrfToken" />
-            <input type="hidden" name="post_data" />
+            <input type="hidden" name="csrfToken"/>
+            <input type="hidden" name="post_data"/>
         </form>
     </div>
 </div>
