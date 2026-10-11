@@ -83,6 +83,13 @@ jobs:
       - name: Create config
         run: cp config-sample.php config.php
 
+      # php-fpm runs as HOST_UID/HOST_GID (default 1000); the runner user owns the checkout with a different UID,
+      # so the container could not write vendor/ (composer install) without passing the runner's IDs.
+      - name: Run php-fpm as the runner user
+        run: |
+          echo "HOST_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "HOST_GID=$(id -g)" >> "$GITHUB_ENV"
+
       - name: Start stack (only services the smoke tests need)
         run: docker compose up -d --build php-fpm nginx mysql mailpit
 
