@@ -2,11 +2,17 @@
 
 ## Validation
 
-A pre-commit hook (`scripts/git-hooks/pre-commit`) syntax-checks staged JS
-(`node --check`) and PHP (`php -l` inside the `php-fpm` container). It is
-activated via `git config core.hooksPath scripts/git-hooks` and must be
-re-enabled on a fresh clone (the config is local, not committed). PHP checks
-are skipped with a warning when the container is not running.
+A pre-commit hook (`scripts/git-hooks/pre-commit`) blocks the commit when a staged
+file fails one of these checks:
+
+- JS syntax (`node --check`) and PHP syntax (`php -l` inside the `php-fpm` container)
+- Prettier format of staged fork-owned files (`bash scripts/check-format.sh --staged`)
+- spec tracker, when `.scratch/` files are staged (`php scripts/scratch-index.php check`)
+- accidentally staged backup files (`.backup`, `.bak`, `.orig`)
+
+A check whose tool is missing (`npx`, running container) is skipped with a warning.
+The hook is activated via `git config core.hooksPath scripts/git-hooks` and must be
+re-enabled on a fresh clone (the config is local, not committed).
 
 After making changes:
 

@@ -9,6 +9,7 @@
 # Usage:
 #   bash scripts/check-format.sh           # check (exit 1 on style issues)
 #   bash scripts/check-format.sh --write   # format the fork-owned files
+#   bash scripts/check-format.sh --staged  # check only the staged fork-owned files (pre-commit hook)
 #
 # Needs the full git history of the upstream base commit (CI: actions/checkout with fetch-depth: 0).
 
@@ -24,7 +25,11 @@ if [ -z "$BASE" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
 fi
 
 MODE="--check"
-[ "${1:-}" = "--write" ] && MODE="--write"
+STAGED=0
+case "${1:-}" in
+    --write) MODE="--write" ;;
+    --staged) STAGED=1 ;;
+esac
 
 PATHS=('application/**/*.php' 'tests/**/*.php' 'assets/**/*.js' 'assets/**/*.scss')
 
@@ -38,6 +43,12 @@ mapfile -t FILES < <(
         sort -u |
         while read -r file; do [ -f "$file" ] && echo "$file"; done
 )
+
+if [ "$STAGED" -eq 1 ] && [ "${#FILES[@]}" -gt 0 ]; then
+    mapfile -t FILES < <(
+        comm -12 <(printf '%s\n' "${FILES[@]}") <(git diff --cached --name-only --diff-filter=ACM | sort -u)
+    )
+fi
 
 if [ "${#FILES[@]}" -eq 0 ]; then
     echo "check-format: no fork-owned files to check"

@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Pre-commit guardrail: syntax-check staged PHP and JS files, and block
-# accidentally staged backup/temporary files (.backup/.bak/.orig).
+# Pre-commit guardrail: syntax-check staged PHP and JS files, check the Prettier
+# format of staged fork-owned files, validate the spec tracker when .scratch/ is
+# staged, and block accidentally staged backup/temporary files (.backup/.bak/.orig).
 #
-# JS is checked on the host (`node --check`). PHP must be checked inside the
-# php-fpm container (the host `php` binary is a ddev shim); when the container is
-# not running, PHP checks are skipped with a warning instead of failing.
+# JS syntax and format are checked on the host (`node --check`, `npx prettier`).
+# PHP must run inside the php-fpm container (the host `php` binary is a ddev shim).
+# When a tool is not available, its check is skipped with a warning instead of failing.
 
 set -u
 
 php_container_running() {
-    docker compose ps -q php-fpm >/dev/null 2>&1
+    [ -n "$(docker compose ps -q --status running php-fpm 2>/dev/null)" ]
 }
 
 fail=0
@@ -46,6 +47,34 @@ for file in $staged; do
             ;;
     esac
 done
+
+# Format of staged fork-owned files (check-format.sh filters to fork-owned PHP/JS/SCSS itself).
+if printf '%s\n' $staged | grep -q -E '\.(php|js|scss)$'; then
+    if command -v npx >/dev/null 2>&1; then
+        bash scripts/check-format.sh --staged
+        status=$?
+        if [ "$status" -eq 2 ]; then
+            echo "pre-commit: upstream base commit not available — skipping format check" >&2
+        elif [ "$status" -ne 0 ]; then
+            echo "pre-commit: Formatfehler – bash scripts/check-format.sh --write, dann erneut stagen" >&2
+            fail=1
+        fi
+    else
+        echo "pre-commit: npx not available — skipping format check" >&2
+    fi
+fi
+
+# Spec tracker: headers, numbering and generated INDEX.md (docs/agents/issue-tracker.md).
+if printf '%s\n' $staged | grep -q '^\.scratch/'; then
+    if php_container_running; then
+        if ! docker compose exec -T php-fpm php scripts/scratch-index.php check; then
+            echo "pre-commit: .scratch ungültig – composer scratch:index ausführen bzw. Kopfzeilen korrigieren" >&2
+            fail=1
+        fi
+    else
+        echo "pre-commit: php-fpm not running — skipping .scratch check" >&2
+    fi
+fi
 
 if [ "$fail" -ne 0 ]; then
     echo "pre-commit: aborted due to validation errors" >&2
