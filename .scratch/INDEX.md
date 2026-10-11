@@ -6,7 +6,7 @@
 
 | Spec | Status | Priorität | Erstellt | Abhängig von | Tickets offen/gesamt |
 |---|---|---|---|---|---|
-| [0009](0009-manage-lock-enforcement/spec.md) Manage-Link serverseitig durchsetzen: Berechtigung und Umbuchungs-/Stornierungsfrist | ready-for-agent | P1 | 2026-10-11 | – | 3/3 |
+| [0009](0009-manage-lock-enforcement/spec.md) Manage-Link serverseitig durchsetzen: Berechtigung und Umbuchungs-/Stornierungsfrist | in-progress | P1 | 2026-10-11 | – | 1/3 |
 | [0010](0010-input-hardening/spec.md) Einstellungen zentral validieren, Firmenname escapen | ready-for-agent | P1 | 2026-10-11 | 0011 | 3/3 |
 | [0012](0012-buffer-end-of-day/spec.md) Tagesende-Puffer nur vor dem effektiven Arbeitsende | ready-for-agent | P1 | 2026-10-11 | – | 2/2 |
 | [0013](0013-booking-policy-extraction/spec.md) Fristen und Sperren in eine eigene Booking-Policy auslagern | ready-for-agent | P2 | 2026-10-11 | 0009, 0012 | 3/3 |

@@ -426,8 +426,28 @@ class Booking extends EA_Controller
                 $customer['phone_number'] = '';
             }
 
+            // Only the manage link hash may authorize changes to an existing appointment. Record IDs sent by
+            // the client are never trusted: they are dropped and, for a valid reschedule, taken from the
+            // stored appointment instead.
+            $original_appointment = $this->resolve_managed_appointment(
+                $post_data['appointment_hash'] ?? null,
+                $appointment['id'] ?? null,
+                $manage_mode,
+            );
+
+            unset($appointment['id'], $customer['id']);
+
+            $manage_mode = $original_appointment !== null;
+
+            if ($manage_mode) {
+                $appointment['id'] = (int) $original_appointment['id'];
+                $customer['id'] = (int) $original_appointment['id_users_customer'];
+
+                $this->check_manage_lock($original_appointment);
+            }
+
             // Check appointment availability before registering it to the database.
-            $appointment['id_users_provider'] = $this->check_datetime_availability();
+            $appointment['id_users_provider'] = $this->check_datetime_availability($appointment);
 
             if (!$appointment['id_users_provider']) {
                 throw new RuntimeException(lang('requested_hour_is_unavailable'));
@@ -578,6 +598,72 @@ class Booking extends EA_Controller
     }
 
     /**
+     * Find the appointment that belongs to a manage link hash.
+     *
+     * @param mixed $appointment_hash Hash from the manage link (as sent by the client).
+     *
+     * @return array|null Returns the appointment or null when the hash is missing, malformed or unknown.
+     */
+    protected function find_appointment_by_hash(mixed $appointment_hash): ?array
+    {
+        if (!is_string($appointment_hash) || !preg_match('/^[a-zA-Z0-9]+$/', $appointment_hash)) {
+            return null;
+        }
+
+        $results = $this->appointments_model->get(['hash' => $appointment_hash]);
+
+        return $results[0] ?? null;
+    }
+
+    /**
+     * Resolve the existing appointment a booking request is allowed to manage.
+     *
+     * A request without manage mode and without an appointment ID is a new booking. Any other request must carry
+     * the manage link hash of exactly the appointment it refers to; otherwise it is rejected instead of being
+     * turned into a new booking.
+     *
+     * @param mixed $appointment_hash Hash from the manage link.
+     * @param mixed $requested_id Appointment ID sent by the client (optional).
+     * @param bool $manage_mode Whether the client claims to reschedule.
+     *
+     * @return array|null Returns the stored appointment for a valid reschedule or null for a new booking.
+     *
+     * @throws RuntimeException
+     */
+    protected function resolve_managed_appointment(mixed $appointment_hash, mixed $requested_id, bool $manage_mode): ?array
+    {
+        if (!$manage_mode && empty($requested_id)) {
+            return null;
+        }
+
+        $appointment = $this->find_appointment_by_hash($appointment_hash);
+
+        if (!$appointment || (!empty($requested_id) && (int) $requested_id !== (int) $appointment['id'])) {
+            throw new RuntimeException(lang('appointment_not_found'));
+        }
+
+        return $appointment;
+    }
+
+    /**
+     * Make sure the stored appointment can still be rescheduled (manage deadline of the original start).
+     *
+     * @param array $appointment Stored appointment.
+     *
+     * @throws RuntimeException
+     */
+    protected function check_manage_lock(array $appointment): void
+    {
+        $provider = $this->providers_model->find($appointment['id_users_provider']);
+
+        $lock = $this->availability->get_appointment_lock($appointment['start_datetime'], $provider['timezone'], 'manage');
+
+        if ($lock['locked']) {
+            throw new RuntimeException(strtr($lock['message'], ['{$limit}' => $lock['limit_text']]));
+        }
+    }
+
+    /**
      * Check whether the provider is still available in the selected appointment date.
      *
      * It is possible that two or more customers select the same appointment date and time concurrently. The app won't
@@ -587,16 +673,14 @@ class Booking extends EA_Controller
      * Use this method just before the customer confirms the appointment registration. If the selected date was reserved
      * in the meanwhile, the customer must be prompted to select another time.
      *
+     * @param array $appointment Sanitized appointment data; an "id" is only present for a verified reschedule.
+     *
      * @return int|null Returns the ID of the provider that is available for the appointment.
      *
      * @throws Exception
      */
-    protected function check_datetime_availability(): ?int
+    protected function check_datetime_availability(array $appointment): ?int
     {
-        $post_data = request('post_data');
-
-        $appointment = $post_data['appointment'];
-
         $appointment_start = new DateTime($appointment['start_datetime']);
 
         $date = $appointment_start->format('Y-m-d');

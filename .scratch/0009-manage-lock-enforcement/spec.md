@@ -1,6 +1,6 @@
 # Manage-Link serverseitig durchsetzen: Berechtigung und Umbuchungs-/Stornierungsfrist
 
-Status: ready-for-agent
+Status: in-progress
 Created: 2026-10-11
 Closed: –
 Priority: P1

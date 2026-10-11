@@ -127,3 +127,4 @@ jobs:
         run: |
           bash tests/smoke/mebeauty-layout-smoke.sh
           bash tests/smoke/email-logo-smoke.sh
+          bash tests/smoke/manage-link-smoke.sh

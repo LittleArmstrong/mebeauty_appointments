@@ -846,6 +846,7 @@ App.Pages.Booking = (function () {
         if (manageMode) {
             data.appointment.id = vars('appointment_data').id;
             data.customer.id = vars('customer_data').id;
+            data.appointment_hash = vars('appointment_data').hash; // The server authorizes the reschedule by this hash.
         }
 
         $('input[name="post_data"]').val(JSON.stringify(data));
