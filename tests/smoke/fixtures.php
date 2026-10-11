@@ -1,27 +1,27 @@
 <?php
 /**
- * Test data helper for the manage-link smoke test (tests/smoke/manage-link-smoke.sh).
+ * Test data helper for the smoke tests (tests/smoke/*-smoke.sh).
  *
  * Boots CodeIgniter via the empty Test controller (the same CLI/bootstrap seam PHPUnit uses).
  *
  * Usage (inside the php-fpm container):
  *
- *   APP_ENV=testing php tests/smoke/manage-link-fixtures.php setup
+ *   APP_ENV=testing php tests/smoke/fixtures.php setup
  *       Creates two customers with one future appointment each and prints JSON with the IDs, hashes,
  *       provider/service and free target slots.
- *   APP_ENV=testing php tests/smoke/manage-link-fixtures.php get <appointment-id>
+ *   APP_ENV=testing php tests/smoke/fixtures.php get <appointment-id>
  *       Prints the stored appointment (JSON, or "null" when it does not exist).
- *   APP_ENV=testing php tests/smoke/manage-link-fixtures.php customer <customer-id>
+ *   APP_ENV=testing php tests/smoke/fixtures.php customer <customer-id>
  *       Prints the stored customer (JSON).
- *   APP_ENV=testing php tests/smoke/manage-link-fixtures.php setting <name> [<value>]
+ *   APP_ENV=testing php tests/smoke/fixtures.php setting <name> [<value>]
  *       Prints the current value of a setting and optionally replaces it.
- *   APP_ENV=testing php tests/smoke/manage-link-fixtures.php lang <key>
+ *   APP_ENV=testing php tests/smoke/fixtures.php lang <key>
  *       Prints a translation (to compare error messages).
- *   APP_ENV=testing php tests/smoke/manage-link-fixtures.php cleanup <appointment-ids> <customer-ids>
+ *   APP_ENV=testing php tests/smoke/fixtures.php cleanup <appointment-ids> <customer-ids>
  *       Deletes the given comma-separated appointments and customers.
  */
 
-$_SERVER['argv'] = ['manage-link-fixtures', 'test'];
+$_SERVER['argv'] = ['fixtures', 'test'];
 
 $command = $argv[1] ?? '';
 $arguments = array_slice($argv, 2);
@@ -160,6 +160,6 @@ switch ($command) {
         break;
 
     default:
-        fwrite(STDERR, 'Usage: manage-link-fixtures.php setup|get|customer|setting|lang|cleanup' . PHP_EOL);
+        fwrite(STDERR, 'Usage: fixtures.php setup|get|customer|setting|lang|cleanup' . PHP_EOL);
         exit(2);
 }

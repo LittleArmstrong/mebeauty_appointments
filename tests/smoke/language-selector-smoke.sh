@@ -15,7 +15,7 @@ has_selector() { local body; body=$(curl -fsS "$BASE/index.php/booking") && grep
 ok() { echo "OK   $1"; }
 
 setting() {
-    docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/manage-link-fixtures.php setting $*" | tail -1
+    docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/fixtures.php setting $*" | tail -1
 }
 
 ORIGINAL=$(setting display_language_selector)

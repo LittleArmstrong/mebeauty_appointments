@@ -2,7 +2,7 @@
 #
 # HTTP smoke test of the manage-link authorization on the booking endpoints (spec 0009).
 #
-# Creates two customers with one future appointment each (tests/smoke/manage-link-fixtures.php),
+# Creates two customers with one future appointment each (tests/smoke/fixtures.php),
 # then sends crafted requests to booking/register and checks the stored data afterwards:
 # a record may only be changed with the manage-link hash that belongs to it, and the
 # manage deadline is checked again on submit. All test data and changed settings are
@@ -23,7 +23,7 @@ fail() { echo "FAIL $1"; FAIL=1; }
 ok() { echo "OK   $1"; }
 
 fixtures() {
-    docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/manage-link-fixtures.php $*"
+    docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/fixtures.php $*"
 }
 
 json() { python3 -c "import sys, json; d = json.load(sys.stdin); print($1)"; }
