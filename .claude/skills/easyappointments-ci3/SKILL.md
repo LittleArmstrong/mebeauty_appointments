@@ -27,7 +27,7 @@ All PHP and Composer commands run inside the `php-fpm` container (`docker compos
 |---|---|---|
 | Controllers | `application/controllers/` | Extend `EA_Controller`; thin — business logic belongs in libraries/models |
 | API v1 | `application/controllers/api/v1/*_api_v1.php` | 13 controllers, bearer token via the `Api` library; document changes in `openapi.yml` |
-| Models | `application/models/` | Extend `EA_Model`; `validate()` throws `InvalidArgumentException` |
+| Models | `application/models/` | Extend `EA_Model`; each model implements its own `save()`/`validate()` (throws `InvalidArgumentException`) |
 | Business logic | `application/libraries/` | e.g. `Availability`, `Notifications`, `Synchronization`, `Email_messages`, `Api`. There is **no** separate service layer directory. |
 | Helpers | `application/helpers/` | Procedural, loaded globally (`setting()`, `lang()`, `e()`, `request()`, …) |
 | Core overrides | `application/core/EA_*.php` | `EA_Controller`, `EA_Model`, `EA_Migration`, `EA_Router`, `EA_Email`, … |
@@ -64,7 +64,7 @@ public function save(): void
 
 `json_response(array $content = [], int $status = 200)` returns JSON; `abort(int $code, string $message = '')` stops with an HTTP error.
 
-**Models** (`application/core/EA_Model.php`): `save()` → `validate()` → `insert()`/`update()`; `find($id)`, `get($where, $limit, $offset, $order_by)`, plus `cast(&$record)`, `only(&$record, $fields)`, `optional(&$record, $fields)`, and API field mapping via `$api_resource` / `api_encode()` / `api_decode()` in each model.
+**Models:** the base class `application/core/EA_Model.php` provides `get_value()`, `get_row()`, `get_batch()`, `add()`, `cast(&$record)`, `only(&$record, $fields)`, `optional(&$record, $fields)` and `db_field()`. Each concrete model (e.g. `Appointments_model`, `Settings_model`) implements its own `save()` → `validate()` → `insert()`/`update()`, `find($id)`, `get($where, $limit, $offset, $order_by)` and the API mapping (`$api_resource`, `api_encode()`, `api_decode()`).
 
 **Settings** (`application/helpers/setting_helper.php`): `setting('name', $default)` reads one value (one DB query per call); `setting(['name' => $value])` writes through `Settings_model::save()`. Every write — backend pages and the settings API — passes `Settings_model::validate()`.
 
@@ -110,4 +110,4 @@ Then expose it on the matching settings page (`data-field="my_setting"`), add tr
 
 ## Maintenance
 
-An earlier version of this skill bundled a generated codebase analysis (Skill Seekers). It was removed because it went stale with every change and contained local absolute paths; regenerate it with Skill Seekers if needed, but do not commit it. Keep this file factual and verify statements against the code when the repository changes.
+Keep this file factual: verify statements against the code when the repository changes. A generated codebase analysis (Skill Seekers) is deliberately not bundled because it goes stale.

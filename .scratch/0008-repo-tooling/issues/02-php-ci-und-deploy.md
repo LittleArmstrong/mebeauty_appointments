@@ -10,7 +10,7 @@
 - [x] CI-Testjob auf PHP 8.3: Installation aus der Lock-Datei statt `update`; Syntaxprüfung parallel; PHPUnit und Validatoren
 - [x] Neuer CI-Job auf PHP 8.2: Plattformprüfung der Lock-Datei ohne Entwicklungspakete und Syntaxprüfung des Laufzeitcodes; Gegenprobe mit einer 8.3-Syntax-Datei schlägt fehl
 - [x] Deploy-Build installiert ohne Entwicklungspakete und ohne `--ignore-platform-reqs`; ein Build mit PHP 8.2 läuft nachweislich durch
-- [x] Alle CI-Jobs grün
+- [ ] Alle CI-Jobs grün
 
 ## Comments
 
@@ -18,3 +18,4 @@
 - `composer.lock` hatte einen veralteten content-hash (Fork entfernte `"version"` aus composer.json); per `composer update --lock` nachgezogen, keine Paketänderung.
 - Die echten CI-Läufe sind erst nach einem Push sichtbar (nicht Teil dieses Auftrags).
 - Nebenbefund: `composer` meldet 18 Sicherheitshinweise in 3 Paketen (`composer audit`), außerhalb dieser Spec.
+- Review-Korrektur: `composer update --lock` hat neben dem content-hash auch Metadaten geändert (Quell-URL `firebase/php-jwt` → `googleapis/php-jwt` bei gleichem Commit, `plugin-api-version` 2.6.0 → 2.9.0); keine Paketversion geändert. Offen nach dem ersten Push: CI-Jobs (build-test 8.3, php82-runtime, smoke) und ein echter Deploy-Build grün.
