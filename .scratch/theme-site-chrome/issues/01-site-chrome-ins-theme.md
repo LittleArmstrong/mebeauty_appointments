@@ -10,5 +10,6 @@
 - [ ] Die vier bestehenden Komponenten sind unverändert in den Ordner des Themes `mebeauty` verschoben; im allgemeinen Komponenten-Ordner liegen keine mehr
 - [ ] Ohne Site-Chrome rendert das Layout wie Upstream (ohne Site-Seitenklasse und Seitenkopf); die Site-Styles greifen dann nicht
 - [ ] Der Smoke-Test prüft zusätzlich: Mit Upstream-Theme per URL-Parameter kein MeBeauty-Site-Chrome im HTML
+- [ ] `CODING_STANDARDS.md` (Ausnahme für die Website-Komponenten) und `docs/assets.md` nennen den neuen Ablageort im Theme
 - [ ] Sichtprüfung mit `mebeauty` (unverändert) und `default` (Upstream-Optik)
 - [ ] Layout-Smoke-Test, PHPUnit und `php -l` grün
