@@ -8,7 +8,7 @@ $site_url = 'https://mebeauty-koeln.de'; ?>
 <header class="site-navbar">
     <nav>
         <div class="site-navbar-inner">
-            <a href="<?= $site_url ?>/" class="site-navbar-logo">
+            <a href="<?= e($site_url) ?>/" class="site-navbar-logo">
                 <picture>
                     <source srcset="<?= asset_url('assets/img/mebeauty/logo.webp') ?>" type="image/webp">
                     <img src="<?= asset_url('assets/img/mebeauty/logo.png') ?>" alt="MeBeauty logo">
@@ -27,10 +27,10 @@ $site_url = 'https://mebeauty-koeln.de'; ?>
             </div>
             <div id="navbar-mobile-menu" class="site-navbar-menu">
                 <ul>
-                    <li><a href="<?= $site_url ?>/"><?= lang('site_nav_home') ?></a></li>
-                    <li><a href="<?= $site_url ?>/Behandlungen"><?= lang('site_nav_treatments') ?></a></li>
-                    <li><a href="<?= $site_url ?>/Preise"><?= lang('site_nav_prices') ?></a></li>
-                    <li><a href="<?= $site_url ?>/Kontakt"><?= lang('site_nav_contact') ?></a></li>
+                    <li><a href="<?= e($site_url) ?>/"><?= lang('site_nav_home') ?></a></li>
+                    <li><a href="<?= e($site_url) ?>/Behandlungen"><?= lang('site_nav_treatments') ?></a></li>
+                    <li><a href="<?= e($site_url) ?>/Preise"><?= lang('site_nav_prices') ?></a></li>
+                    <li><a href="<?= e($site_url) ?>/Kontakt"><?= lang('site_nav_contact') ?></a></li>
                 </ul>
             </div>
         </div>

@@ -12,7 +12,7 @@ $imprint_url = vars('imprint_url') ?: $site_url . '/Impressum';
 <footer class="site-footer">
     <div class="site-footer-grid">
         <div>
-            <h2><a href="<?= $site_url ?>/">MeBeauty</a></h2>
+            <h2><a href="<?= e($site_url) ?>/">MeBeauty</a></h2>
             <div class="site-footer-social">
                 <a href="https://www.instagram.com/mebeauty_koeln/" target="_blank" rel="noopener noreferrer">
                     <img src="<?= asset_url('assets/img/mebeauty/instagram.png') ?>" alt="Instagram">
@@ -20,7 +20,7 @@ $imprint_url = vars('imprint_url') ?: $site_url . '/Impressum';
                 <a href="https://www.tiktok.com/@mebeauty_koeln" target="_blank" rel="noopener noreferrer">
                     <img src="<?= asset_url('assets/img/mebeauty/tiktok.png') ?>" alt="TikTok">
                 </a>
-                <a href="<?= $whatsapp_url ?>" target="_blank" rel="noopener noreferrer">
+                <a href="<?= e($whatsapp_url) ?>" target="_blank" rel="noopener noreferrer">
                     <img src="<?= asset_url('assets/img/mebeauty/whatsapp.png') ?>" alt="WhatsApp">
                 </a>
             </div>
@@ -28,14 +28,14 @@ $imprint_url = vars('imprint_url') ?: $site_url . '/Impressum';
         <div>
             <h3><?= lang('site_treatments') ?></h3>
             <ul class="site-footer-treatments">
-                <li><a href="<?= $site_url ?>/Behandlungen#01_Gesichtsbehandlungen">Gesichtsbehandlungen</a></li>
-                <li><a href="<?= $site_url ?>/Behandlungen#02_Haarentfernung">Haarentfernung</a></li>
-                <li><a href="<?= $site_url ?>/Behandlungen#03_Plasma_Pen">Plasma Pen</a></li>
-                <li><a href="<?= $site_url ?>/Behandlungen#04_Massagen_mit_Olga">Aroma Massagen (mit Olga)</a></li>
-                <li><a href="<?= $site_url ?>/Behandlungen#05_Koerperbehandlungen">Körperbehandlungen</a></li>
-                <li><a href="<?= $site_url ?>/Behandlungen#06_Zahnbleaching">Zahnbleaching</a></li>
-                <li><a href="<?= $site_url ?>/Behandlungen#07_Manikuere_Pedikuere">Maniküre &amp; Pediküre</a></li>
-                <li><a href="<?= $site_url ?>/Behandlungen#08_Keratinglaettung">Keratinglättung</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#01_Gesichtsbehandlungen">Gesichtsbehandlungen</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#02_Haarentfernung">Haarentfernung</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#03_Plasma_Pen">Plasma Pen</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#04_Massagen_mit_Olga">Aroma Massagen (mit Olga)</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#05_Koerperbehandlungen">Körperbehandlungen</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#06_Zahnbleaching">Zahnbleaching</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#07_Manikuere_Pedikuere">Maniküre &amp; Pediküre</a></li>
+                <li><a href="<?= e($site_url) ?>/Behandlungen#08_Keratinglaettung">Keratinglättung</a></li>
             </ul>
         </div>
         <div>

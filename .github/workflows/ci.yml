@@ -46,6 +46,9 @@ jobs:
       - name: Validate asset references
         run: php scripts/validate-asset-references.php
 
+      - name: Validate output escaping in fork-owned views
+        run: php scripts/validate-view-escaping.php
+
       - name: Validate spec tracker (.scratch)
         run: php scripts/scratch-index.php check
 

@@ -53,6 +53,7 @@
         "test": "APP_ENV=testing php vendor/bin/phpunit",
         "check:migrations": "php scripts/validate-migrations.php application/migrations",
         "check:assets": "php scripts/validate-asset-references.php",
+        "check:views": "php scripts/validate-view-escaping.php",
         "scratch:index": "php scripts/scratch-index.php generate",
         "check:scratch": "php scripts/scratch-index.php check",
         "post-install-cmd": "@cleanup-vendor",
