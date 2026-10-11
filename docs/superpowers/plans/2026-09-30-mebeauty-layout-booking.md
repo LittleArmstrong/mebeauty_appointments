@@ -25,7 +25,7 @@
 ### Task 0: Umgebung vorbereiten und Doku veröffentlichen
 
 **Files:**
-- Create: `.scratch/mebeauty-layout/spec.md`, `.scratch/mebeauty-layout/issues/01-…-05-….md` (Spec+Tickets aus der Session)
+- Create: `.scratch/0001-mebeauty-layout/spec.md`, `.scratch/0001-mebeauty-layout/issues/01-…-05-….md` (Spec+Tickets aus der Session)
 - Create: `docs/superpowers/plans/2026-09-30-mebeauty-layout-booking.md` (dieser Plan)
 
 - [ ] **Step 1: Hard-Reset auf den vereinbarten Stand**

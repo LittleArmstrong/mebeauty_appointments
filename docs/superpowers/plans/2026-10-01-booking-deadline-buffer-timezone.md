@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Spec: `.scratch/booking-deadline-buffer-timezone/spec.md` — Ticket-Zerlegung: `.scratch/booking-deadline-buffer-timezone/issues/01..07` (eine Task pro Ticket, Reihenfolge = Abhängigkeiten).
+- Spec: `.scratch/0003-booking-deadline-buffer-timezone/spec.md` — Ticket-Zerlegung: `.scratch/0003-booking-deadline-buffer-timezone/issues/01..07` (eine Task pro Ticket, Reihenfolge = Abhängigkeiten).
 - Es werden **keine neuen PHPUnit-Unit-Tests** für die Availability-Library geschrieben (Spec-Entscheidung: keine DB-Fixture-Infrastruktur). Verifikation = `php -l`, `composer test`, `npm run build` + manuelle Checkliste mit konkretem DB/UI-Setup.
 - **Commits:** Gemäß AGENTS.md darf NICHT automatisch committet werden. Jede Task endet mit einem Checkpoint: `git status`/`git diff` zeigen, Commit-Befehl vorschlagen, aber erst nach ausdrücklicher Nutzer-Freigabe ausführen.
 - Vor Beginn: Task-Branch anlegen: `git checkout -b agent/booking-deadline-buffer-timezone`.

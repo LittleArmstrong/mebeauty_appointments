@@ -39,6 +39,9 @@ jobs:
       - name: Validate asset references
         run: php scripts/validate-asset-references.php
 
+      - name: Validate spec tracker (.scratch)
+        run: php scripts/scratch-index.php check
+
       - name: Run PHPUnit
         run: vendor/bin/phpunit --configuration phpunit.xml
 
