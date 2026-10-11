@@ -45,8 +45,24 @@ Anzahl Tage N vor dem Termintag, an dem die Buchungsfrist liegt (Frist für Tag 
 _Avoid_: Vorlauftage, Offset-Tage
 
 **Pufferzeit (Buffer Time)**:
-Globale Ruhe-/Aufräumzeit nach einem Termin, in der kein neuer Termin beginnen darf; optional gilt sie auch vor dem Arbeitsende.
+Globale Ruhe-/Aufräumzeit nach einem Termin, in der kein neuer Termin beginnen darf; optional gilt sie auch vor dem Arbeitsende — nie vor einem Termin, einer Pause oder einer Unavailability.
 _Avoid_: Aufräumzeit, Abstandszeit
+
+**Arbeitsende**:
+Ende des effektiven Tagesplans eines Dienstleisters, einschließlich einer Arbeitsplan-Ausnahme für diesen Tag; Pausen und Terminbeginne sind kein Arbeitsende.
+_Avoid_: Feierabend, Periodenende, Tagesende (ohne Bezug zum Dienstleister)
+
+**Umbuchung**:
+Verschieben eines bestehenden Termins über den Manage-Link; ob sie erlaubt ist, entscheidet die Umbuchungs-/Stornierungsfrist des ursprünglichen Termins, der neue Zeitpunkt unterliegt wie jede Neubuchung der Buchungsfrist.
+_Avoid_: Terminänderung, Reschedule (im Deutschen)
+
+**Theme**:
+Kundenspezifisches Erscheinungsbild der App aus Bootstrap/SCSS-Styles und optionalem Site-Chrome; je Installation ist genau ein Theme aktiv.
+_Avoid_: Skin, Design (allein)
+
+**Site-Chrome**:
+Navbar, Seitenkopf (Intro), Footer und WhatsApp-Button, die im Booking-Flow die Website des Kunden nachbilden; gehört zum Theme, nicht zum Kern der App.
+_Avoid_: Website-Header/-Footer, Layout
 
 **App-Logo (Wordmark)**:
 Das rechteckige MeBeauty-Logo (`assets/img/mebeauty/logo.png`), verwendet in der Buchungs-Navbar und als Social-Vorschau (og:image).

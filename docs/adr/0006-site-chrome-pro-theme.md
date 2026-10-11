@@ -1,0 +1,7 @@
+# Site-Chrome gehört zum Theme statt zum Kern-Layout
+
+Der Fork bedient aktuell nur MeBeauty, soll später aber weitere Kunden bedienen. Das Site-Chrome (Navbar, Intro, Footer, WhatsApp-Button) bildet im Booking-Flow die Website des jeweiligen Kunden nach und unterscheidet sich deshalb pro Kunde nicht nur in Daten, sondern in Struktur und Markup. Deshalb gehört das Site-Chrome zum **Theme**: Ein Theme bringt neben seinen Styles optional eigene Site-Chrome-Partials mit, das Booking-Layout bindet sie nur ein, wenn das aktive Theme welche hat; ohne Partials gilt das Upstream-Layout. Kundendaten wie Telefonnummer, Adresse und Social-Links stehen direkt in den Partials des Themes. Texte laufen trotzdem über `lang()`, damit ein Theme mehrsprachig werden kann.
+
+Verworfen wurde ein generisches Site-Chrome mit im Backend pflegbaren Kundendaten (Settings + Migration + UI): Es erzwingt für alle Kunden dieselbe Struktur, die selten zur jeweiligen Website passt, und erzeugt deutlich mehr Code im upstream-nahen Bereich. Ebenso verworfen: die Daten in eine Config-Datei auszulagern, weil sie ohne gemeinsames Markup keinen Mehrwert bringt.
+
+Consequences: Ein neuer Kunde bedeutet ein neues Theme (SCSS + optionale Partials), keinen Eingriff in Kern-Views. Änderungen an Kontaktdaten erfordern einen Deploy. Ein per URL-Parameter gewähltes anderes Theme schaltet auch das Site-Chrome um; das ist akzeptiert. Upstream-Themes zeigen kein fremdes Branding mehr.
