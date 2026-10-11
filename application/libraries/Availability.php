@@ -43,6 +43,7 @@ class Availability
         $this->CI->load->model('working_plan_exceptions_model');
 
         $this->CI->load->library('ics_file');
+        $this->CI->load->library('booking_policy');
     }
 
     /**
@@ -792,40 +793,6 @@ class Availability
     }
 
     /**
-     * Get the booking deadline for the selected date.
-     *
-     * In fixed time mode the deadline of day D is (D - deadline days) at the deadline time. In minutes mode
-     * there is no such deadline and null is returned.
-     *
-     * @param string $date Selected date (Y-m-d).
-     * @param string $timezone Timezone used for the deadline calculation.
-     *
-     * @return DateTime|null Returns the deadline moment, or null when the minutes mode is active.
-     *
-     * @throws Exception
-     */
-    public function get_booking_deadline(string $date, string $timezone): ?DateTime
-    {
-        if (setting('booking_deadline_mode', 'minutes') !== 'fixed_time') {
-            return null;
-        }
-
-        $deadline_time = (string) setting('booking_deadline_time', '18:00');
-
-        $deadline_days = max(0, (int) setting('booking_deadline_days', '1'));
-
-        [$hour, $minute] = array_pad(explode(':', $deadline_time), 2, '0');
-
-        $deadline = new DateTime($date, new DateTimeZone($timezone));
-
-        $deadline->setTime((int) $hour, (int) $minute, 0);
-
-        $deadline->modify('-' . $deadline_days . ' days');
-
-        return $deadline;
-    }
-
-    /**
      * Get the normalized global buffer time in minutes.
      *
      * @return int
@@ -850,141 +817,6 @@ class Availability
     }
 
     /**
-     * Check whether the given deadline has already passed.
-     *
-     * @param DateTime $deadline The deadline moment.
-     * @param string $timezone Timezone used for the current time.
-     *
-     * @return bool Returns true when the current time is after the deadline.
-     *
-     * @throws Exception
-     */
-    public function is_deadline_passed(DateTime $deadline, string $timezone): bool
-    {
-        return new DateTime('now', new DateTimeZone($timezone)) > $deadline;
-    }
-
-    /**
-     * Get the lock status of an appointment start moment.
-     *
-     * In fixed time mode the appointment is locked once the deadline of its day has passed. In minutes mode the
-     * appointment is locked when its start lies inside the minimum lead time window.
-     *
-     * The `booking` kind uses the booking deadline (new bookings). The `manage` kind uses the manage deadline,
-     * which covers rescheduling and cancellation and defaults to inheriting the booking deadline.
-     *
-     * @param string $start_datetime Appointment start date and time.
-     * @param string $timezone Timezone used for the lock calculation.
-     * @param string $kind Lock kind (`booking` or `manage`).
-     *
-     * @return array{locked: bool, limit_text: string, message: string} Returns the lock status, the formatted
-     * limit for the message and the language message key content.
-     *
-     * @throws Exception
-     */
-    public function get_appointment_lock(string $start_datetime, string $timezone, string $kind = 'booking'): array
-    {
-        $appointment_start = new DateTime($start_datetime, new DateTimeZone($timezone));
-
-        return $kind === 'manage'
-            ? $this->get_manage_lock($appointment_start, $timezone)
-            : $this->get_booking_lock($appointment_start, $timezone);
-    }
-
-    /**
-     * Get the booking lock status of an appointment start moment.
-     *
-     * @throws Exception
-     */
-    protected function get_booking_lock(DateTime $appointment_start, string $timezone): array
-    {
-        $deadline = $this->get_booking_deadline($appointment_start->format('Y-m-d'), $timezone);
-
-        if ($deadline !== null) {
-            return [
-                'locked' => $this->is_deadline_passed($deadline, $timezone),
-                'limit_text' => format_date_time($deadline),
-                'message' => lang('appointment_locked_message_deadline'),
-            ];
-        }
-
-        $book_advance_timeout = setting('book_advance_timeout', 0);
-        $book_advance_timeout = is_numeric($book_advance_timeout) ? max(0, (int) $book_advance_timeout) : 0;
-
-        $limit = new DateTime('now', new DateTimeZone($timezone));
-        $limit->modify('+' . $book_advance_timeout . ' minutes');
-
-        return [
-            'locked' => $appointment_start < $limit,
-            'limit_text' => sprintf('%02d:%02d', intdiv($book_advance_timeout, 60), $book_advance_timeout % 60),
-            'message' => lang('appointment_locked_message'),
-        ];
-    }
-
-    /**
-     * Get the manage lock status (rescheduling and cancellation) of an appointment start moment.
-     *
-     * @throws Exception
-     */
-    protected function get_manage_lock(DateTime $appointment_start, string $timezone): array
-    {
-        $mode = setting('manage_deadline_mode', 'inherit');
-
-        if ($mode === 'inherit') {
-            return $this->get_booking_lock($appointment_start, $timezone);
-        }
-
-        if ($mode === 'fixed_time') {
-            $deadline = $this->get_manage_deadline($appointment_start->format('Y-m-d'), $timezone);
-
-            return [
-                'locked' => $this->is_deadline_passed($deadline, $timezone),
-                'limit_text' => format_date_time($deadline),
-                'message' => lang('manage_locked_message_deadline'),
-            ];
-        }
-
-        $minutes = setting('manage_deadline_minutes', 0);
-        $minutes = is_numeric($minutes) ? max(0, (int) $minutes) : 0;
-
-        $limit = new DateTime('now', new DateTimeZone($timezone));
-        $limit->modify('+' . $minutes . ' minutes');
-
-        return [
-            'locked' => $appointment_start < $limit,
-            'limit_text' => sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60),
-            'message' => lang('manage_locked_message_minutes'),
-        ];
-    }
-
-    /**
-     * Get the manage deadline for the selected date in fixed time mode.
-     *
-     * @param string $date Selected date (Y-m-d).
-     * @param string $timezone Timezone used for the deadline calculation.
-     *
-     * @return DateTime Returns the manage deadline moment.
-     *
-     * @throws Exception
-     */
-    protected function get_manage_deadline(string $date, string $timezone): DateTime
-    {
-        $deadline_time = (string) setting('manage_deadline_time', '18:00');
-
-        $deadline_days = max(0, (int) setting('manage_deadline_days', '1'));
-
-        [$hour, $minute] = array_pad(explode(':', $deadline_time), 2, '0');
-
-        $deadline = new DateTime($date, new DateTimeZone($timezone));
-
-        $deadline->setTime((int) $hour, (int) $minute, 0);
-
-        $deadline->modify('-' . $deadline_days . ' days');
-
-        return $deadline;
-    }
-
-    /**
      * Consider the book advance timeout and remove available hours that have passed the threshold.
      *
      * If the selected date is today, remove past hours. It is important  include the timeout before booking
@@ -1003,29 +835,17 @@ class Availability
     {
         $provider_timezone = new DateTimeZone($provider['timezone']);
 
-        $threshold = new DateTime('now', $provider_timezone);
+        // Booking deadline and minimum lead time are decided by the booking policy (null = whole day locked).
+        $earliest_start = $this->CI->booking_policy->get_earliest_booking_start($date, $provider['timezone']);
 
-        $deadline = $this->get_booking_deadline($date, $provider['timezone']);
-
-        if ($deadline !== null) {
-            // Fixed time mode: once the deadline has passed the whole day is locked. No minimum lead
-            // time applies in this mode, only hours that lie in the past are filtered below.
-            if ($this->is_deadline_passed($deadline, $provider['timezone'])) {
-                return [];
-            }
-        } else {
-            // Minutes mode: keep the existing book advance timeout behavior.
-            $book_advance_timeout = setting('book_advance_timeout', 0);
-
-            $book_advance_timeout = is_numeric($book_advance_timeout) ? max(0, (int) $book_advance_timeout) : 0;
-
-            $threshold->modify('+' . $book_advance_timeout . ' minutes');
+        if ($earliest_start === null) {
+            return [];
         }
 
         foreach ($available_hours as $index => $value) {
             $available_hour = new DateTime($date . ' ' . $value, $provider_timezone);
 
-            if ($available_hour->getTimestamp() <= $threshold->getTimestamp()) {
+            if ($available_hour->getTimestamp() < $earliest_start->getTimestamp()) {
                 unset($available_hours[$index]);
             }
         }

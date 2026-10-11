@@ -1,6 +1,6 @@
 # Fristen und Sperren in eine eigene Booking-Policy auslagern
 
-Status: ready-for-agent
+Status: in-progress
 Created: 2026-10-11
 Closed: –
 Priority: P2

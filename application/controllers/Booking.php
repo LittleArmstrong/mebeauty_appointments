@@ -78,6 +78,7 @@ class Booking extends EA_Controller
         $this->load->library('synchronization');
         $this->load->library('notifications');
         $this->load->library('availability');
+        $this->load->library('booking_policy');
         $this->load->library('webhooks_client');
         $this->load->library('jitsi_client');
     }
@@ -245,7 +246,7 @@ class Booking extends EA_Controller
 
             // Make sure the appointment can still be rescheduled or cancelled.
 
-            $lock = $this->availability->get_appointment_lock($appointment['start_datetime'], $provider['timezone'], 'manage');
+            $lock = $this->booking_policy->get_lock($appointment['start_datetime'], $provider['timezone'], 'manage');
 
             if ($lock['locked']) {
                 html_vars([
@@ -676,7 +677,7 @@ class Booking extends EA_Controller
 
         // Same check as when the manage link is opened (index()), repeated here because the deadline may pass
         // between opening the page and submitting it.
-        $lock = $this->availability->get_appointment_lock(
+        $lock = $this->booking_policy->get_lock(
             $appointment['start_datetime'],
             $provider['timezone'],
             'manage',
