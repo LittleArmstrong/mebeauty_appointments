@@ -189,9 +189,15 @@ if (!function_exists('pure_html')) {
     {
         $config = HTMLPurifier_Config::createDefault();
 
+        // The directory check runs once per path and request (the helper may be called for every rich text field).
+        static $usable_cache_paths = [];
+
         $cache_path = rtrim(config('cache_path'), '/') . '/htmlpurifier';
 
-        if ((is_dir($cache_path) || @mkdir($cache_path, 0775, true)) && is_writable($cache_path)) {
+        $usable_cache_paths[$cache_path] ??=
+            (is_dir($cache_path) || @mkdir($cache_path, 0775, true)) && is_writable($cache_path);
+
+        if ($usable_cache_paths[$cache_path]) {
             $config->set('Cache.SerializerPath', $cache_path);
         } else {
             $config->set('Cache.DefinitionImpl', null);

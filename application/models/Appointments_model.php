@@ -464,15 +464,17 @@ class Appointments_model extends EA_Model
         string $end,
         ?int $exclude_appointment_id = null,
     ): array {
-        if ($exclude_appointment_id) {
-            $this->db->where('id !=', $exclude_appointment_id);
-        }
-
-        return $this->db
+        $query = $this->db
             ->select('start_datetime, end_datetime')
             ->from('appointments')
             ->where('id_services', $service_id)
-            ->where('is_unavailability', false)
+            ->where('is_unavailability', false);
+
+        if ($exclude_appointment_id) {
+            $query->where('id !=', $exclude_appointment_id);
+        }
+
+        return $query
             ->group_start()
             ->where('start_datetime <', $end)
             ->where('end_datetime >', $start)

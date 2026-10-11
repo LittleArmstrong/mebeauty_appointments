@@ -62,6 +62,23 @@ class HtmlHelperTest extends TestCase
         }
     }
 
+    public function testPureHtmlRepeatedCallsWithSameCachePathStayCorrect(): void
+    {
+        $originalCachePath = config('cache_path');
+        $tmp = sys_get_temp_dir() . '/htmlpurifier-repeat-' . bin2hex(random_bytes(4));
+
+        config(['cache_path' => $tmp . '/']);
+
+        try {
+            $this->assertSame('<p>Hello</p>', pure_html('<script>alert(1)</script><p>Hello</p>'));
+            $this->assertSame('<p>Again</p>', pure_html('<script>alert(2)</script><p>Again</p>'));
+            $this->assertDirectoryExists($tmp . '/htmlpurifier');
+        } finally {
+            config(['cache_path' => $originalCachePath]);
+            $this->removeDirectory($tmp);
+        }
+    }
+
     private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {

@@ -4,9 +4,13 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Der Terminausschluss steht bedingt in der Abfragekette; das Ergebnis ist identisch
-- [ ] Das Ergebnis der Verzeichnisprüfung wird pro Request statisch gecacht
-- [ ] Die bestehenden Helper-Tests sind grün, ggf. um einen Test für wiederholte Aufrufe ergänzt
-- [ ] PHPUnit und `php -l` grün
+- [x] Der Terminausschluss steht bedingt in der Abfragekette; das Ergebnis ist identisch
+- [x] Das Ergebnis der Verzeichnisprüfung wird pro Request statisch gecacht
+- [x] Die bestehenden Helper-Tests sind grün, ggf. um einen Test für wiederholte Aufrufe ergänzt
+- [x] PHPUnit und `php -l` grün
+
+## Comments
+
+- Verzeichnisprüfung wird pro Cache-Pfad statisch gemerkt (nicht global), weil Tests `cache_path` innerhalb eines Prozesses wechseln. Neuer Test für wiederholte Aufrufe. Service-Buchungsabfrage als eine Kette; Smoke über einen Service mit Slot-Kapazität grün.
