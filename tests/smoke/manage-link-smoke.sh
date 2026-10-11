@@ -177,4 +177,28 @@ else
     fail "valid reschedule (HTTP $STATUS, $(cat "$TMP/body"))"
 fi
 
+# 8./9. Available hours in manage mode: a foreign appointment ID without hash is not excluded,
+#       the own appointment (identified by hash) is.
+available_hours() {
+    curl -s "$BASE/index.php/booking/get_available_hours" \
+        --data-urlencode "provider_id=$PROVIDER" \
+        --data-urlencode "service_id=$SERVICE" \
+        --data-urlencode "selected_date=$DATE" \
+        --data-urlencode "manage_mode=1" "$@"
+}
+VICTIM_HOUR="${VICTIM_START:11:5}"
+OWNER_HOUR="${TARGET:11:5}"
+
+if available_hours --data-urlencode "appointment_id=$VICTIM_ID" | grep -q "\"$VICTIM_HOUR\""; then
+    fail "available hours: foreign appointment $VICTIM_ID excluded via appointment_id"
+else
+    ok "available hours: foreign appointment id is ignored (slot $VICTIM_HOUR stays taken)"
+fi
+
+if available_hours --data-urlencode "appointment_hash=$OWNER_HASH" | grep -q "\"$OWNER_HOUR\""; then
+    ok "available hours: own appointment excluded via manage hash (slot $OWNER_HOUR free)"
+else
+    fail "available hours: own appointment not excluded via manage hash"
+fi
+
 exit $FAIL

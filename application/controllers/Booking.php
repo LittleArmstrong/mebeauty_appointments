@@ -616,6 +616,21 @@ class Booking extends EA_Controller
     }
 
     /**
+     * Get the ID of the appointment that belongs to the manage link hash of the current request.
+     *
+     * Availability requests in manage mode exclude the customer's own appointment so its time slot shows as free.
+     * Only the hash may identify that appointment; a client-provided appointment ID is ignored.
+     *
+     * @return int|null Returns the appointment ID or null without a valid hash.
+     */
+    protected function find_managed_appointment_id(): ?int
+    {
+        $appointment = $this->find_appointment_by_hash(request('appointment_hash'));
+
+        return $appointment ? (int) $appointment['id'] : null;
+    }
+
+    /**
      * Resolve the existing appointment a booking request is allowed to manage.
      *
      * A request without manage mode and without an appointment ID is a new booking. Any other request must carry
@@ -785,7 +800,7 @@ class Booking extends EA_Controller
             check('service_id', 'numeric');
             check('selected_date', 'date');
             check('manage_mode', 'bool|null');
-            check('appointment_id', 'numeric|null');
+            check('appointment_hash', 'string|null');
 
             $provider_id = request('provider_id');
             $service_id = request('service_id');
@@ -802,7 +817,7 @@ class Booking extends EA_Controller
             // If manage mode is TRUE then the following we should not consider the selected appointment when
             // calculating the available time periods of the provider.
 
-            $exclude_appointment_id = request('manage_mode') ? request('appointment_id') : null;
+            $exclude_appointment_id = request('manage_mode') ? $this->find_managed_appointment_id() : null;
 
             // If the user has selected the "any-provider" option then we will need to search for an available provider
             // that will provide the requested service.
@@ -873,13 +888,12 @@ class Booking extends EA_Controller
 
             check('provider_id', 'string|numeric|null');
             check('service_id', 'numeric');
-            check('appointment_id', 'numeric|null');
+            check('appointment_hash', 'string|null');
             check('manage_mode', 'bool|null');
             check('selected_date', 'date');
 
             $provider_id = request('provider_id');
             $service_id = request('service_id');
-            $appointment_id = request('appointment_id');
             $manage_mode = filter_var(request('manage_mode'), FILTER_VALIDATE_BOOLEAN);
             $selected_date_string = request('selected_date');
             $selected_date = new DateTime($selected_date_string);
@@ -889,7 +903,7 @@ class Booking extends EA_Controller
             $provider_ids =
                 $provider_id === ANY_PROVIDER ? $this->search_providers_by_service($service_id) : [$provider_id];
 
-            $exclude_appointment_id = $manage_mode ? $appointment_id : null;
+            $exclude_appointment_id = $manage_mode ? $this->find_managed_appointment_id() : null;
 
             // Get the service record.
             $service = $this->services_model->find($service_id);

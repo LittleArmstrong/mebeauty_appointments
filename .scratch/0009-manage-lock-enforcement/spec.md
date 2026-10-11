@@ -1,8 +1,8 @@
 # Manage-Link serverseitig durchsetzen: Berechtigung und Umbuchungs-/Stornierungsfrist
 
-Status: in-progress
+Status: resolved
 Created: 2026-10-11
-Closed: –
+Closed: 2026-10-11
 Priority: P1
 Depends-on: –
 

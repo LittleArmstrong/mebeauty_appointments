@@ -4,11 +4,15 @@
 
 **Blocked by:** 01 (Umbuchung nur mit gültigem Manage-Hash)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Der Booking-Flow schickt bei beiden Abfragen im Manage-Modus den Hash statt der Termin-ID
-- [ ] Der Server löst den Hash wie in 01 auf und verwendet nur die so ermittelte ID als Ausschluss
-- [ ] Abfrage mit fremder Termin-ID ohne Hash → der fremde Termin bleibt belegt (Smoke-Fall)
-- [ ] Abfrage mit gültigem Hash → der eigene alte Zeitpunkt erscheint als frei
-- [ ] Die Abfragen bleiben POST (bewusst, siehe Spec)
-- [ ] `composer test`, `php -l`, `node --check`, Layout-Smoke-Test grün
+- [x] Der Booking-Flow schickt bei beiden Abfragen im Manage-Modus den Hash statt der Termin-ID
+- [x] Der Server löst den Hash wie in 01 auf und verwendet nur die so ermittelte ID als Ausschluss
+- [x] Abfrage mit fremder Termin-ID ohne Hash → der fremde Termin bleibt belegt (Smoke-Fall)
+- [x] Abfrage mit gültigem Hash → der eigene alte Zeitpunkt erscheint als frei
+- [x] Die Abfragen bleiben POST (bewusst, siehe Spec)
+- [x] `composer test`, `php -l`, `node --check`, Layout-Smoke-Test grün
+
+## Comments
+
+- `find_managed_appointment_id()` löst den Hash auf; `appointment_id` wird von beiden Abfragen nicht mehr gelesen. Smoke-Fälle 8/9; Gegenprobe gegen den vorherigen Controller: beide rot.

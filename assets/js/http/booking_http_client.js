@@ -60,7 +60,8 @@ App.Http.Booking = (function () {
         }
 
         // If the manage mode is true then the appointment's start date should return as available too.
-        const appointmentId = vars('manage_mode') ? vars('appointment_data').id : null;
+        // In manage mode the server excludes the customer's own appointment, identified by the manage link hash.
+        const appointmentHash = vars('manage_mode') ? vars('appointment_data').hash : null;
 
         // Make ajax post request and get the available hours.
         const url = App.Utils.Url.siteUrl('booking/get_available_hours');
@@ -72,7 +73,7 @@ App.Http.Booking = (function () {
             selected_date: selectedDate,
             service_duration: serviceDuration,
             manage_mode: Number(vars('manage_mode') || 0),
-            appointment_id: appointmentId,
+            appointment_hash: appointmentHash,
         };
 
         $.post(url, data).done((response) => {
@@ -281,7 +282,7 @@ App.Http.Booking = (function () {
             return;
         }
 
-        const appointmentId = App.Pages.Booking.manageMode ? vars('appointment_data').id : null;
+        const appointmentHash = App.Pages.Booking.manageMode ? vars('appointment_data').hash : null;
 
         const url = App.Utils.Url.siteUrl('booking/get_unavailable_dates');
 
@@ -291,7 +292,7 @@ App.Http.Booking = (function () {
             selected_date: encodeURIComponent(selectedDateString),
             csrf_token: vars('csrf_token'),
             manage_mode: Number(App.Pages.Booking.manageMode),
-            appointment_id: appointmentId,
+            appointment_hash: appointmentHash,
         };
 
         $.ajax({
