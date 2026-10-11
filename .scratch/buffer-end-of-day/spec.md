@@ -1,66 +1,69 @@
-# Pufferzeit am Arbeitsende nur vor dem echten Arbeitsende
+# Tagesende-Puffer nur vor dem effektiven Arbeitsende
 
 Status: ready-for-agent
 
 ## Problem Statement
 
-ADR 0002 und das Glossar legen fest: Die Pufferzeit gilt nach echten Terminen, **nie davor**. Optional gilt sie zusätzlich vor dem **Arbeitsende**. Die Verfügbarkeitsberechnung zieht den Tagesende-Puffer aber vom Ende **jeder** freien Zeitspanne ab. Freie Spannen enden nicht nur am Arbeitsende, sondern auch dort, wo ein Termin beginnt, eine Pause anfängt oder eine Unavailability bzw. Blocked Period liegt. Mit der Standardeinstellung (Puffer vor Arbeitsende an) gibt es deshalb faktisch Puffer **vor** Terminen, vor Pausen und vor Unavailabilities.
+Nach jedem echten Termin gibt es bereits eine **Pufferzeit**, in der kein neuer Termin beginnen darf. Die optionale Einstellung „Puffer vor Arbeitsende“ soll festlegen, ob dieser Puffer zusätzlich vor dem Arbeitsende eingehalten werden muss: Der letzte Termin des Tages endet dann so früh, dass bis Feierabend noch Aufräumzeit bleibt (ADR 0002).
 
-Für den Salon bedeutet das: Lücken direkt vor einem bestehenden Termin oder vor der Mittagspause werden nicht angeboten, obwohl sie laut Regel buchbar sind. Welche Slots ein Kunde sieht, hängt außerdem von der Reihenfolge der Buchungen ab. Bucht jemand zuerst den späteren Termin, fehlt danach der Slot davor. Im umgekehrten Fall bleibt er erhalten.
+Die Verfügbarkeitsberechnung zieht diesen Tagesende-Puffer aber vom Ende **jeder** freien Zeitspanne ab. Freie Spannen enden nicht nur am Arbeitsende, sondern auch an Pausen, an Terminbeginnen, an Unavailabilities und an Blocked Periods. Mit der Standardeinstellung (an) wirkt der Puffer deshalb auch vor Pausen, vor Unavailabilities und vor Terminen. Das widerspricht ADR 0002 („nie vor einem Termin“, nicht bei Unavailabilities/Blocked Periods).
 
-Das betrifft beide Berechnungswege: Dienstleister mit einem Teilnehmer pro Slot und Services mit mehreren Teilnehmern.
+Für den Salon heißt das: Lücken vor der Mittagspause, vor einem bestehenden Termin oder vor einer manuellen Sperre werden nicht angeboten, obwohl sie buchbar sind. Betroffen sind Einzeltermine und Services mit mehreren Teilnehmern.
 
 ## Solution
 
-Der Tagesende-Puffer wirkt nur noch auf die freie Zeitspanne, deren Ende mit dem **Arbeitsende** des Dienstleisters an diesem Tag zusammenfällt. Arbeitsende ist das Ende des effektiven Tagesplans, also inklusive einer Arbeitsplan-Ausnahme für den Tag (Glossar „Arbeitsende“). Endet eine Spanne an einem Terminbeginn, einer Pause, einer Unavailability oder einer Blocked Period, gilt dort kein Puffer. Ein Slot darf dann bündig davor enden.
+Der Tagesende-Puffer wirkt nur noch auf die freie Spanne, die am **effektiven Arbeitsende** des Dienstleisters endet (Glossar „Arbeitsende“: Ende des Tagesplans, bei einer Arbeitsplan-Ausnahme deren Ende).
 
-Der Puffer **nach** Terminen bleibt unverändert.
+- Option an: `Terminende + Pufferzeit ≤ effektives Arbeitsende` (Gleichheit erlaubt)
+- Option aus: `Terminende ≤ effektives Arbeitsende`
+- Vor Pausen, bestehenden Terminen, Unavailabilities und Blocked Periods gilt nur `Terminende ≤ Beginn der Unterbrechung`, ohne Puffer.
+- Der Puffer **nach** Terminen bleibt unverändert. Er verschiebt den Beginn freier Spannen, der Tagesende-Puffer betrifft nur deren Ende. Damit wird der Puffer nicht doppelt angewendet.
 
 ## User Stories
 
-1. Als Kunde will ich einen Slot buchen können, der direkt vor einem bestehenden Termin endet, damit vorhandene Lücken genutzt werden.
-2. Als Kunde will ich einen Slot buchen können, der direkt vor der Pause des Dienstleisters endet, damit der Vormittag voll ausgelastet werden kann.
-3. Als Salonbetreiberin will ich, dass vor Unavailabilities und Blocked Periods kein Puffer gilt, wie in ADR 0002 festgelegt.
-4. Als Salonbetreiberin will ich, dass bei aktivierter Option der letzte Slot des Tages so endet, dass bis zum Arbeitsende die Pufferzeit frei bleibt, damit ich nach dem letzten Kunden aufräumen kann.
-5. Als Salonbetreiberin will ich, dass bei deaktivierter Option der letzte Slot bis zum Arbeitsende reichen darf.
-6. Als Salonbetreiberin will ich, dass bei einer Arbeitsplan-Ausnahme (z. B. Donnerstag bis 20:00 statt 18:00) der Puffer vor 20:00 gilt und nicht vor 18:00.
-7. Als Salonbetreiberin will ich, dass der Puffer je Dienstleister gegen dessen eigenes Arbeitsende gerechnet wird, damit unterschiedliche Arbeitszeiten korrekt berücksichtigt werden.
-8. Als Kunde will ich dieselben freien Slots sehen, egal in welcher Reihenfolge andere Kunden zuvor gebucht haben, damit die Verfügbarkeit nachvollziehbar ist.
-9. Als Salonbetreiberin will ich, dass sich der Puffer nach einem Termin nicht ändert, damit die Aufräumzeit nach Kunden erhalten bleibt.
-10. Als Salonbetreiberin will ich, dass Services mit mehreren Teilnehmern dieselbe Regel befolgen wie Einzeltermine.
-11. Als Salonbetreiberin will ich, dass eine Unavailability, die bis zum Arbeitsende reicht, keinen zusätzlichen Puffer davor erzeugt, damit freie Zeit vor einer frühen Schließung nicht verloren geht.
-12. Als Entwickler will ich die Slot-Erzeugung ohne Datenbank testen können, damit Pufferregeln schnell und deterministisch geprüft werden.
+1. Als Kunde will ich einen Slot buchen können, der bündig vor der Pause des Dienstleisters endet.
+2. Als Kunde will ich einen Slot buchen können, der bündig vor einem bestehenden Termin endet (der Puffer gilt nur nach Terminen, ADR 0002).
+3. Als Salonbetreiberin will ich, dass vor Unavailabilities und Blocked Periods kein Puffer gilt, auch wenn sie bis zum Arbeitsende reichen.
+4. Als Salonbetreiberin will ich, dass bei aktivierter Option der letzte Termin spätestens so endet, dass bis zum Arbeitsende die Pufferzeit frei bleibt; ein Ende genau „Arbeitsende minus Puffer“ ist erlaubt.
+5. Als Salonbetreiberin will ich, dass bei deaktivierter Option der letzte Termin bis zum Arbeitsende reichen darf.
+6. Als Salonbetreiberin will ich, dass bei einer Arbeitsplan-Ausnahme (länger oder verkürzt) deren Ende als Arbeitsende gilt.
+7. Als Salonbetreiberin will ich, dass bei einem Tag mit Pausen nur das letzte Teilintervall ein Arbeitsende hat.
+8. Als Salonbetreiberin will ich, dass jeder Dienstleister gegen sein eigenes Arbeitsende gerechnet wird.
+9. Als Salonbetreiberin will ich, dass sich der Puffer nach Terminen nicht ändert und nicht doppelt wirkt.
+10. Als Salonbetreiberin will ich, dass Services mit mehreren Teilnehmern dieselbe Regel befolgen.
+11. Als Entwickler will ich die Slot-Erzeugung ohne Datenbank testen können.
 
 ## Implementation Decisions
 
-- Die Slot-Erzeugung aus freien Zeitspannen wird eine reine, öffentlich testbare Funktion der Verfügbarkeits-Library. Eingaben: Datum, freie Spannen, Service-Dauer, Slot-Intervall, Tagesende-Puffer in Minuten, Arbeitsende des Tages. Ausgabe: Liste der Slot-Startzeiten. Sie liest keine Settings und keine Datenbank. Vorbild ist die bereits statische Überlappungszählung.
-- Der Tagesende-Puffer wird nur auf eine Spanne angewendet, deren Ende gleich dem Arbeitsende ist.
-- Das Arbeitsende wird aus dem effektiven Tagesplan bestimmt, der für die Periodenberechnung ohnehin ermittelt wird (Arbeitsplan oder Ausnahme des Tages). Es wird vom Aufrufer übergeben, nicht neu geladen.
-- Der Mehrteilnehmer-Pfad bekommt dieselbe Regel: Die Schleifenbedingung berücksichtigt den Tagesende-Puffer nur für die Spanne, die am Arbeitsende endet. Die bestehende Verschiebung des Konfliktfensters um den Puffer nach Terminen bleibt unverändert (laut Spec `booking-deadline-buffer-timezone` gewollt).
-- Die Behandlung des Puffers nach Terminen bleibt unverändert.
-- Keine Schemaänderung, keine neuen Settings.
+- Die Slot-Erzeugung aus freien Spannen wird eine reine, öffentlich testbare Funktion der Verfügbarkeits-Library (Vorbild: die bereits statische Überlappungszählung). Eingaben: Datum, freie Spannen, Service-Dauer, Slot-Intervall, Pufferzeit, Option „Puffer vor Arbeitsende“, effektives Arbeitsende. Ausgabe: Slot-Startzeiten. Keine Settings- oder Datenbankzugriffe.
+- Das effektive Arbeitsende ist das Ende des Tagesplans, den die Periodenberechnung ohnehin ermittelt (Wochentagsplan oder Arbeitsplan-Ausnahme). Der Aufrufer übergibt es, es wird nicht neu geladen. Easy!Appointments kennt pro Tag genau ein Arbeitsintervall; Teilintervalle entstehen nur durch Pausen.
+- Erkennung: Eine Spanne „endet am Arbeitsende“, wenn ihr Ende gleich dem effektiven Arbeitsende ist. Endet eine Unavailability, Blocked Period oder ein Termin erst danach, endet die Spanne vorher und bekommt keinen Puffer.
+- Der Mehrteilnehmer-Pfad nutzt dieselbe Regel (möglichst dieselbe Prüffunktion). Das Vorziehen des Konfliktfensters um den Puffer nach Terminen bleibt unverändert.
+- Die Ergebnisse dürfen von der Buchungsreihenfolge abhängen. Das ist gewollt: Ein neuer Termin darf bündig vor einem bestehenden enden, umgekehrt nicht (Spec `booking-deadline-buffer-timezone`, „Puffer vor Terminen“ ist Out of Scope).
+- Keine Schemaänderung, keine neuen Einstellungen.
 
 ## Testing Decisions
 
-- Unit-Tests gegen die neue reine Slot-Funktion (Vorbild: bestehende Verfügbarkeits-Tests zur Überlappungszählung). Szenarien mit Dauer 60, Intervall 15, Puffer 15, Arbeitsende 18:00:
-  - Spanne endet am Arbeitsende, Option an → letzter Slot 16:45.
-  - Spanne endet am Arbeitsende, Option aus → letzter Slot 17:00.
-  - Spanne endet an einem Terminbeginn (z. B. 12:00) → letzter Slot 11:00.
-  - Spanne endet am Pausenbeginn → Slot bündig vor der Pause.
-  - Arbeitsplan-Ausnahme bis 20:00 → Puffer vor 20:00, nicht vor 18:00.
-  - Spanne zu kurz für Dauer plus Puffer am Arbeitsende → keine Slots.
+- Unit-Tests gegen die reine Slot-Funktion. Szenarien mit Dauer 60, Intervall 15, Puffer 15:
+  - Arbeitsende 18:00, Option an → letzter Slot 16:45 (16:45 + 60 + 15 = 18:00, Gleichheit erlaubt)
+  - Option aus → letzter Slot 17:00
+  - Verkürzter Tag per Ausnahme bis 14:00, Option an → letzter Slot 12:45
+  - Pause 12:00–13:00 → Slot 11:00 wird angeboten
+  - Bestehender Termin ab 15:00 → Slot 14:00 wird angeboten
+  - Blocked Period 17:00–18:00 → Slot 16:00 wird angeboten
+  - Unavailability bis zum Arbeitsende → kein Puffer davor
+  - Bestehender Termin bis 10:00 → erster Slot 10:15 (nur Puffer nach dem Termin, nicht doppelt)
+  - Spanne kürzer als Dauer + Puffer am Arbeitsende → keine Slots
 - Gute Tests prüfen nur die erzeugten Slots, nicht die interne Schleife.
-- Der Mehrteilnehmer-Pfad hängt an Datenbankabfragen und wird manuell geprüft: Ein Slot vor einem Termin desselben Dienstleisters wird angeboten.
-- Manuelle Gegenprobe: Zwei Termine in beiden Buchungsreihenfolgen anlegen → identische freie Slots.
+- Der Mehrteilnehmer-Pfad hängt an Datenbankabfragen und wird manuell geprüft (Ergebnis im Ticket dokumentiert).
 
 ## Out of Scope
 
-- Pufferzeit pro Service (in ADR 0002 verworfen).
-- Puffer nach Unavailabilities oder Blocked Periods (in ADR 0002 verworfen).
+- Puffer pro Service, Puffer vor Terminen, Puffer nach Unavailabilities/Blocked Periods (ADR 0002 verworfen).
 - Performance der Datenbankabfragen pro Slot im Mehrteilnehmer-Pfad.
-- Auslagern der Fristlogik (Spec `booking-policy-extraction`).
+- Auslagerung der Fristlogik (Spec `booking-policy-extraction`).
 
 ## Further Notes
 
-- Bezug: ADR 0002, Glossar „Pufferzeit“ und „Arbeitsende“. Der Code wird an die ADR angepasst, nicht umgekehrt.
-- Spec `booking-policy-extraction` verschiebt später das Lesen der Settings. Diese Spec ist davon unabhängig, weil die neue Slot-Funktion keine Settings liest.
+- Bezug: ADR 0002, Glossar „Pufferzeit“ und „Arbeitsende“. Der Code wird an die ADR angepasst.
+- Die neue Slot-Funktion liest keine Einstellungen; die spätere Zwischenspeicherung der Puffer-Einstellungen (Spec `booking-policy-extraction`, Ticket 02) ist davon unabhängig.

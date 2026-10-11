@@ -1,13 +1,13 @@
-# 02: Slot-Kapazität eines Services validieren
+# 02: Slot-Kapazität strikt als ganze Zahl ≥ 0
 
-**What to build:** Ein Service mit einer Slot-Kapazität, die keine ganze Zahl ≥ 0 ist (z. B. „abc“ oder „-1“), wird beim Speichern abgelehnt, im Backend wie über die API, mit derselben Art Validierungsfehler wie andere ungültige Service-Felder. Leer oder nicht gesetzt bleibt erlaubt und bedeutet unbegrenzt.
+**What to build:** Ein Service mit einer Slot-Kapazität, die keine ganze Zahl ≥ 0 ist, wird beim Speichern abgelehnt, im Backend und über die Service-API mit demselben Validierungsfehler. Leer oder nicht gesetzt bedeutet weiterhin unbegrenzt. Die API-Beschreibung enthält das Feld.
 
 **Blocked by:** None (can start immediately)
 
 **Status:** ready-for-agent
 
-- [ ] „abc“, „-1“ und „1.5“ werden abgelehnt
-- [ ] „0“, „3“ und leer/nicht gesetzt werden akzeptiert
-- [ ] Die API liefert für einen ungültigen Wert eine Validierungsfehler-Antwort
-- [ ] Unit-Test für die Prüfregel
-- [ ] PHPUnit und `php -l` grün
+- [ ] Die Validierung des Service-Models lehnt `abc`, `1.5` und `-1` ab; `0`, `3` und leer/nicht gesetzt sind gültig
+- [ ] Backend-Speichern und Service-API liefern denselben Fehler (manuelle Probe)
+- [ ] Die OpenAPI-Beschreibung enthält `slotCapacity` im Service-Schema
+- [ ] Unit-Test der Regel
+- [ ] `composer test` und `php -l` grün

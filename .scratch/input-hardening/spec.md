@@ -1,61 +1,76 @@
-# Eingaben validieren und Ausgaben escapen
+# Einstellungen zentral validieren, Firmenname escapen
 
 Status: ready-for-agent
 
 ## Problem Statement
 
-Die vom Fork eingeführten Einstellungen (Buchungsfrist, Manage-Frist, Pufferzeit) werden beim Speichern im Backend ungeprüft übernommen. Ein Tippfehler wie „25:99“ als Frist-Uhrzeit, negative Tagesabstände oder Text in Zahlenfeldern landen in der Datenbank. Die Verfügbarkeitsberechnung fängt das nur teilweise ab und rechnet dann still mit falschen Werten, z. B. 0 Minuten. Für den Salon heißt das: Die Buchungsseite verhält sich anders als eingestellt, und niemand merkt es. Dasselbe gilt für die Slot-Kapazität eines Services: Ein Wert wie „abc“ wird akzeptiert und als 0 (unbegrenzt) interpretiert.
+Die vom Fork eingeführten Einstellungen werden beim Speichern ungeprüft übernommen: Buchungsfrist, Manage-Frist, Pufferzeit, Zeitzonen-Anzeige und Firmenkopf. Ein Tippfehler wie „25:99“ als Frist-Uhrzeit, negative Tagesabstände oder Text in Zahlenfeldern landet in der Datenbank. Die Verfügbarkeitsberechnung rechnet dann still mit falschen Werten. Das gilt im Backend wie über die Einstellungs-API.
 
-Außerdem gibt der Fork den Firmennamen und die Firmenfarbe an mehreren Stellen unescaped aus: im Seitentitel, in Social-Vorschau-Tags, im Nachrichten-Layout und in E-Mails. Die Werte pflegt zwar nur ein Admin, aber ein Name mit Sonderzeichen wie „Beauty & Co“ oder Anführungszeichen erzeugt kaputtes HTML. Upstream escaped solche Ausgaben standardmäßig.
+Das Speichern ist außerdem nicht atomar. Die Einstellungen werden nacheinander gespeichert, ein Fehler mittendrin lässt einen halb übernommenen Zustand zurück.
+
+Die **Firmenfarbe** stammt zwar aus einem Farbwähler, wird serverseitig aber nicht geprüft. Sie landet ungeprüft in einem Style-Block der Seite und in E-Mails. Über die API ließe sich damit beliebiges CSS oder HTML einschleusen.
+
+Die **Slot-Kapazität** eines Services wird nur auf „nicht negativ“ geprüft. „abc“ wird als 0 (unbegrenzt) und „1.5“ als 1 übernommen. Die API-Beschreibung kennt das Feld nicht.
+
+Den **Firmennamen** gibt der Fork an zehn Stellen unescaped aus (Seitentitel, Social-Vorschau, Backend-Kopf, E-Mail-Titel). Upstream hatte ihn im Booking-Layout escaped, beim Umbau ist das verloren gegangen.
 
 ## Solution
 
-- Beim Speichern der Buchungseinstellungen prüft der Server die Frist- und Puffer-Einstellungen. Bei einem ungültigen Wert wird **nichts** gespeichert, und der Admin sieht eine verständliche Fehlermeldung, welches Feld betroffen ist.
-- Beim Speichern eines Services wird geprüft, ob die Slot-Kapazität eine ganze Zahl ≥ 0 ist. Sonst wird der Service mit Validierungsfehler abgelehnt, im Backend wie über die API.
-- Alle vom Fork eingeführten oder geänderten Ausgaben von Firmenname und Firmenfarbe werden escaped. Die Firmenfarbe in E-Mails wird nur verwendet, wenn sie ein gültiger Hex-Farbwert ist, sonst gilt die Standardfarbe.
+- Die Regeln für die Fork-Einstellungen und die Firmenfarbe stehen an **einer** Stelle: in der Validierung des Settings-Models, durch die alle Schreibwege laufen (Backend-Seiten und API).
+- Die Backend-Seiten, die diese Einstellungen speichern (Buchungseinstellungen und Business-Einstellungen), prüfen alle übermittelten Werte, **bevor** sie den ersten speichern. Ein ungültiger Wert speichert nichts und meldet das betroffene Feld.
+- Die Slot-Kapazität muss eine ganze Zahl ≥ 0 sein, im Backend wie über die API. Die API-Beschreibung wird ergänzt.
+- Alle zehn unescapten Ausgaben des Firmennamens werden escaped.
 
 ## User Stories
 
-1. Als Salonbetreiberin will ich eine Fehlermeldung sehen, wenn ich eine ungültige Frist-Uhrzeit eingebe, damit ich den Fehler sofort korrigieren kann.
+1. Als Salonbetreiberin will ich eine Fehlermeldung mit dem betroffenen Feld sehen, wenn ich eine ungültige Frist-Uhrzeit eingebe.
 2. Als Salonbetreiberin will ich, dass bei einem ungültigen Wert gar nichts gespeichert wird, damit keine halb übernommene Konfiguration entsteht.
-3. Als Salonbetreiberin will ich, dass die Fehlermeldung das betroffene Feld nennt, damit ich es schnell finde.
-4. Als Salonbetreiberin will ich, dass Tagesabstände nur ganze Zahlen ≥ 0 akzeptieren, damit eine Frist nie in der Zukunft des Termintags liegt.
-5. Als Salonbetreiberin will ich, dass Vorlauf- und Pufferminuten nur ganze Zahlen ≥ 0 akzeptieren, damit die Verfügbarkeit nicht mit Phantasiewerten rechnet.
-6. Als Salonbetreiberin will ich, dass die Frist-Modi nur die vorgesehenen Werte annehmen (Buchungsfrist: Minuten oder feste Uhrzeit; Manage-Frist: übernehmen, Minuten oder feste Uhrzeit), damit kein undefinierter Zustand entsteht.
-7. Als Salonbetreiberin will ich, dass die Option „Puffer vor Arbeitsende“ nur an oder aus sein kann, damit das Verhalten eindeutig ist.
-8. Als Salonbetreiberin will ich, dass eine Slot-Kapazität wie „abc“ oder „-1“ abgelehnt wird, damit ein Gerät nicht versehentlich unbegrenzt buchbar wird.
-9. Als API-Nutzer will ich bei ungültiger Slot-Kapazität eine Validierungsfehler-Antwort bekommen, so wie bei anderen ungültigen Service-Feldern.
-10. Als Salonbetreiberin will ich, dass gültige bestehende Werte weiterhin gespeichert werden können, damit sich für korrekte Konfigurationen nichts ändert.
-11. Als Kunde will ich, dass Seitentitel, Social-Vorschau und E-Mails auch bei Sonderzeichen im Firmennamen korrekt angezeigt werden.
-12. Als Salonbetreiberin will ich, dass eine ungültige Firmenfarbe die E-Mails nicht zerschießt, sondern die Standardfarbe verwendet wird.
-13. Als Entwickler will ich die Regeln für die Settings an einer Stelle haben, damit Backend-Speichern und künftige Aufrufer dieselben Regeln nutzen.
+3. Als Salonbetreiberin will ich, dass Tagesabstände, Manage-Minuten und Pufferminuten nur ganze Zahlen ≥ 0 akzeptieren.
+4. Als Salonbetreiberin will ich, dass die Modi nur die vorgesehenen Werte annehmen, damit kein undefinierter Zustand entsteht.
+5. Als Salonbetreiberin will ich, dass Schalter (Puffer vor Arbeitsende, Firmenkopf) nur an oder aus sein können.
+6. Als API-Nutzer will ich für ungültige Einstellungswerte dieselbe Ablehnung bekommen wie im Backend.
+7. Als Salonbetreiberin will ich, dass gültige und bereits gespeicherte Werte (auch „keine Firmenfarbe“ = Weiß) weiterhin gespeichert werden können.
+8. Als Salonbetreiberin will ich, dass eine Firmenfarbe nur als Farbwert gespeichert werden kann, damit Seite und E-Mails nicht zerschossen werden.
+9. Als Salonbetreiberin will ich, dass eine Slot-Kapazität wie „abc“, „1.5“ oder „-1“ abgelehnt wird, damit ein Gerät nicht versehentlich unbegrenzt buchbar wird.
+10. Als API-Nutzer will ich die Slot-Kapazität in der API-Beschreibung finden.
+11. Als Kunde will ich, dass Seitentitel, Social-Vorschau, Backend-Kopf und E-Mails auch bei Sonderzeichen im Firmennamen korrekt erscheinen.
+12. Als Entwickler will ich die Regeln an einer Stelle pflegen und ohne Datenbank testen können.
 
 ## Implementation Decisions
 
-- Neue reine Validierungsfunktion für die Fork-Settings der Buchungseinstellungen. Sie nimmt die zu speichernden Name/Wert-Paare entgegen und wirft bei Verstoß eine Validierungs-Exception mit Feldbezug. Regeln:
-  - Frist-Uhrzeiten (Buchungs- und Manage-Frist): Format `HH:MM`, 00:00–23:59.
-  - Tagesabstände, Manage-Minuten, Pufferminuten: ganze Zahl ≥ 0.
-  - Buchungsfrist-Modus ∈ {Minuten, feste Uhrzeit}; Manage-Frist-Modus ∈ {übernehmen, Minuten, feste Uhrzeit}; Werte wie in der bestehenden Migration.
-  - Puffer vor Arbeitsende ∈ {0, 1}.
-- Settings, die nicht zum Fork gehören, bleiben ungeprüft wie bei Upstream.
-- Der Buchungseinstellungs-Controller ruft die Validierung vor dem ersten Speichern auf; ein Fehler bricht den gesamten Speichervorgang ab und wird über die vorhandene JSON-Fehlerantwort an das Backend gemeldet.
-- Die Validierung im Service-Model prüft die Slot-Kapazität auf ganze Zahl ≥ 0 (numerischer String oder Integer); leer bzw. nicht gesetzt bleibt erlaubt und bedeutet 0.
-- Escaping mit dem vorhandenen Escape-Helper an allen vom Fork eingeführten oder geänderten Ausgaben des Firmennamens (Booking-Layout inkl. Social-Vorschau-Tags, Nachrichten-Layout, E-Mail-Templates).
-- E-Mail-Templates: Die Firmenfarbe wird gegen ein Hex-Muster (`#RGB` / `#RRGGBB`) geprüft, sonst gilt die Standard-Primärfarbe.
+- **Ort der Regeln:** die Validierung des Settings-Models. Sie läuft bei jedem Speichern einer Einstellung, also bei den Backend-Seiten und bei der API über den Settings-Helper. Die Regeln selbst stehen in einer reinen Funktion (Name + Wert → Fehler oder ok), die ohne Datenbank testbar ist.
+- **Regeln** (nur aus vorhandener UI, Fachlogik und Migration abgeleitet, ohne künstliche Obergrenzen):
+  - Frist-Uhrzeiten (Buchungs- und Manage-Frist): `HH:MM`, 00:00–23:59 (Eingabefeld vom Typ Uhrzeit)
+  - Tagesabstände, Manage-Minuten, Pufferminuten: ganze Zahl ≥ 0 (Eingabefelder mit Minimum 0; die Verfügbarkeit rechnet ohnehin mit ≥ 0)
+  - Buchungsfrist-Modus ∈ {minutes, fixed_time}; Manage-Frist-Modus ∈ {inherit, minutes, fixed_time}; Zeitzonen-Anzeige ∈ {dropdown, confirm_only, hidden}; Zeitzonen-Quelle ∈ {company, browser}
+  - Puffer vor Arbeitsende, Firmenkopf anzeigen ∈ {0, 1}
+  - Firmenfarbe: `#RGB` oder `#RRGGBB` (die Formen, die die Farbberechnung verarbeitet); Weiß bleibt der Wert für „nicht gesetzt“
+- Alle Defaults der bestehenden Migration erfüllen die Regeln. Staging und Produktion nutzen keine Firmenfarbe (Weiß), es gibt also keine Bestandsdaten, die die Regeln verletzen.
+- Die Einstellungen anderer Upstream-Bereiche bleiben ungeprüft.
+- **Atomar speichern:** Die Speicher-Aktionen der Buchungs- und Business-Einstellungen validieren erst alle übermittelten Werte und speichern dann. Fehler laufen über die vorhandene JSON-Fehlerantwort.
+- **Slot-Kapazität:** Die Validierung des Service-Models verlangt eine ganze Zahl ≥ 0 (Ziffernfolge oder Integer); leer bzw. nicht gesetzt bedeutet weiter 0. Backend und Service-API nutzen dasselbe Model. Die API-Beschreibung (OpenAPI) bekommt das Feld im Service-Schema.
+- **Escaping:** Der vorhandene Escape-Helper an allen Ausgaben des Firmennamens in HTML-Text und Attributen:
+  - Booking-Layout (Titel und zwei Social-Vorschau-Tags)
+  - Backend-, Konto- und Nachrichten-Layout (Titel)
+  - Backend-Kopf
+  - Titel der vier E-Mail-Vorlagen (Termin gespeichert, Termin storniert, Passwort zurücksetzen, Konto-Wiederherstellung)
+- Für die Firmenfarbe im Style-Block reicht Escaping nicht. Dort schützt die Formatprüfung beim Speichern.
 - Keine Schemaänderung.
 
 ## Testing Decisions
 
-- Unit-Tests für die Validierungsfunktion: gültige Grenzwerte (00:00, 23:59, 0) werden akzeptiert; ungültige Werte (24:00, 9:5, -1, „abc“, unbekannter Modus) werden mit Feldbezug abgelehnt. Vorbild: bestehende Helper-Tests unter den Unit-Tests (Validierungs-Helper).
-- Unit-Test für die Slot-Kapazitätsregel, sofern sie ohne Datenbank prüfbar ist; sonst über die reine Prüffunktion, die das Model nutzt.
-- Escaping: Der Layout-Smoke-Test bleibt grün. Manuelle Probe mit einem Firmennamen, der `&` und `"` enthält: Der Seitenquelltext enthält die Werte escaped.
+- Unit-Tests der reinen Regel-Funktion: gültige Grenzwerte (`00:00`, `23:59`, `0`, `#fff`, `#d1ae5e`, `#ffffff`) und ungültige Werte (`24:00`, `9:5`, `-1`, `abc`, unbekannter Modus, `red;}`) mit Feldbezug. Ein Test prüft, dass alle Migrations-Defaults gültig sind. Vorbild: die bestehenden Helper-Unit-Tests.
+- Unit-Test der Slot-Kapazitätsregel.
+- Escaping: Probe mit dem Firmennamen `Beauty & "Co" <b>` auf Booking-, Backend-, Konto- und Nachrichtenseite sowie in den E-Mails (Mailpit); Layout-Smoke-Test und E-Mail-Logo-Smoke-Test bleiben grün.
 
 ## Out of Scope
 
-- Validierung der Upstream-Settings.
-- Client-seitige Validierung im Backend-Formular (darf ergänzt werden, ersetzt aber nicht die Serverprüfung).
+- Validierung von Upstream-Einstellungen außer der Firmenfarbe.
+- Client-seitige Validierung (darf ergänzt werden, ersetzt die Serverprüfung nicht).
 - Escaping in Upstream-Views, die der Fork nicht verändert hat.
 
 ## Further Notes
 
-- Bezug: ADR 0002, ADR 0003. Die Werte müssen zu den von der Migration gesetzten Defaults passen; die Defaults müssen die Validierung bestehen.
+- Bezug: ADR 0002, ADR 0003, Glossar „Firmenfarbe“.
+- Das Nachrichten-Layout ändert auch `upstream-diff-hygiene/02`. Erst dort die Formatierung bereinigen, dann hier escapen.
+- Die Spec `theme-site-chrome` (Einstellung „Sprachauswahl anzeigen“) nutzt denselben Regel-Mechanismus.

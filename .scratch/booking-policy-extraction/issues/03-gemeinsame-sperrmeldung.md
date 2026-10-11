@@ -1,12 +1,13 @@
 # 03: Gemeinsamer Baustein für die Sperrmeldung
 
-**What to build:** Buchungsseite und Stornierungsseite erzeugen die Meldung „Termin gesperrt“ über denselben Baustein, mit identischem Text, Grenzwert und Seitendaten wie heute.
+**What to build:** Buchungsseite, Stornierungsseite und die Absende-Prüfung einer Umbuchung erzeugen die Meldung „Termin gesperrt“ über denselben Baustein, mit identischem Text, Grenzwert und Seitendaten wie bisher. Der Baustein verarbeitet nur ein fertiges Sperrergebnis der Policy und prüft weder Frist noch Berechtigung.
 
-**Blocked by:** 01 (Booking-Policy für Fristen und Sperren mit Unit-Tests)
+**Blocked by:** 01 (Booking-Policy als einzige Implementierung von Fristen und Sperren)
 
 **Status:** ready-for-agent
 
-- [ ] Ein gemeinsamer Helper/Trait baut die Seitendaten der Sperrmeldung aus der Sperre der Policy auf
-- [ ] Die nahezu identischen Blöcke in Buchungs- und Stornierungs-Controller sind entfernt
-- [ ] Manuelle Probe: Ein gesperrter Manage-Link und eine gesperrte Stornierung zeigen dieselbe Meldung wie vorher
-- [ ] PHPUnit, `php -l` und Layout-Smoke-Test grün
+- [ ] Ein Baustein liefert aus einem Sperrergebnis den Meldungstext (Grenzwert eingesetzt) und die Seitendaten der Meldungsseite
+- [ ] Buchungs- und Stornierungsseite nutzen die Seitendaten, die Absende-Prüfung nur den Text; die bisherigen nahezu identischen Blöcke sind entfernt
+- [ ] Der Baustein ruft weder die Policy noch die Hash-Prüfung auf
+- [ ] Manuelle Probe: gesperrter Manage-Link, gesperrte Stornierung und gesperrte Umbuchung zeigen die gleiche Meldung wie vorher
+- [ ] `composer test`, `php -l`, Layout-Smoke-Test grün

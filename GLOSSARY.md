@@ -21,7 +21,7 @@ Die Subdomain, unter der die Terminbuchungs-App erreichbar ist (Test: booking-te
 _Avoid_: App-URL, Buchungsseite (das ist der Booking-Flow)
 
 **Firmenfarbe (Company Color)**:
-Die in den Business Settings gespeicherte Primärfarbe, die die feste Theme-Primärfarbe zur Laufzeit überschreibt (nur wenn sie vom Standard abweicht).
+Die in den allgemeinen Einstellungen gespeicherte, optionale Primärfarbe, die die Theme-Standardfarbe zur Laufzeit überschreibt; Weiß bedeutet „keine Firmenfarbe“.
 _Avoid_: Markenfarbe, Theme-Farbe
 
 **Vorlaufzeit (Lead Time)**:
@@ -52,13 +52,21 @@ _Avoid_: Aufräumzeit, Abstandszeit
 Ende des effektiven Tagesplans eines Dienstleisters, einschließlich einer Arbeitsplan-Ausnahme für diesen Tag; Pausen und Terminbeginne sind kein Arbeitsende.
 _Avoid_: Feierabend, Periodenende, Tagesende (ohne Bezug zum Dienstleister)
 
+**Manage-Link**:
+Der persönliche Link aus der Terminbestätigung, mit dem ein Kunde genau seinen Termin umbuchen oder stornieren darf; der darin enthaltene Termin-Hash ist die einzige Berechtigung dafür.
+_Avoid_: Bearbeitungslink, Reschedule-Link
+
 **Umbuchung**:
 Verschieben eines bestehenden Termins über den Manage-Link; ob sie erlaubt ist, entscheidet die Umbuchungs-/Stornierungsfrist des ursprünglichen Termins, der neue Zeitpunkt unterliegt wie jede Neubuchung der Buchungsfrist.
 _Avoid_: Terminänderung, Reschedule (im Deutschen)
 
 **Theme**:
-Kundenspezifisches Erscheinungsbild der App aus Bootstrap/SCSS-Styles und optionalem Site-Chrome; je Installation ist genau ein Theme aktiv.
+Kundenspezifisches Erscheinungsbild der App aus Bootstrap/SCSS-Styles, einer Theme-Standardfarbe und optionalem Site-Chrome; je Installation ist genau ein Theme aktiv.
 _Avoid_: Skin, Design (allein)
+
+**Theme-Standardfarbe**:
+Die Hauptfarbe, die ein Theme selbst verwendet; sie gilt überall dort, wo keine Firmenfarbe gesetzt ist.
+_Avoid_: Primärfarbe (ohne Bezug), Markenfarbe
 
 **Site-Chrome**:
 Navbar, Seitenkopf (Intro), Footer und WhatsApp-Button, die im Booking-Flow die Website des Kunden nachbilden; gehört zum Theme, nicht zum Kern der App.

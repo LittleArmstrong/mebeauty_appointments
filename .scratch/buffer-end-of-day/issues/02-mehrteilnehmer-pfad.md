@@ -1,13 +1,12 @@
 # 02: Mehrteilnehmer-Services mit derselben Pufferregel
 
-**What to build:** Services mit mehreren Teilnehmern pro Slot verhalten sich beim Tagesende-Puffer wie Einzeltermine: Der Puffer gilt nur vor dem Arbeitsende des Dienstleisters, nicht vor Terminen, Pausen oder Unavailabilities. Die Verschiebung des Konfliktfensters um den Puffer nach Terminen bleibt unverändert.
+**What to build:** Services mit mehreren Teilnehmern pro Slot verhalten sich beim Tagesende-Puffer wie Einzeltermine: Er gilt nur für die Spanne, die am effektiven Arbeitsende des Dienstleisters endet, nicht vor Pausen, Terminen, Unavailabilities oder Blocked Periods. Das Vorziehen des Konfliktfensters um den Puffer nach Terminen bleibt unverändert.
 
-**Blocked by:** 01 (Reine Slot-Funktion, Tagesende-Puffer nur am Arbeitsende)
+**Blocked by:** 01 (Reine Slot-Funktion; Tagesende-Puffer nur am effektiven Arbeitsende)
 
 **Status:** ready-for-agent
 
-- [ ] Ein Mehrteilnehmer-Service bietet einen Slot an, der bündig vor einer Pause endet
-- [ ] Am Arbeitsende gilt der Puffer gemäß Option
-- [ ] Das Arbeitsende wird aus dem effektiven Tagesplan inkl. Ausnahme bestimmt
-- [ ] Manuelle Prüfung dokumentiert (Szenario und Ergebnis im Ticket unter `## Comments`)
-- [ ] PHPUnit und `php -l` grün
+- [ ] Die Schleifenbedingung im Mehrteilnehmer-Pfad berücksichtigt den Tagesende-Puffer nur für die Spanne, deren Ende das effektive Arbeitsende ist (möglichst über dieselbe Prüffunktion wie in 01)
+- [ ] Manuelle Prüfung mit einem Service mit mehreren Teilnehmern: Ein Slot bündig vor der Pause wird angeboten; am Arbeitsende gilt die Option (an und aus); bei einer Arbeitsplan-Ausnahme gilt deren Ende
+- [ ] Szenario und Ergebnis der manuellen Prüfung unter `## Comments` dokumentiert
+- [ ] `composer test` und `php -l` grün

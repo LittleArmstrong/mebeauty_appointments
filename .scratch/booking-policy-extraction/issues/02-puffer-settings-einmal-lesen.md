@@ -1,11 +1,11 @@
-# 02: Puffer-Settings einmal pro Berechnung lesen
+# 02: Puffer-Einstellungen einmal je Berechnung lesen
 
-**What to build:** Die Verfügbarkeitsberechnung liest Pufferzeit und „Puffer vor Arbeitsende“ einmal je Instanz statt pro Zeitspanne, Tag und Dienstleister. Die Monatsansicht der Buchungsseite erzeugt dadurch deutlich weniger identische Datenbankabfragen. Die Slots bleiben identisch.
+**What to build:** Die Verfügbarkeitsberechnung liest Pufferzeit und „Puffer vor Arbeitsende“ einmal je Instanz statt pro Zeitspanne, Tag und Dienstleister. Die Monatsansicht erzeugt dadurch weniger identische Datenbankabfragen. Die angebotenen Slots bleiben identisch.
 
-**Blocked by:** buffer-end-of-day/02
+**Blocked by:** None (can start immediately; wegen Code-Nähe nach buffer-end-of-day/01 empfohlen)
 
 **Status:** ready-for-agent
 
-- [ ] Die Puffer-Settings werden pro Instanz einmal gelesen und gecacht
-- [ ] Die Slots für einen Beispieltag sind vor und nach der Änderung identisch (manuell oder per Unit-Test der Slot-Funktion)
-- [ ] PHPUnit, `php -l` und Layout-Smoke-Test grün
+- [ ] Die Puffer-Einstellungen werden je Instanz einmal gelesen und wiederverwendet
+- [ ] Die Slots eines Beispieltags sind vorher und nachher identisch (Unit-Tests der Slot-Funktion bzw. manuelle Probe)
+- [ ] `composer test`, `php -l`, Layout-Smoke-Test grün

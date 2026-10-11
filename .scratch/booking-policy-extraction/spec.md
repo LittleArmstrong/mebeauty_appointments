@@ -4,73 +4,77 @@ Status: ready-for-agent
 
 ## Problem Statement
 
-Die Logik für Buchungsfrist, Manage-Frist und Sperren eines Termins steckt in der Verfügbarkeits-Library, obwohl sie fachlich eine **Buchungsregel** ist und keine Slot-Berechnung. Das hat vier Folgen:
+Die Logik für Buchungsfrist, Manage-Frist und Terminsperren steckt in der Verfügbarkeits-Library, obwohl sie eine Buchungsregel ist und keine Slot-Berechnung. Daraus folgen mehrere Probleme:
 
-- **Merge-Konflikte:** Die Verfügbarkeits-Library ist eine der am stärksten veränderten Upstream-Dateien. Jeder Upstream-Sync (ADR 0005) wird dadurch teurer.
-- **Duplikation:** Die Berechnung der Fristen ist für Buchungs- und Manage-Frist nahezu identisch kopiert, ebenso die Minuten-Sperre. Das Normalisieren der Vorlaufzeit gibt es dreimal. Eine Korrektur muss an mehreren Stellen nachgezogen werden.
-- **Nicht testbar:** Die Fristen hängen an der echten Uhrzeit und an Settings aus der Datenbank. Darum gibt es keinen einzigen Test dafür, obwohl es reine Datumsrechnung ist.
-- **Viele DB-Abfragen:** Jeder Settings-Zugriff ist eine Datenbankabfrage. Pufferzeit und Frist-Settings werden pro Zeitspanne, pro Tag und pro Dienstleister erneut gelesen. Bei der Monatsansicht ergibt das viele identische Abfragen.
-
-Außerdem erzeugen die Buchungsseite und die Stornierungsseite fast identisch die Meldung „Termin gesperrt“.
+- **Mehrere abweichende Implementierungen:** Dieselbe Regel existiert zweimal, als Filter der Slot-Liste und als Sperre eines bestehenden Termins. An der exakten Grenze des Minuten-Modus widersprechen sie sich. Beispiel bei 60 Minuten Mindestvorlaufzeit, jetzt 10:00:00: Der Slot 11:00 wird **nicht** angeboten, ein bestehender 11:00-Termin ist aber **nicht** gesperrt.
+- **Duplikation:** Die Fristberechnung ist für Buchungs- und Manage-Frist nahezu identisch kopiert, ebenso die Minuten-Sperre. Die Vorlaufzeit wird an drei Stellen normalisiert.
+- **Nicht testbar:** Alles hängt an der echten Uhrzeit und an Datenbank-Einstellungen. Es gibt keinen einzigen Test für Fristen.
+- **Merge-Konflikte:** Die Verfügbarkeits-Library ist eine der am stärksten veränderten Upstream-Dateien (ADR 0005).
+- **Viele identische DB-Abfragen:** Jeder Zugriff auf eine Einstellung ist eine eigene Datenbankabfrage. Die Puffer-Einstellungen werden pro Zeitspanne, Tag und Dienstleister erneut gelesen.
+- **Doppelte Sperrmeldung:** Buchungs- und Stornierungsseite erzeugen die Meldung „Termin gesperrt“ fast identisch.
 
 ## Solution
 
-Eine eigene Library **Booking-Policy** beantwortet alle Fragen zu Fristen und Sperren: Bis wann ist ein Tag für Neubuchungen offen? Ist ein Termin für Neubuchung, Umbuchung oder Stornierung gesperrt, und mit welcher Meldung? Die aktuelle Zeit und die Settings werden ihr übergeben bzw. einmal geladen. So lässt sie sich vollständig ohne Datenbank und ohne echte Uhr testen. Die Verfügbarkeits-Library fragt die Policy nur noch, ab wann Slots eines Tages angeboten werden dürfen. Buchungs- und Stornierungsseite rufen die Policy für die Sperre auf und erzeugen die Sperrmeldung über einen gemeinsamen Baustein.
+Eine eigene Library **Booking-Policy** ist die einzige Implementierung von Fristen und Sperren. Sie beantwortet drei Fragen:
+- Ab wann darf ein Slot eines Tages angeboten werden?
+- Ist ein bestehender Termin für Neubuchung oder Verwaltung gesperrt, und mit welcher Meldung?
+- Wann liegt die Frist eines Tages?
 
-Das Verhalten für Kunden und Salon bleibt unverändert. Es handelt sich um einen reinen Umbau.
+Uhr und Einstellungen werden ihr übergeben bzw. einmal geladen. Verfügbarkeit, Buchungsseite, Umbuchen und Stornierung fragen nur noch die Policy.
+
+Mit dem Umbau wird die Grenze **vereinheitlicht**: Ein Termin, der genau zur Mindestvorlaufzeit beginnt, ist buchbar und verwaltbar („mindestens“). Das ist die einzige beabsichtigte Verhaltensänderung. Sonst bleibt alles gleich.
 
 ## User Stories
 
-1. Als Salonbetreiberin will ich, dass sich Buchungsfrist, Manage-Frist und Sperrmeldungen nach dem Umbau exakt wie vorher verhalten, damit kein Kunde etwas davon merkt.
-2. Als Entwickler will ich die Fristlogik an einer einzigen Stelle finden, damit ich Regeln schnell verstehe und ändere.
-3. Als Entwickler will ich Fristen mit einer festgelegten „jetzt“-Zeit testen, damit Tests deterministisch sind und nicht von der Uhrzeit abhängen.
-4. Als Entwickler will ich Fristen mit vorgegebenen Settings testen, damit ich keine Datenbank brauche.
-5. Als Entwickler will ich, dass die Fristberechnung für Buchungs- und Manage-Frist denselben Baustein nutzt, damit Korrekturen überall gleichzeitig greifen.
-6. Als Entwickler will ich, dass die Minuten-Sperre für beide Fristarten denselben Baustein nutzt.
-7. Als Entwickler will ich, dass die Vorlaufzeit-Minuten an einer Stelle normalisiert werden.
-8. Als Maintainer will ich, dass die Verfügbarkeits-Library möglichst nah am Upstream bleibt, damit Upstream-Syncs weniger Konflikte erzeugen.
-9. Als Kunde will ich, dass die Monatsansicht der Buchungsseite schnell lädt, damit ich zügig einen Tag wählen kann.
-10. Als Entwickler will ich die Sperrmeldung für Buchungs- und Stornierungsseite an einer Stelle erzeugen, damit Texte und Variablen konsistent bleiben.
-11. Als Salonbetreiberin will ich, dass im Modus „übernehmen“ die Manage-Frist exakt der Buchungsfrist folgt, wie in ADR 0003 festgelegt.
-12. Als Salonbetreiberin will ich, dass im Festzeit-Modus der ganze Tag nach Fristablauf gesperrt ist, ohne zusätzliche Vorlaufzeit, wie in ADR 0002 festgelegt.
-13. Als Entwickler will ich, dass die Prüfung beim Absenden einer Umbuchung (Spec `manage-lock-enforcement`) dieselbe Policy nutzt wie beim Öffnen.
+1. Als Salonbetreiberin will ich, dass sich Buchungsfrist, Manage-Frist und Sperrmeldungen nach dem Umbau wie vorher verhalten (bis auf die vereinheitlichte Grenze).
+2. Als Kunde will ich, dass ein Termin, der genau zur Mindestvorlaufzeit beginnt, sowohl buchbar als auch verwaltbar ist, damit beide Regeln dasselbe sagen.
+3. Als Salonbetreiberin will ich, dass im Festzeit-Modus der Tag bis einschließlich der Frist-Uhrzeit (z. B. 18:00:00) offen ist und danach ganz gesperrt wird, wie bisher.
+4. Als Salonbetreiberin will ich, dass im Modus „übernehmen“ die Manage-Frist exakt der Buchungsfrist folgt (ADR 0003).
+5. Als Entwickler will ich die Fristlogik an genau einer Stelle finden.
+6. Als Entwickler will ich Fristen mit einer festgelegten Uhrzeit und vorgegebenen Einstellungen testen, ohne Datenbank.
+7. Als Entwickler will ich, dass Buchungs- und Manage-Frist denselben Baustein für die Fristberechnung und für die Minuten-Sperre nutzen.
+8. Als Maintainer will ich, dass die Verfügbarkeits-Library näher am Upstream bleibt.
+9. Als Kunde will ich, dass die Monatsansicht schnell lädt.
+10. Als Entwickler will ich die Sperrmeldung an einer Stelle erzeugen, ohne dass dieser Baustein selbst Fristen oder Berechtigungen prüft.
 
 ## Implementation Decisions
 
-- Neue Library **Booking_policy** mit kleiner öffentlicher Schnittstelle:
-  - Sperre eines Termins: Eingaben sind der Beginn des Termins, die Zeitzone und die Art (Neubuchung oder Manage). Rückgabe wie bisher: ob gesperrt, Grenzwert-Text und Meldungstext.
-  - Frist eines Tages für Neubuchungen: Datum und Zeitzone → Fristzeitpunkt oder „keine Frist“ (Minuten-Modus).
-  - Frühester buchbarer Zeitpunkt eines Tages: kombiniert Festzeit-Frist und Minuten-Vorlaufzeit. Die Verfügbarkeit nutzt ihn, um Slots abzuschneiden.
-- Testbarkeit: Die „jetzt“-Zeit ist injizierbar (Default: echte Zeit). Die Settings werden über eine injizierbare Quelle gelesen (Default: Settings-Helper), und zwar einmal je Instanz, also gecacht.
-- Interne Helfer ersetzen die Duplikate: ein Baustein für die Festzeit-Frist (Uhrzeit + Tagesabstand), einer für die Minuten-Sperre, einer für das Lesen eines ganzzahligen Settings ≥ 0.
-- Die Verfügbarkeits-Library entfernt ihre Frist- und Sperrmethoden und ruft stattdessen die Policy auf. Die öffentliche Sperrmethode bleibt höchstens als dünne Weiterleitung erhalten, falls weitere Aufrufer existieren; sonst entfällt sie.
-- Pufferzeit-Settings in der Verfügbarkeits-Library werden einmal pro Instanz gelesen, nicht mehr pro Zeitspanne.
-- Buchungs- und Stornierungsseite erzeugen die Sperrmeldung über einen gemeinsamen Baustein (privater Helper oder Trait), der die Seitendaten aus der Sperre der Policy aufbaut.
-- Sprachschlüssel und Meldungstexte bleiben unverändert.
-- Keine Schemaänderung.
+- Neue Library **Booking_policy** (Logik gehört nach Projektkonvention in Libraries; Controller bleiben schlank). Öffentliche Schnittstelle:
+  - Sperre eines Termins: Beginn, Zeitzone, Art (Neubuchung | Verwaltung) → gesperrt ja/nein, Grenzwert-Text, Meldungstext
+  - Frist eines Tages für Neubuchungen: Datum, Zeitzone → Zeitpunkt oder „keine“ (Minuten-Modus)
+  - Frühester buchbarer Zeitpunkt eines Tages (für den Slot-Filter der Verfügbarkeit)
+- **Uhr injizierbar** (Default: echte Zeit), **Einstellungsquelle injizierbar** (Default: Settings-Helper), Einstellungen einmal je Instanz gelesen.
+- Interne Bausteine ersetzen die Duplikate: Festzeit-Frist (Uhrzeit + Tagesabstand), Minuten-Grenze, ganzzahlige Einstellung ≥ 0.
+- **Eine Grenzsemantik für beide Verwendungen:**
+  - Minuten-Modus: Ein Termin bzw. Slot ist zulässig, wenn `Beginn ≥ jetzt + Vorlaufzeit` (vereinheitlicht, vorher Slot-Filter `>`, Sperre `≥`)
+  - Festzeit-Modus: Der Tag ist offen, solange `jetzt ≤ Frist` (unverändert)
+  - Vergangene Uhrzeiten werden weiterhin gefiltert.
+- Die Verfügbarkeits-Library enthält danach keine Frist- oder Sperrberechnung mehr; die zukünftige Buchungsgrenze (Upstream) bleibt dort.
+- Die Prüfung beim Absenden einer Umbuchung (Spec `manage-lock-enforcement`) nutzt die Policy.
+- Die Puffer-Einstellungen in der Verfügbarkeits-Library werden einmal je Instanz gelesen (eigenes Ticket, unabhängig).
+- **Sperrmeldung:** Ein gemeinsamer Baustein erzeugt aus einem **fertigen** Sperrergebnis der Policy den Meldungstext (mit eingesetztem Grenzwert) bzw. die Seitendaten. Er berechnet keine Frist und prüft keine Berechtigung. Buchungs- und Stornierungsseite nutzen die Seitendaten, die Absende-Prüfung (JSON) nutzt nur den Text.
+- Sprachschlüssel und Texte bleiben unverändert. Keine Schemaänderung.
 
 ## Testing Decisions
 
-- Haupt-Seam ist die öffentliche Schnittstelle der Booking-Policy (vom Nutzer bestätigt). Unit-Tests mit festgelegter „jetzt“-Zeit und vorgegebenen Settings:
-  - Festzeit-Modus: Frist 18:00, Tagesabstand 1 → Termin am Folgetag ist um 17:59 offen und um 18:00 gesperrt.
-  - Festzeit-Modus, Tagesabstand 0 → Frist am selben Tag.
-  - Minuten-Modus: Vorlaufzeit 120 → Termin in 119 Minuten gesperrt, in 121 Minuten offen.
-  - Manage „übernehmen“ → gleiches Ergebnis wie Buchungsfrist.
-  - Manage „Minuten“ und Manage „feste Uhrzeit“ → eigene Frist, unabhängig von der Buchungsfrist.
-  - Zeitzonen: Dienstleister in einer anderen Zeitzone als der Server → Frist in der Zeitzone des Dienstleisters.
-  - Sommerzeitwechsel: Frist über die Umstellung hinweg wird korrekt berechnet.
-  - Frühester buchbarer Zeitpunkt im Festzeit-Modus nach Fristablauf → ganzer Tag gesperrt.
-- Gute Tests prüfen nur Rückgaben der öffentlichen Schnittstelle, keine internen Helfer.
-- Vorbild: bestehende Unit-Tests der Verfügbarkeits-Library.
-- Regression: Layout-Smoke-Test und das Smoke-Skript aus Spec `manage-lock-enforcement` bleiben grün.
+- Haupt-Seam ist die öffentliche Schnittstelle der Booking-Policy. Unit-Tests mit fester Uhr und vorgegebenen Einstellungen:
+  - Festzeit, Frist 18:00, Tagesabstand 1: Termin am Folgetag um 18:00:00 offen, um 18:00:01 gesperrt
+  - Festzeit, Tagesabstand 0: Frist am selben Tag
+  - Minuten-Modus, 60 Minuten, jetzt 10:00:00: Beginn 11:00 zulässig (Slot angeboten, Termin nicht gesperrt); Beginn 10:59 gesperrt bzw. nicht angeboten
+  - Manage „inherit“ = Buchungsfrist; Manage „minutes“ und „fixed_time“ unabhängig von der Buchungsfrist
+  - Zeitzone des Dienstleisters abweichend von der Server-Zeitzone
+  - Sommerzeitwechsel zwischen Frist und Termintag
+  - Frühester buchbarer Zeitpunkt im Festzeit-Modus nach Fristablauf → ganzer Tag gesperrt
+- Gute Tests prüfen nur Rückgaben der öffentlichen Schnittstelle.
+- Regression: Smoke-Skript aus `manage-lock-enforcement` und Layout-Smoke-Test.
 
 ## Out of Scope
 
-- Verhaltensänderungen an Fristen oder Sperren.
-- Ein globaler Cache für alle Settings der App.
-- Slot-Kapazität und Pufferregeln (Spec `buffer-end-of-day`).
+- Weitere Verhaltensänderungen an Fristen oder Sperren.
+- Ein globaler Cache für alle Einstellungen der App.
+- Zukünftige Buchungsgrenze (Upstream-Einstellung).
 
 ## Further Notes
 
-- Reihenfolge: nach `manage-lock-enforcement` und `buffer-end-of-day`, damit die Fixes auf dem alten Stand klein bleiben und der Umbau sie mitnimmt.
-- Bezug: ADR 0002, ADR 0003, ADR 0005 (Upstream-Sync).
+- Reihenfolge: nach `manage-lock-enforcement/02` und `buffer-end-of-day/02`, damit die Fixes auf dem alten Stand klein bleiben.
+- Bezug: ADR 0002, ADR 0003, ADR 0005; Glossar „Vorlaufzeit“, „Buchungsfrist“, „Umbuchungs-/Stornierungsfrist“.
