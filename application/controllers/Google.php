@@ -48,6 +48,7 @@ class Google extends EA_Controller
             $CI = get_instance();
 
             $CI->load->library('google_sync');
+            $CI->load->library('appointment_contact_rules');
 
             // Load the libraries as this method is called statically from the CLI command
 
@@ -288,13 +289,16 @@ class Google extends EA_Controller
                             ? (string) $google_event->getDescription()
                             : trim($google_event_summary . ' ' . $google_event->getDescription());
                     } else {
-                        $google_event_notes = $google_event->getDescription();
+                        // The contact block written by the sync never goes back into the notes (spec 0017).
+                        $google_event_notes = $CI->appointment_contact_rules->strip_contact_block(
+                            $google_event->getDescription(),
+                        );
                     }
 
                     $is_different =
                         $local_event_start !== $google_event_start->getTimestamp() ||
                         $local_event_end !== $google_event_end->getTimestamp() ||
-                        $local_event['notes'] !== $google_event_notes;
+                        (string) $local_event['notes'] !== (string) $google_event_notes;
 
                     if ($is_different) {
                         $local_event['start_datetime'] = $google_event_start->format('Y-m-d H:i:s');

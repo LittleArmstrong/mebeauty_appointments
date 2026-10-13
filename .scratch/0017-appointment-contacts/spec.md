@@ -1,8 +1,8 @@
 # Termin-Kontaktdaten: Kontaktdaten pro Termin, Kundendatensatz geschützt
 
-Status: ready-for-agent
+Status: resolved
 Created: 2026-10-13
-Closed: –
+Closed: 2026-10-14
 Priority: P1
 Depends-on: 0009
 

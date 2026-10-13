@@ -73,12 +73,14 @@ class Booking extends EA_Controller
         $this->load->model('customers_model');
         $this->load->model('settings_model');
         $this->load->model('consents_model');
+        $this->load->model('appointment_contacts_model');
 
         $this->load->library('timezones');
         $this->load->library('synchronization');
         $this->load->library('notifications');
         $this->load->library('availability');
         $this->load->library('booking_policy');
+        $this->load->library('appointment_contact_rules');
         $this->load->library('webhooks_client');
         $this->load->library('jitsi_client');
     }
@@ -403,26 +405,6 @@ class Booking extends EA_Controller
             // Sanitize appointment fields - only allow expected fields
             $appointment = array_intersect_key($appointment, array_flip($this->allowed_appointment_fields));
 
-            if (!array_key_exists('address', $customer)) {
-                $customer['address'] = '';
-            }
-
-            if (!array_key_exists('city', $customer)) {
-                $customer['city'] = '';
-            }
-
-            if (!array_key_exists('zip_code', $customer)) {
-                $customer['zip_code'] = '';
-            }
-
-            if (!array_key_exists('notes', $customer)) {
-                $customer['notes'] = '';
-            }
-
-            if (!array_key_exists('phone_number', $customer)) {
-                $customer['phone_number'] = '';
-            }
-
             // Only the manage link hash may authorize changes to an existing appointment. Record IDs sent by
             // the client are never trusted: they are dropped and, for a valid reschedule, taken from the
             // stored appointment instead.
@@ -438,7 +420,6 @@ class Booking extends EA_Controller
 
             if ($manage_mode) {
                 $appointment['id'] = (int) $original_appointment['id'];
-                $customer['id'] = (int) $original_appointment['id_users_customer'];
 
                 $this->check_manage_lock($original_appointment);
             }
@@ -486,12 +467,21 @@ class Booking extends EA_Controller
                 }
             }
 
-            if ($this->customers_model->exists($customer)) {
-                $customer['id'] = $this->customers_model->find_record_id($customer);
+            // A reschedule stays with the customer of the original appointment, a new booking is matched by email
+            // (spec 0017).
+            $email_customer_id = $this->customers_model->exists($customer)
+                ? $this->customers_model->find_record_id($customer)
+                : 0;
 
+            $customer_id = $this->appointment_contact_rules->resolve_customer_id(
+                $original_appointment,
+                $email_customer_id,
+            );
+
+            if ($customer_id) {
                 $existing_appointments = $this->appointments_model->get([
                     'id !=' => $manage_mode ? $appointment['id'] : null,
-                    'id_users_customer' => $customer['id'],
+                    'id_users_customer' => $customer_id,
                     'start_datetime <=' => $appointment['start_datetime'],
                     'end_datetime >=' => $appointment['end_datetime'],
                 ]);
@@ -541,10 +531,16 @@ class Booking extends EA_Controller
 
             $this->customers_model->only($customer, $this->allowed_customer_fields);
 
-            $customer_id = $this->customers_model->save($customer);
-            $customer = $this->customers_model->find($customer_id);
+            $existing_customer = $customer_id ? $this->customers_model->find($customer_id) : null;
 
-            $appointment['id_users_customer'] = $customer_id;
+            $customer_record = $this->appointment_contact_rules->customer_record(
+                $customer,
+                $existing_customer,
+                $email_customer_id ?: null,
+            );
+
+            $this->customers_model->only($customer_record, $this->allowed_customer_fields);
+
             $appointment['is_unavailability'] = false;
             $appointment['color'] = $service['color'];
 
@@ -555,7 +551,33 @@ class Booking extends EA_Controller
 
             $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
 
-            $appointment_id = $this->appointments_model->save($appointment);
+            // The appointment is saved first; an existing customer record is only changed once it is stored.
+            $this->db->trans_begin();
+
+            try {
+                $customer_id = $customer_id ?: $this->customers_model->save($customer_record);
+
+                $appointment['id_users_customer'] = $customer_id;
+
+                $appointment_id = $this->appointments_model->save($appointment);
+
+                $this->appointment_contacts_model->save_for_appointment(
+                    $appointment_id,
+                    $this->appointment_contact_rules->contact($customer),
+                );
+
+                if ($existing_customer) {
+                    $this->customers_model->save($customer_record);
+                }
+
+                $this->db->trans_commit();
+            } catch (Throwable $e) {
+                $this->db->trans_rollback();
+
+                throw $e;
+            }
+
+            $customer = $this->customers_model->find($customer_id);
             $appointment = $this->appointments_model->find($appointment_id);
 
             $company_color = setting('company_color');

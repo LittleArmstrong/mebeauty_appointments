@@ -50,5 +50,5 @@ Ist im Footer nichts anzuzeigen, entfällt er ganz, samt Trennlinie. Eine neue E
 ## Further Notes
 
 - Herkunft: Grilling am 2026-10-11, zusammen mit 0017.
-- Hängt nur wegen der Migrationskonsolidierung von 0017 ab. Wird 0019 zuerst umgesetzt, übernimmt es die Auflösung von 071.
+- Hängt nur wegen der Migrationskonsolidierung von 0017 ab (071 ist seit 0017/01 in 070 aufgegangen; neue Einstellungen kommen in 070).
 - Bezug: 0010, 0014, ADR 0005, Glossar „Wizard-Card“, „Booking-Flow“.

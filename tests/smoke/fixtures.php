@@ -13,6 +13,8 @@
  *       Prints the stored appointment (JSON, or "null" when it does not exist).
  *   APP_ENV=testing php tests/smoke/fixtures.php customer <customer-id>
  *       Prints the stored customer (JSON).
+ *   APP_ENV=testing php tests/smoke/fixtures.php contact <appointment-id>
+ *       Prints the stored appointment contact (JSON, or "null" when the appointment has none).
  *   APP_ENV=testing php tests/smoke/fixtures.php setting <name> [<value>]
  *       Prints the current value of a setting and optionally replaces it.
  *   APP_ENV=testing php tests/smoke/fixtures.php lang <key>
@@ -31,6 +33,7 @@ require __DIR__ . '/../../index.php';
 $CI = &get_instance();
 $CI->load->model('appointments_model');
 $CI->load->model('customers_model');
+$CI->load->model('appointment_contacts_model');
 $CI->load->model('providers_model');
 $CI->load->model('services_model');
 $CI->load->library('availability');
@@ -136,6 +139,10 @@ switch ($command) {
         echo json_encode($CI->customers_model->find((int) ($arguments[0] ?? 0))) . PHP_EOL;
         break;
 
+    case 'contact':
+        echo json_encode($CI->appointment_contacts_model->find_by_appointment((int) ($arguments[0] ?? 0))) . PHP_EOL;
+        break;
+
     case 'setting':
         $name = $arguments[0] ?? '';
         echo (string) setting($name) . PHP_EOL;
@@ -160,6 +167,6 @@ switch ($command) {
         break;
 
     default:
-        fwrite(STDERR, 'Usage: fixtures.php setup|get|customer|setting|lang|cleanup' . PHP_EOL);
+        fwrite(STDERR, 'Usage: fixtures.php setup|get|customer|contact|setting|lang|cleanup' . PHP_EOL);
         exit(2);
 }

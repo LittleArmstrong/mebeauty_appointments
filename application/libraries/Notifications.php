@@ -37,6 +37,7 @@ class Notifications
         $this->CI->load->model('providers_model');
         $this->CI->load->model('secretaries_model');
         $this->CI->load->model('settings_model');
+        $this->CI->load->model('appointment_contacts_model');
 
         $this->CI->load->library('email_messages');
         $this->CI->load->library('ics_file');
@@ -69,6 +70,9 @@ class Notifications
             $provider_link = site_url('calendar/reschedule/' . $appointment['hash']);
 
             $ics_stream = $this->CI->ics_file->get_stream($appointment, $service, $provider, $customer);
+
+            // Salon mails show the appointment contact; the customer mail goes to the customer record (spec 0017).
+            $contact_customer = $this->CI->appointment_contacts_model->display_customer($appointment, $customer);
 
             // Notify customer.
             $send_customer =
@@ -116,7 +120,7 @@ class Notifications
                         $appointment,
                         $provider,
                         $service,
-                        $customer,
+                        $contact_customer,
                         $settings,
                         $subject,
                         $message,
@@ -148,7 +152,7 @@ class Notifications
                         $appointment,
                         $provider,
                         $service,
-                        $customer,
+                        $contact_customer,
                         $settings,
                         $subject,
                         $message,
@@ -184,7 +188,7 @@ class Notifications
                         $appointment,
                         $provider,
                         $service,
-                        $customer,
+                        $contact_customer,
                         $settings,
                         $subject,
                         $message,

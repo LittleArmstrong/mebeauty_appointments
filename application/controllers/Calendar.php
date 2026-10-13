@@ -77,6 +77,7 @@ class Calendar extends EA_Controller
         $this->load->model('services_model');
         $this->load->model('providers_model');
         $this->load->model('roles_model');
+        $this->load->model('appointment_contacts_model');
 
         $this->load->library('accounts');
         $this->load->library('google_sync');
@@ -86,6 +87,7 @@ class Calendar extends EA_Controller
         $this->load->library('webhooks_client');
         $this->load->library('permissions');
         $this->load->library('jitsi_client');
+        $this->load->library('appointment_contact_rules');
     }
 
     /**
@@ -150,6 +152,11 @@ class Calendar extends EA_Controller
                 $edit_appointment = $occurrences[0];
 
                 $this->appointments_model->load($edit_appointment, ['customer']);
+
+                $edit_appointment['customer'] = $this->appointment_contacts_model->display_customer(
+                    $edit_appointment,
+                    $edit_appointment['customer'],
+                );
             }
         }
 
@@ -282,6 +289,12 @@ class Calendar extends EA_Controller
 
             $this->check_event_permissions((int) $appointment_data['id_users_provider']);
 
+            $stored_appointment = !empty($appointment_data['id'])
+                ? $this->appointments_model->find((int) $appointment_data['id'])
+                : null;
+
+            $contact = null;
+
             // Save customer changes to the database.
             if ($customer_data) {
                 $customer = $customer_data;
@@ -302,6 +315,20 @@ class Calendar extends EA_Controller
                 if (empty($customer['id']) && $this->customers_model->exists($customer)) {
                     $customer['id'] = $this->customers_model->find_record_id($customer);
                 }
+
+                // Appointment contact and customer record changes of the dialog (spec 0017).
+                $edits_stored_customer =
+                    $stored_appointment &&
+                    !empty($customer['id']) &&
+                    (int) $customer['id'] === (int) $stored_appointment['id_users_customer'];
+
+                ['customer' => $customer, 'contact' => $contact] = $this->appointment_contact_rules->backend_save(
+                    $customer,
+                    $edits_stored_customer ? $this->customers_model->find((int) $customer['id']) : null,
+                    $edits_stored_customer
+                        ? $this->appointment_contacts_model->find_by_appointment((int) $stored_appointment['id'])
+                        : null,
+                );
 
                 $customer['id'] = $this->customers_model->save($customer);
             }
@@ -363,6 +390,10 @@ class Calendar extends EA_Controller
 
             if (empty($appointment['id'])) {
                 throw new RuntimeException('The appointment ID is not available.');
+            }
+
+            if ($contact !== null) {
+                $this->appointment_contacts_model->save_for_appointment((int) $appointment['id'], $contact);
             }
 
             $appointment = $this->appointments_model->find($appointment['id']);
@@ -678,6 +709,8 @@ class Calendar extends EA_Controller
 
             unset($appointment);
 
+            $this->appointment_contacts_model->apply_to_customers($response['appointments']);
+
             $user_id = session('user_id');
 
             $role_slug = session('role_slug');
@@ -832,6 +865,8 @@ class Calendar extends EA_Controller
             }
 
             unset($appointment);
+
+            $this->appointment_contacts_model->apply_to_customers($response['appointments']);
 
             // Get unavailability periods (only for provider).
             $response['unavailabilities'] = [];

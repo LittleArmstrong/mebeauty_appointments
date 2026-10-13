@@ -4,12 +4,21 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Kachel und Dialog zeigen die Termin-Kontaktdaten, Rückfall auf den Datensatz bei Altbestand
-- [ ] Anlegen im Backend speichert Termin-Kontaktdaten
-- [ ] Regel-Modul: geänderte Felder gegenüber den gespeicherten Termin-Kontaktdaten; Unit-Tests dafür
-- [ ] Bearbeiten: nur geänderte Kontaktfelder wirken auf Termin-Kontaktdaten und Datensatz; Verschieben lässt beide unverändert
-- [ ] Berechtigungsprüfungen des Backends bleiben unverändert
+- [x] Kachel und Dialog zeigen die Termin-Kontaktdaten, Rückfall auf den Datensatz bei Altbestand
+- [x] Anlegen im Backend speichert Termin-Kontaktdaten
+- [x] Regel-Modul: geänderte Felder gegenüber den gespeicherten Termin-Kontaktdaten; Unit-Tests dafür
+- [x] Bearbeiten: nur geänderte Kontaktfelder wirken auf Termin-Kontaktdaten und Datensatz; Verschieben lässt beide unverändert
+- [x] Berechtigungsprüfungen des Backends bleiben unverändert
 - [ ] Manuelle Sichtprüfung durch den Nutzer (Kachel, Dialog, Anlegen, Bearbeiten, Verschieben)
-- [ ] `bash scripts/test.sh` grün
+- [x] `bash scripts/test.sh` grün
+
+## Comments
+
+- Kachel, Tabellenansicht und Dialog: `apply_to_customers()` legt die Termin-Kontaktdaten über `appointment.customer` (Kalender-JS unverändert); `calendar/reschedule/<hash>` ebenso. Rückfall auf den Datensatz ohne Kontaktzeile.
+- `Appointment_contact_rules::backend_save()` entscheidet: Bearbeiten des Kunden des Termins → nur gegenüber den Termin-Kontaktdaten (Altbestand: Datensatz) geänderte Felder gehen in Kontakt und Datensatz; neuer Termin oder anderer Kunde → Dialogeingabe wird Kontakt. Verschieben (Drag & Drop sendet keine Kundendaten) ändert nichts. Berechtigungsprüfungen unverändert.
+- Per HTTP mit Admin-Login geprüft (Wegwerfskript): Telefon geändert → Kontakt + Datensatz 0999; nur Nachname geändert, Datensatz-Vorname vorher extern auf „Anders“ → Datensatz behält „Anders“, Kontakt „Smoke“; Verschieben → Kontakt unverändert; Neuanlage → Kontakt aus Dialog; Liste zeigt Kontaktdaten, Altbestand den Datensatz.
+- Bekannter Grenzfall: Wählt das Personal im Dialog denselben Kunden erneut aus der Liste, füllt das die Felder mit dem Datensatz; weichen diese vom Kontakt ab, zählt das als Änderung.
+- **Manuelle Sichtprüfung durch den Nutzer ausstehend** (Kachel, Dialog, Anlegen, Bearbeiten, Verschieben).
+- `bash scripts/test.sh` grün.

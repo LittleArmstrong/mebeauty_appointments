@@ -5,9 +5,12 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
     /**
      * Upgrade method.
      *
-     * Consolidates the former migrations 070–073: the booking deadline/buffer and
-     * timezone settings, the company-header setting, the manage-deadline settings,
-     * and the per-service slot capacity column.
+     * Collects all fork changes until the first production release (ADR 0005): the
+     * booking deadline/buffer and timezone settings, the company-header setting, the
+     * manage-deadline settings, the language-selector setting (formerly 071), the
+     * per-service slot capacity column and the appointment_contacts table (spec 0017,
+     * ADR 0008). Idempotent: only creates what is missing, so
+     * an existing database can be re-migrated from version 69.
      */
     public function up(): void
     {
@@ -23,7 +26,8 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
             'manage_deadline_mode' => 'inherit',
             'manage_deadline_minutes' => '0',
             'manage_deadline_time' => '18:00',
-            'manage_deadline_days' => '1'
+            'manage_deadline_days' => '1',
+            'display_language_selector' => '1'
         ];
 
         foreach ($settings as $name => $value) {
@@ -42,13 +46,42 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                 ]
             ]);
         }
+
+        if (!$this->db->table_exists('appointment_contacts')) {
+            $this->dbforge->add_field([
+                'id' => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
+                'id_appointments' => ['type' => 'INT', 'constraint' => 11, 'null' => false],
+                'first_name' => ['type' => 'VARCHAR', 'constraint' => 256, 'null' => true],
+                'last_name' => ['type' => 'VARCHAR', 'constraint' => 512, 'null' => true],
+                'email' => ['type' => 'VARCHAR', 'constraint' => 512, 'null' => true],
+                'phone_number' => ['type' => 'VARCHAR', 'constraint' => 128, 'null' => true],
+                'create_datetime' => ['type' => 'DATETIME', 'null' => true],
+                'update_datetime' => ['type' => 'DATETIME', 'null' => true]
+            ]);
+
+            $this->dbforge->add_key('id', true);
+
+            $this->dbforge->create_table('appointment_contacts', true, ['engine' => 'InnoDB']);
+
+            $this->db->query(
+                'ALTER TABLE `' .
+                    $this->db->dbprefix('appointment_contacts') .
+                    '`
+                    ADD UNIQUE KEY `appointment_contacts_appointment` (`id_appointments`),
+                    ADD CONSTRAINT `appointment_contacts_appointments` FOREIGN KEY (`id_appointments`) REFERENCES `' .
+                    $this->db->dbprefix('appointments') .
+                    '` (`id`)
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE'
+            );
+        }
     }
 
     /**
      * Downgrade method.
      *
-     * Destructive: deletes the twelve settings and drops the services.slot_capacity
-     * column, including any data stored in it.
+     * Destructive: deletes the settings, drops the services.slot_capacity column and
+     * the appointment_contacts table, including any data stored in them.
      */
     public function down(): void
     {
@@ -65,12 +98,17 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                 'manage_deadline_mode',
                 'manage_deadline_minutes',
                 'manage_deadline_time',
-                'manage_deadline_days'
+                'manage_deadline_days',
+                'display_language_selector'
             ])
             ->delete('settings');
 
         if ($this->db->field_exists('slot_capacity', 'services')) {
             $this->dbforge->drop_column('services', 'slot_capacity');
+        }
+
+        if ($this->db->table_exists('appointment_contacts')) {
+            $this->dbforge->drop_table('appointment_contacts');
         }
     }
 }

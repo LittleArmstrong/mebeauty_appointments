@@ -4,11 +4,18 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Regel-Modul: Umbuchung löst den Kunden über den Original-Termin auf; E-Mail-Wechsel nur bei freier Adresse
-- [ ] Ein anderer Kunde wird bei der Umbuchung weder zugeordnet noch geändert
-- [ ] Termin-Kontaktdaten des umgebuchten Termins entsprechen den neuen Eingaben
-- [ ] Unit-Tests (rot gegen altes Verhalten, Beleg hier)
-- [ ] Smoke-Fälle: Umbuchung mit E-Mail eines anderen Kunden (Termin bleibt, anderer Kunde unverändert, E-Mail des Datensatzes unverändert); Umbuchung mit freier neuer E-Mail (Datensatz übernimmt sie)
-- [ ] `bash scripts/test.sh` grün
+- [x] Regel-Modul: Umbuchung löst den Kunden über den Original-Termin auf; E-Mail-Wechsel nur bei freier Adresse
+- [x] Ein anderer Kunde wird bei der Umbuchung weder zugeordnet noch geändert
+- [x] Termin-Kontaktdaten des umgebuchten Termins entsprechen den neuen Eingaben
+- [x] Unit-Tests (rot gegen altes Verhalten, Beleg hier)
+- [x] Smoke-Fälle: Umbuchung mit E-Mail eines anderen Kunden (Termin bleibt, anderer Kunde unverändert, E-Mail des Datensatzes unverändert); Umbuchung mit freier neuer E-Mail (Datensatz übernimmt sie)
+- [x] `bash scripts/test.sh` grün
+
+## Comments
+
+- Umbuchung löst den Kunden über `resolve_customer_id($original_appointment, …)` auf; `customer_record` übernimmt eine geänderte E-Mail nur, wenn kein anderer Kunde sie hat (Unit-Tests `testRescheduleKeepsTheEmailWhenAnotherCustomerHasIt`, `testRescheduleTakesOverAFreeNewEmail`).
+- Rot vor Umsetzung (Smoke gegen altes `Booking.php`): „FAIL reschedule with another customer's email: appointment customer 90“ (Termin wanderte zu Anna) und „FAIL reschedule with a free new email“. Danach OK.
+- Die Doppelbuchungsprüfung „customer_is_already_booked“ greift jetzt auch bei Umbuchungen (mit dem Original-Kunden, eigener Termin ausgenommen).
+- `bash scripts/test.sh` grün.

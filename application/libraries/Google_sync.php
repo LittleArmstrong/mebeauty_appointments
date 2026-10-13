@@ -52,6 +52,8 @@ class Google_sync
         $this->CI->load->model('customers_model');
         $this->CI->load->model('providers_model');
         $this->CI->load->model('services_model');
+        $this->CI->load->model('appointment_contacts_model');
+        $this->CI->load->library('appointment_contact_rules');
 
         if (is_app_installed()) {
             $this->initialize_clients();
@@ -199,9 +201,14 @@ class Google_sync
         array $customer,
         array $settings,
     ): Event {
+        // The event shows the appointment contact: a contact block in the description and the attendee (spec 0017).
+        $customer = $this->CI->appointment_contacts_model->display_customer($appointment, $customer);
+
         $event = new Google_Service_Calendar_Event();
         $event->setSummary(!empty($service) ? $service['name'] : 'Unavailable');
-        $event->setDescription($appointment['notes']);
+        $event->setDescription(
+            $this->CI->appointment_contact_rules->event_description($customer ?: null, $appointment['notes']),
+        );
         $event->setLocation($appointment['location'] ?? $settings['company_name']);
 
         $timezone = new DateTimeZone($provider['timezone']);
@@ -292,8 +299,13 @@ class Google_sync
             $appointment['id_google_calendar'],
         );
 
+        // The event shows the appointment contact: a contact block in the description and the attendee (spec 0017).
+        $customer = $this->CI->appointment_contacts_model->display_customer($appointment, $customer);
+
         $event->setSummary($service['name']);
-        $event->setDescription($appointment['notes']);
+        $event->setDescription(
+            $this->CI->appointment_contact_rules->event_description($customer ?: null, $appointment['notes']),
+        );
         $event->setLocation($appointment['location'] ?? $settings['company_name']);
 
         $timezone = new DateTimeZone($provider['timezone']);
