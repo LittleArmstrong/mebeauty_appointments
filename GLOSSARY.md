@@ -60,6 +60,22 @@ _Avoid_: Bearbeitungslink, Reschedule-Link
 Verschieben eines bestehenden Termins über den Manage-Link; ob sie erlaubt ist, entscheidet die Umbuchungs-/Stornierungsfrist des ursprünglichen Termins, der neue Zeitpunkt unterliegt wie jede Neubuchung der Buchungsfrist.
 _Avoid_: Terminänderung, Reschedule (im Deutschen)
 
+**Termin-Kontaktdaten**:
+Vorname, Nachname, E-Mail und Telefon, mit denen ein bestimmter Termin gebucht wurde; sie bleiben am Termin, auch wenn sich der Kundendatensatz später ändert, und werden überall angezeigt, wo der Termin erscheint (Kalender, Google, Salon-Mail).
+_Avoid_: Momentaufnahme, Snapshot, Buchungskontakt
+
+**Kundendatensatz**:
+Der Eintrag eines Kunden in der Kundenverwaltung; enthält den letzten bekannten Stand der Kundendaten und dient der Wiedererkennung über die E-Mail-Adresse.
+_Avoid_: Kundenstamm, Kundenprofil, Kundenkonto
+
+**E-Mail-Bestätigung**:
+Nachweis per Link, dass die bei einer Online-Buchung eingegebene E-Mail-Adresse der buchenden Person gehört; per Einstellung erforderlich.
+_Avoid_: Double-Opt-in, Verifizierungscode
+
+**Vormerkung**:
+Ein Online-Termin, der bei aktiver E-Mail-Bestätigung bis zum Klick auf den Bestätigungslink den Slot hält (10 Minuten); im Backend als „unbestätigt“ sichtbar, in Google erst nach der Bestätigung.
+_Avoid_: Reservierung, unbestätigte Buchung, Pending
+
 **Theme**:
 Kundenspezifisches Erscheinungsbild der App aus Bootstrap/SCSS-Styles, einer Theme-Standardfarbe und optionalem Site-Chrome; je Installation ist genau ein Theme aktiv.
 _Avoid_: Skin, Design (allein)

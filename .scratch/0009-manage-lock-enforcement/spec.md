@@ -84,7 +84,7 @@ Der vorhandene Termin-Hash (Bestandteil jedes Manage-Links) wird beim Absenden u
 
 ## Further Notes
 
-- **Bekanntes Restrisiko (Upstream, nicht Teil dieser Spec):** Kunden werden weiterhin über die E-Mail-Adresse zugeordnet. Wer bei einer Neubuchung (ohne Hash) oder bei der eigenen Umbuchung die E-Mail-Adresse eines anderen Kunden einträgt, wird diesem Kunden zugeordnet und überschreibt dessen Stammdaten (Name, Telefon, Adresse, Notizen, Sprache); dieser Kunde erhält die Benachrichtigung. Der ID-Weg ist mit dieser Spec geschlossen, der E-Mail-Weg nicht. Empfehlung: eigene Spec (z. B. Stammdaten bestehender Kunden bei öffentlicher Buchung nicht überschreiben).
+- **Bekanntes Restrisiko (Upstream, nicht Teil dieser Spec):** Kunden werden weiterhin über die E-Mail-Adresse zugeordnet. Wer bei einer Neubuchung (ohne Hash) oder bei der eigenen Umbuchung die E-Mail-Adresse eines anderen Kunden einträgt, wird diesem Kunden zugeordnet und überschreibt dessen Stammdaten (Name, Telefon, Adresse, Sprache; Notizen gehören zum Termin und sind nicht betroffen); dieser Kunde erhält die Benachrichtigung. Der ID-Weg ist mit dieser Spec geschlossen, der E-Mail-Weg nicht. Empfehlung: eigene Spec (z. B. Stammdaten bestehender Kunden bei öffentlicher Buchung nicht überschreiben). Aufgegriffen in 0017 (Termin-Kontaktdaten) und 0018 (E-Mail-Bestätigung).
 
 - Die Schwächen stammen aus Easy!Appointments 1.6.0. Die Änderungen bleiben lokal im Buchungs-Controller und im Booking-Flow (ADR 0005, kleiner Upstream-Diff).
 - Bezug: ADR 0003, Glossar „Manage-Link“, „Umbuchung“, „Umbuchungs-/Stornierungsfrist“.

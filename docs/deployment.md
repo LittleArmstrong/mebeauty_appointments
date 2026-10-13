@@ -119,8 +119,22 @@ Manuell bei manitu prüfen (nach Versionswechsel oder neuer Extension in `compos
 Migrationen setzen Upstream-kompatible Defaults. Kundenspezifische Werte stellt der Betreiber nach dem Update im
 Backend ein:
 
-- **MeBeauty, ab Migration 071:** Buchungseinstellungen → „Sprachauswahl im Buchungsformular anzeigen“ ausschalten,
+- **MeBeauty:** Buchungseinstellungen → „Sprachauswahl im Buchungsformular anzeigen“ ausschalten,
   solange die mebeauty-Site nur deutsch ist (Setting `display_language_selector = 0`).
+- **MeBeauty, ab Spec 0018:** „E-Mail-Bestätigung erforderlich“ einschalten (`require_email_verification = 1`).
+  Voraussetzung: funktionierender Mailversand, sonst ist keine Online-Buchung möglich.
+- **MeBeauty, ab Spec 0019:** „Footer anzeigen“ ausschalten (`display_booking_footer = 0`).
+
+## Geänderte Migration 070 nachziehen (bis zum ersten Prod-Release)
+
+Bis zum ersten Prod-Release werden Fork-Änderungen in Migration `070` zusammengelegt (ADR 0005). Nach einem Deploy,
+der `070` ändert, auf Test und lokal einmalig:
+
+```sql
+UPDATE ea_migrations SET version = 69;
+```
+
+danach `php index.php console migrate`. `070` legt nur an, was noch fehlt.
 
 ## Umgebungs-spezifische Dateien
 

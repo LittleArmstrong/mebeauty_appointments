@@ -59,7 +59,7 @@ Die Retro nach 0008–0015 hat wiederkehrende Reibungen gefunden:
 - `restart`-Richtlinien in `docker-compose.yml`.
 - Escaping in Upstream-Views.
 - Skill-Quellen außerhalb des Repos (`~/.agents/skills` ist bereits geleert).
-- Kundenzuordnung per E-Mail (nächste Spec 0017) und `composer audit` (danach 0018).
+- Kundenzuordnung per E-Mail (jetzt 0017 und 0018) und `composer audit` (jetzt 0020; 0019 ist der Booking-Footer).
 
 ## Further Notes
 
