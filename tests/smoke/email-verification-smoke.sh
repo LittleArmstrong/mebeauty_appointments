@@ -14,7 +14,11 @@
 #   restore data and the link is invalid;
 # - "erneut senden" (booking/resend_verification, Vormerkung of the browser session) waits 60 seconds after the
 #   last mail, replaces the link, stops after 5 mails per email and hour (also for a new Vormerkung) and neither
-#   reveals the manage link hash nor needs or accepts an email or ID from the client.
+#   reveals the manage link hash nor needs or accepts an email or ID from the client;
+# - a reschedule with a changed email applies the new time right away, keeps the old email in the appointment
+#   contact and the customer record (the reschedule mail goes there) and sends a link to the new email; an
+#   expired link changes nothing, a valid one takes over the email (customer record only while no other customer
+#   has it); a reschedule without email change needs no link.
 # All test data is removed on exit.
 #
 # Requires the docker stack to be up (php-fpm, nginx, mysql, mailpit) and a provider with a service.
@@ -36,8 +40,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# POST booking/register as a new booking. Arguments: cookie jar, start (Y-m-d H:i:s), email. Prints the HTTP
-# status, body is in $TMP/body.
+# POST booking/register. Arguments: cookie jar, start (Y-m-d H:i:s), email, manage link hash (optional: a
+# reschedule). Prints the HTTP status, body is in $TMP/body.
 register() {
     local jar=$1
     curl -s -o /dev/null -c "$jar" -b "$jar" "$BASE/index.php/booking"
@@ -56,7 +60,8 @@ register() {
         --data-urlencode "post_data[customer][email]=$3" \
         --data-urlencode "post_data[customer][phone_number]=0170 444" \
         --data-urlencode "post_data[customer][timezone]=UTC" \
-        --data-urlencode "post_data[manage_mode]=0" \
+        --data-urlencode "post_data[manage_mode]=$([ -n "${4:-}" ] && echo 1 || echo 0)" \
+        --data-urlencode "post_data[appointment_hash]=${4:-}" \
         "$BASE/index.php/booking/register"
 }
 
@@ -97,6 +102,11 @@ TARGET_HOUR=$(echo "$SETUP" | json "d['target_hour']")
 TARGET="$DATE $TARGET_HOUR:00"
 SECOND_HOUR=$(echo "$SETUP" | json "d['victim']['start']")
 SECOND_HOUR="${SECOND_HOUR:11:5}"
+OWNER_APPOINTMENT=$(echo "$SETUP" | json "d['owner']['id']")
+OWNER_HASH=$(echo "$SETUP" | json "d['owner']['hash']")
+OWNER_START=$(echo "$SETUP" | json "d['owner']['start']")
+OWNER=$(echo "$SETUP" | json "d['owner']['customer_id']")
+VICTIM=$(echo "$SETUP" | json "d['victim']['customer_id']")
 CREATED_APPOINTMENTS=",$(echo "$SETUP" | json "d['owner']['id']")"
 CREATED_CUSTOMERS=",$(echo "$SETUP" | json "d['victim']['customer_id']"),$(echo "$SETUP" | json "d['owner']['customer_id']")"
 
@@ -339,6 +349,88 @@ if [ "$STATUS" = "200" ] && json "d['sent'] is False and d['wait_seconds'] == 0"
     ok "resend without Vormerkung in the browser session sends nothing"
 else
     fail "resend without Vormerkung (HTTP $STATUS, $(cat "$TMP/resend"))"
+fi
+
+# 10. Reschedule with a changed email (spec 0018/05): the new time applies right away, the email waits for the link.
+OWNER_EMAIL=$(fixtures customer "$OWNER" | json "d['email']")
+VICTIM_EMAIL=$(fixtures customer "$VICTIM" | json "d['email']")
+CHANGED_EMAIL="smoke-verify-change-$$-$RANDOM@example.com"
+OWNER_JAR="$TMP/owner-laptop"
+OWNER_MAILS_BEFORE=$(mail_count "$OWNER_EMAIL")
+CUSTOMER_NOTIFICATIONS=$(fixtures setting customer_notifications | tail -1)
+
+STATUS=$(register "$OWNER_JAR" "$TARGET" "$CHANGED_EMAIL" "$OWNER_HASH")
+CHANGE=$(fixtures verification-by-email "$CHANGED_EMAIL")
+if [ "$STATUS" = "200" ] && json "d.get('appointment_hash') == '$OWNER_HASH' and 'verification_pending' not in d" <"$TMP/body" | grep -q True \
+    && [ "$(appointment_field "$OWNER_APPOINTMENT" start_datetime)" = "$TARGET" ] \
+    && [ "$(appointment_field "$OWNER_APPOINTMENT" id_users_customer)" = "$OWNER" ] \
+    && [ "$(echo "$CHANGE" | json "d and d['purpose'] == 'email_change' and d['id_appointments'] == $OWNER_APPOINTMENT")" = "True" ]; then
+    ok "reschedule with a changed email applies the new time right away and stores an email change"
+else
+    fail "reschedule with a changed email (HTTP $STATUS, $(cat "$TMP/body"), appointment $(fixtures get "$OWNER_APPOINTMENT"), verification $CHANGE)"
+fi
+
+if [ "$(contact_field "$OWNER_APPOINTMENT" email)" = "$OWNER_EMAIL" ] \
+    && [ "$(fixtures customer "$OWNER" | json "d['email']")" = "$OWNER_EMAIL" ] \
+    && [ "$(mail_count "$OWNER_EMAIL")" = "$((OWNER_MAILS_BEFORE + (CUSTOMER_NOTIFICATIONS == 1 ? 1 : 0)))" ] \
+    && [ "$(mail_count "$CHANGED_EMAIL")" = "1" ]; then
+    ok "until the click contact and customer keep the old email, the reschedule mail goes there, the new email gets only the link"
+else
+    fail "before the click: contact $(fixtures contact "$OWNER_APPOINTMENT"), customer $(fixtures customer "$OWNER"), mails old $(mail_count "$OWNER_EMAIL") (before $OWNER_MAILS_BEFORE), new $(mail_count "$CHANGED_EMAIL")"
+fi
+
+# Expiry changes nothing at the appointment; the expired link is invalid.
+CHANGE_TOKEN="smokechange$$$RANDOM"
+fixtures verification-token "$CHANGED_EMAIL" "$CHANGE_TOKEN" 11 >/dev/null
+available_hours >/dev/null
+RESULT=$(open_link "$TMP/owner-phone" "$CHANGE_TOKEN")
+if [ "${RESULT%% *}" = "200" ] && grep -qF "$INVALID" "$TMP/page" \
+    && [ "$(appointment_field "$OWNER_APPOINTMENT" start_datetime)" = "$TARGET" ] \
+    && [ "$(appointment_field "$OWNER_APPOINTMENT" id_users_customer)" = "$OWNER" ] \
+    && [ "$(contact_field "$OWNER_APPOINTMENT" email)" = "$OWNER_EMAIL" ] \
+    && [ "$(fixtures customer "$OWNER" | json "d['email']")" = "$OWNER_EMAIL" ]; then
+    ok "expired email change keeps the appointment and the old email"
+else
+    fail "expired email change: $RESULT, appointment $(fixtures get "$OWNER_APPOINTMENT"), contact $(fixtures contact "$OWNER_APPOINTMENT")"
+fi
+
+# A new reschedule with the changed email sends a new link; the click takes the email over.
+STATUS=$(register "$OWNER_JAR" "$TARGET" "$CHANGED_EMAIL" "$OWNER_HASH")
+fixtures verification-token "$CHANGED_EMAIL" "$CHANGE_TOKEN" >/dev/null
+RESULT=$(open_link "$TMP/owner-phone" "$CHANGE_TOKEN")
+if [ "$STATUS" = "200" ] && [[ "${RESULT%% *}" == 30? ]] && [[ "${RESULT#* }" == *"booking_confirmation/of/$OWNER_HASH" ]] \
+    && [ "$(contact_field "$OWNER_APPOINTMENT" email)" = "$CHANGED_EMAIL" ] \
+    && [ "$(fixtures customer "$OWNER" | json "d['email']")" = "$CHANGED_EMAIL" ] \
+    && [ "$(appointment_field "$OWNER_APPOINTMENT" start_datetime)" = "$TARGET" ] \
+    && [ "$(fixtures verification-by-email "$CHANGED_EMAIL")" = "null" ]; then
+    ok "the email change link takes the new email into contact and customer record"
+else
+    fail "email change link (HTTP $STATUS): $RESULT, contact $(fixtures contact "$OWNER_APPOINTMENT"), customer $(fixtures customer "$OWNER"), verification $(fixtures verification-by-email "$CHANGED_EMAIL")"
+fi
+
+# A reschedule without email change needs no link.
+STATUS=$(register "$TMP/owner-other" "$OWNER_START" "$CHANGED_EMAIL" "$OWNER_HASH")
+if [ "$STATUS" = "200" ] && json "d.get('appointment_hash') == '$OWNER_HASH'" <"$TMP/body" | grep -q True \
+    && [ "$(appointment_field "$OWNER_APPOINTMENT" start_datetime)" = "$OWNER_START" ] \
+    && [ "$(fixtures verification-by-email "$CHANGED_EMAIL")" = "null" ] \
+    && [ "$(mail_count "$CHANGED_EMAIL")" = "$((2 + (CUSTOMER_NOTIFICATIONS == 1 ? 1 : 0)))" ]; then
+    ok "reschedule without email change needs no verification, its mail goes to the confirmed email"
+else
+    fail "reschedule without email change (HTTP $STATUS, $(cat "$TMP/body"), verification $(fixtures verification-by-email "$CHANGED_EMAIL"), mails $(mail_count "$CHANGED_EMAIL"))"
+fi
+
+# The email of another customer reaches the appointment contact only, both customer records stay unchanged.
+register "$OWNER_JAR" "$OWNER_START" "$VICTIM_EMAIL" "$OWNER_HASH" >/dev/null
+TAKEN_CHANGE_TOKEN="smoketakenchange$$$RANDOM"
+fixtures verification-token "$OWNER_APPOINTMENT" "$TAKEN_CHANGE_TOKEN" >/dev/null
+RESULT=$(open_link "$TMP/owner-phone" "$TAKEN_CHANGE_TOKEN")
+if [[ "${RESULT%% *}" == 30? ]] && [ "$(contact_field "$OWNER_APPOINTMENT" email)" = "$VICTIM_EMAIL" ] \
+    && [ "$(fixtures customer "$OWNER" | json "d['email']")" = "$CHANGED_EMAIL" ] \
+    && [ "$(fixtures customer "$VICTIM" | json "d['email']")" = "$VICTIM_EMAIL" ] \
+    && [ "$(appointment_field "$OWNER_APPOINTMENT" id_users_customer)" = "$OWNER" ]; then
+    ok "email change to another customer's email changes only the appointment contact"
+else
+    fail "email change to a taken email: $RESULT, contact $(fixtures contact "$OWNER_APPOINTMENT"), owner $(fixtures customer "$OWNER"), appointment $(fixtures get "$OWNER_APPOINTMENT")"
 fi
 
 exit $FAIL

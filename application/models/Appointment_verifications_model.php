@@ -182,6 +182,17 @@ class Appointment_verifications_model extends EA_Model
     }
 
     /**
+     * Delete the verifications of an appointment with a purpose (e.g. a replaced email change).
+     *
+     * @param int $appointment_id Appointment ID.
+     * @param string $purpose Purpose of the verifications.
+     */
+    public function delete_for_appointment(int $appointment_id, string $purpose): void
+    {
+        $this->db->delete('appointment_verifications', ['id_appointments' => $appointment_id, 'purpose' => $purpose]);
+    }
+
+    /**
      * Delete a Vormerkung with its verification (only an appointment without customer).
      *
      * @param int $appointment_id Appointment ID.

@@ -471,6 +471,12 @@ class Booking extends EA_Controller
                 }
             }
 
+            // With email verification a changed email of a reschedule keeps the old one until the new address is
+            // verified (spec 0018/05).
+            $changed_email = $manage_mode
+                ? $this->email_verification->hold_back_email_change($original_appointment, $customer)
+                : null;
+
             // A reschedule stays with the customer of the original appointment, a new booking is matched by email
             // (spec 0017).
             $email_customer_id = $this->customers_model->exists($customer)
@@ -592,6 +598,10 @@ class Booking extends EA_Controller
 
             $appointment = $this->after_appointment_saved($appointment_id, $customer_id, $manage_mode);
 
+            if ($changed_email !== null) {
+                $this->email_verification->start_email_change($appointment, $changed_email);
+            }
+
             $response = [
                 'appointment_id' => $appointment['id'],
                 'appointment_hash' => $appointment['hash'],
@@ -606,8 +616,8 @@ class Booking extends EA_Controller
     /**
      * Confirm a Vormerkung with the link from the email verification mail (spec 0018).
      *
-     * A valid link books the appointment like a regular online booking and redirects to the success page; an
-     * unknown or used link shows a neutral message.
+     * A valid link books the appointment like a regular online booking (or takes over the new email of a
+     * reschedule) and redirects to the success page; an unknown or used link shows a neutral message.
      *
      * @param string $token Token from the link.
      */
@@ -621,7 +631,13 @@ class Booking extends EA_Controller
             fn(array $appointment) => (bool) $this->check_datetime_availability($appointment),
         );
 
-        if (($confirmed['result'] ?? null) !== Email_verification::RESULT_CONFIRMED) {
+        if (
+            !in_array(
+                $confirmed['result'] ?? null,
+                [Email_verification::RESULT_CONFIRMED, Email_verification::RESULT_EMAIL_CHANGED],
+                true,
+            )
+        ) {
             html_vars([
                 'show_message' => true,
                 'page_title' => lang('page_title') . ' ' . e(setting('company_name')),
@@ -641,7 +657,15 @@ class Booking extends EA_Controller
             return;
         }
 
-        $appointment = $this->after_appointment_saved($confirmed['appointment_id'], $confirmed['customer_id'], false);
+        // A confirmed email change only updates Google and the webhook; the reschedule mails went out already.
+        $email_changed = $confirmed['result'] === Email_verification::RESULT_EMAIL_CHANGED;
+
+        $appointment = $this->after_appointment_saved(
+            $confirmed['appointment_id'],
+            $confirmed['customer_id'],
+            $email_changed,
+            !$email_changed,
+        );
 
         redirect('booking_confirmation/of/' . $appointment['hash']);
     }
@@ -670,11 +694,16 @@ class Booking extends EA_Controller
      * @param int $appointment_id Appointment ID.
      * @param int $customer_id Customer ID.
      * @param bool $manage_mode Whether the booking was a reschedule.
+     * @param bool $notify Whether customer and salon get their mails (not for a confirmed email change).
      *
      * @return array Returns the stored appointment.
      */
-    protected function after_appointment_saved(int $appointment_id, int $customer_id, bool $manage_mode): array
-    {
+    protected function after_appointment_saved(
+        int $appointment_id,
+        int $customer_id,
+        bool $manage_mode,
+        bool $notify = true,
+    ): array {
         $customer = $this->customers_model->find($customer_id);
         $appointment = $this->appointments_model->find($appointment_id);
         $service = $this->services_model->find($appointment['id_services']);
@@ -694,14 +723,16 @@ class Booking extends EA_Controller
 
         $this->synchronization->sync_appointment_saved($appointment, $service, $provider, $customer, $settings);
 
-        $this->notifications->notify_appointment_saved(
-            $appointment,
-            $service,
-            $provider,
-            $customer,
-            $settings,
-            $manage_mode,
-        );
+        if ($notify) {
+            $this->notifications->notify_appointment_saved(
+                $appointment,
+                $service,
+                $provider,
+                $customer,
+                $settings,
+                $manage_mode,
+            );
+        }
 
         $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_SAVE, $appointment);
 

@@ -2,11 +2,14 @@
 /**
  * Local variables.
  *
- * Email verification mail (fork, spec 0018): link that confirms a Vormerkung.
+ * Email verification mail (fork, spec 0018): link that confirms a Vormerkung or the new email of a reschedule.
  *
  * @var string $subject
  * @var string $message
  * @var string $verification_link
+ * @var string $button
+ * @var string $link_expires
+ * @var string $ignore_message
  * @var array $appointment
  * @var array $service
  * @var array $provider
@@ -413,7 +416,7 @@ $primary_color_hover = $colors['hover'];
                                                         <tr>
                                                            <td>
                                                                 <a href="<?= e($verification_link) ?>" target="_blank">
-                                                                    <?= lang('email_verification_button') ?>
+                                                                    <?= e($button) ?>
                                                                 </a>
                                                             </td>
                                                         </tr>
@@ -424,10 +427,10 @@ $primary_color_hover = $colors['hover'];
                                             </tbody>
                                         </table>
                                         <p class="warning-text">
-                                            <?= lang('email_verification_link_expires') ?>
+                                            <?= e($link_expires) ?>
                                         </p>
                                         <p class="warning-text">
-                                            <?= lang('email_verification_ignore_message') ?>
+                                            <?= e($ignore_message) ?>
                                         </p>
                                     </td>
                                 </tr>

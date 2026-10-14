@@ -373,4 +373,70 @@ class EmailVerificationRulesTest extends TestCase
             $this->rules()->resent_verification($record, 'new-token', new DateTimeImmutable('2026-10-14 12:03:00'))
         );
     }
+
+    public function testRescheduleWithAChangedEmailNeedsVerification(): void
+    {
+        $this->assertTrue(
+            $this->rules()->requires_email_change_verification(true, 'anna@example.com', 'anna.neu@example.com', [])
+        );
+    }
+
+    public function testRescheduleWithTheSameEmailInOtherCaseNeedsNoVerification(): void
+    {
+        $this->assertFalse(
+            $this->rules()->requires_email_change_verification(true, 'anna@example.com', ' Anna@Example.COM ', [])
+        );
+    }
+
+    public function testRescheduleWithAChangedEmailWithoutTheSettingNeedsNoVerification(): void
+    {
+        $this->assertFalse(
+            $this->rules()->requires_email_change_verification(false, 'anna@example.com', 'anna.neu@example.com', [])
+        );
+    }
+
+    public function testRescheduleWithAnEmptyEmailNeedsNoVerification(): void
+    {
+        $this->assertFalse($this->rules()->requires_email_change_verification(true, 'anna@example.com', ' ', []));
+    }
+
+    public function testChangedEmailVerifiedInThisSessionNeedsNoVerification(): void
+    {
+        $this->assertFalse(
+            $this->rules()->requires_email_change_verification(true, 'anna@example.com', 'Anna.Neu@example.com', [
+                'anna.neu@example.com'
+            ])
+        );
+    }
+
+    public function testEmailChangeVerificationStoresTheNewEmailOfTheAppointmentForTenMinutes(): void
+    {
+        $token = str_repeat('cd', 32);
+
+        $record = $this->rules()->email_change_verification(
+            ['id' => 41] + self::APPOINTMENT,
+            ' Anna.Neu@Example.com ',
+            $token,
+            new DateTimeImmutable('2026-10-14 12:00:00')
+        );
+
+        $this->assertSame(
+            [
+                'id_appointments' => 41,
+                'purpose' => 'email_change',
+                'email' => 'anna.neu@example.com',
+                'token_hash' => hash('sha256', $token),
+                'expires_datetime' => '2026-10-14 12:10:00',
+                'last_sent_datetime' => '2026-10-14 12:00:00',
+                'send_count' => 1,
+                'id_services' => 3,
+                'id_users_provider' => 2,
+                'start_datetime' => '2026-11-02 10:00:00',
+                'end_datetime' => '2026-11-02 11:00:00',
+                'notes' => 'Bitte ruhig',
+                'customer_data' => '{"email":"Anna.Neu@Example.com"}'
+            ],
+            $record
+        );
+    }
 }

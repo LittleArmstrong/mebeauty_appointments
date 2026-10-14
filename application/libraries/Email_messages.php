@@ -258,15 +258,22 @@ class Email_messages
         array $provider,
         string $recipient_email,
         array $settings,
+        bool $email_change = false,
     ): void {
-        $subject = lang('email_verification_subject');
+        // A changed email of a reschedule gets its own texts (spec 0018/05).
+        $prefix = $email_change ? 'email_verification_change_' : 'email_verification_';
+
+        $subject = lang($prefix . 'subject');
 
         $html = $this->CI->load->view(
             'emails/email_verification_email',
             [
                 'subject' => $subject,
-                'message' => lang('email_verification_message'),
+                'message' => lang($prefix . 'message'),
                 'verification_link' => $verification_link,
+                'button' => lang($prefix . 'button'),
+                'link_expires' => lang($prefix . 'link_expires'),
+                'ignore_message' => lang($prefix . 'ignore_message'),
                 'appointment' => $appointment,
                 'service' => $service,
                 'provider' => $provider,

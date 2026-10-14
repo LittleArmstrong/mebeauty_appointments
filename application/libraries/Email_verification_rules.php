@@ -9,7 +9,8 @@
  *
  * Rules:
  * - With the setting "require_email_verification" a new online booking becomes a Vormerkung, unless its email was
- *   already verified in this browser session. A reschedule via manage link needs no verification.
+ *   already verified in this browser session. A reschedule via manage link applies right away; only a changed
+ *   email waits for a link to the new address ("E-Mail-Änderung") and stays the old one until then.
  * - A verification link is valid for 10 minutes; the data to restore the booking is kept for 24 hours after the
  *   mail. An expired Vormerkung (purpose "booking") is deleted and frees its slot; a later click books it again when
  *   the slot is still free. An expired email change keeps its appointment.
@@ -110,6 +111,33 @@ class Email_verification_rules
     }
 
     /**
+     * Decide whether the email entered during a reschedule via manage link must be verified first (spec 0018/05).
+     *
+     * Only a changed email waits for the link; time and the other entries of the reschedule apply right away. An
+     * email verified in this browser session needs no further verification.
+     *
+     * @param bool $enabled Value of the setting "require_email_verification".
+     * @param string|null $stored_email Email of the appointment before the reschedule (verified address).
+     * @param string|null $entered_email Email entered in the reschedule.
+     * @param array $verified_emails Emails verified in this browser session.
+     *
+     * @return bool Returns true when the entered email becomes a pending email change.
+     */
+    public function requires_email_change_verification(
+        bool $enabled,
+        ?string $stored_email,
+        ?string $entered_email,
+        array $verified_emails
+    ): bool {
+        $entered_email = $this->normalize_email($entered_email);
+
+        return $enabled &&
+            $entered_email !== '' &&
+            $entered_email !== $this->normalize_email($stored_email) &&
+            !in_array($entered_email, $verified_emails, true);
+    }
+
+    /**
      * Add an email to the emails verified in this browser session.
      *
      * @param mixed $verified_emails Stored list (anything else than an array counts as empty).
@@ -159,6 +187,42 @@ class Email_verification_rules
             'end_datetime' => $appointment['end_datetime'],
             'notes' => $appointment['notes'] ?? null,
             'customer_data' => json_encode($customer, JSON_UNESCAPED_UNICODE)
+        ];
+    }
+
+    /**
+     * Build the verification record of a changed email during a reschedule (purpose "email_change").
+     *
+     * The record belongs to the rescheduled appointment; its expiry keeps the appointment, the email just stays the
+     * old one.
+     *
+     * @param array $appointment Rescheduled appointment (with ID).
+     * @param string $email Entered new email.
+     * @param string $token Token of the link (only its hash is stored).
+     * @param DateTimeImmutable $now Current time (database time zone).
+     *
+     * @return array Returns the record including the appointment ID.
+     */
+    public function email_change_verification(
+        array $appointment,
+        string $email,
+        string $token,
+        DateTimeImmutable $now
+    ): array {
+        return [
+            'id_appointments' => (int) $appointment['id'],
+            'purpose' => self::PURPOSE_EMAIL_CHANGE,
+            'email' => $this->normalize_email($email),
+            'token_hash' => $this->token_hash($token),
+            'expires_datetime' => $now->modify('+' . self::VALIDITY_MINUTES . ' minutes')->format('Y-m-d H:i:s'),
+            'last_sent_datetime' => $now->format('Y-m-d H:i:s'),
+            'send_count' => 1,
+            'id_services' => (int) $appointment['id_services'],
+            'id_users_provider' => (int) $appointment['id_users_provider'],
+            'start_datetime' => $appointment['start_datetime'],
+            'end_datetime' => $appointment['end_datetime'],
+            'notes' => $appointment['notes'] ?? null,
+            'customer_data' => json_encode(['email' => trim($email)], JSON_UNESCAPED_UNICODE)
         ];
     }
 
