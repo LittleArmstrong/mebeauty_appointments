@@ -8,8 +8,9 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
      * Collects all fork changes until the first production release (ADR 0005): the
      * booking deadline/buffer and timezone settings, the company-header setting, the
      * manage-deadline settings, the language-selector setting (formerly 071), the
-     * per-service slot capacity column and the appointment_contacts table (spec 0017,
-     * ADR 0008). Idempotent: only creates what is missing, so
+     * per-service slot capacity column, the appointment_contacts table (spec 0017,
+     * ADR 0008) and the email verification setting and appointment_verifications table
+     * (spec 0018). Idempotent: only creates what is missing, so
      * an existing database can be re-migrated from version 69.
      */
     public function up(): void
@@ -27,7 +28,8 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
             'manage_deadline_minutes' => '0',
             'manage_deadline_time' => '18:00',
             'manage_deadline_days' => '1',
-            'display_language_selector' => '1'
+            'display_language_selector' => '1',
+            'require_email_verification' => '0'
         ];
 
         foreach ($settings as $name => $value) {
@@ -75,13 +77,56 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                     ON UPDATE CASCADE'
             );
         }
+
+        // Marks an appointment as Vormerkung (purpose "booking") or holds a changed email (purpose "email_change")
+        // until the link is clicked. Only the token hash is stored. The restore data (service, provider, start, end,
+        // notes, customer form data) outlives the appointment of an expired Vormerkung, hence ON DELETE SET NULL.
+        if (!$this->db->table_exists('appointment_verifications')) {
+            $this->dbforge->add_field([
+                'id' => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
+                'id_appointments' => ['type' => 'INT', 'constraint' => 11, 'null' => true],
+                'purpose' => ['type' => 'VARCHAR', 'constraint' => 32, 'null' => false],
+                'email' => ['type' => 'VARCHAR', 'constraint' => 512, 'null' => false],
+                'token_hash' => ['type' => 'CHAR', 'constraint' => 64, 'null' => false],
+                'expires_datetime' => ['type' => 'DATETIME', 'null' => false],
+                'last_sent_datetime' => ['type' => 'DATETIME', 'null' => true],
+                'send_count' => ['type' => 'INT', 'constraint' => 11, 'default' => 0],
+                'id_services' => ['type' => 'INT', 'constraint' => 11, 'null' => true],
+                'id_users_provider' => ['type' => 'INT', 'constraint' => 11, 'null' => true],
+                'start_datetime' => ['type' => 'DATETIME', 'null' => true],
+                'end_datetime' => ['type' => 'DATETIME', 'null' => true],
+                'notes' => ['type' => 'TEXT', 'null' => true],
+                'customer_data' => ['type' => 'TEXT', 'null' => true],
+                'create_datetime' => ['type' => 'DATETIME', 'null' => true],
+                'update_datetime' => ['type' => 'DATETIME', 'null' => true]
+            ]);
+
+            $this->dbforge->add_key('id', true);
+            $this->dbforge->add_key('email');
+
+            $this->dbforge->create_table('appointment_verifications', true, ['engine' => 'InnoDB']);
+
+            $this->db->query(
+                'ALTER TABLE `' .
+                    $this->db->dbprefix('appointment_verifications') .
+                    '`
+                    ADD UNIQUE KEY `appointment_verifications_token_hash` (`token_hash`),
+                    ADD KEY `appointment_verifications_appointment` (`id_appointments`),
+                    ADD CONSTRAINT `appointment_verifications_appointments` FOREIGN KEY (`id_appointments`) REFERENCES `' .
+                    $this->db->dbprefix('appointments') .
+                    '` (`id`)
+                    ON DELETE SET NULL
+                    ON UPDATE CASCADE'
+            );
+        }
     }
 
     /**
      * Downgrade method.
      *
      * Destructive: deletes the settings, drops the services.slot_capacity column and
-     * the appointment_contacts table, including any data stored in them.
+     * the appointment_contacts and appointment_verifications tables, including any data
+     * stored in them.
      */
     public function down(): void
     {
@@ -99,12 +144,17 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                 'manage_deadline_minutes',
                 'manage_deadline_time',
                 'manage_deadline_days',
-                'display_language_selector'
+                'display_language_selector',
+                'require_email_verification'
             ])
             ->delete('settings');
 
         if ($this->db->field_exists('slot_capacity', 'services')) {
             $this->dbforge->drop_column('services', 'slot_capacity');
+        }
+
+        if ($this->db->table_exists('appointment_verifications')) {
+            $this->dbforge->drop_table('appointment_verifications');
         }
 
         if ($this->db->table_exists('appointment_contacts')) {

@@ -23,9 +23,15 @@
  *       Prints a translation (to compare error messages).
  *   APP_ENV=testing php tests/smoke/fixtures.php cleanup <appointment-ids> <customer-ids>
  *       Deletes the given comma-separated appointments and customers.
+ *   APP_ENV=testing php tests/smoke/fixtures.php verification-by-email <email>
+ *       Prints the newest email verification for that email (JSON, or "null"), spec 0018.
+ *   APP_ENV=testing php tests/smoke/fixtures.php verification-token <appointment-id> <token> [<minutes-back>]
+ *       Gives the verification of the appointment a known token (the smoke test reads no mails) and, with
+ *       minutes-back, moves its expiry, last mail and creation time that many minutes into the past. Prints the
+ *       verification (JSON, or "null" when the appointment has none).
  *   APP_ENV=testing php tests/smoke/fixtures.php purge
- *       Deletes every smoke customer (email smoke-…@example.com) with their appointments, e.g. left over by an
- *       aborted run.
+ *       Deletes every smoke customer (email smoke-…@example.com) with their appointments and every email
+ *       verification of a smoke email with its Vormerkung, e.g. left over by an aborted run.
  */
 
 $_SERVER['argv'] = ['fixtures', 'test'];
@@ -39,6 +45,7 @@ $CI = &get_instance();
 $CI->load->model('appointments_model');
 $CI->load->model('customers_model');
 $CI->load->model('appointment_contacts_model');
+$CI->load->model('appointment_verifications_model');
 $CI->load->model('providers_model');
 $CI->load->model('services_model');
 $CI->load->library('availability');
@@ -184,7 +191,44 @@ switch ($command) {
         }
         break;
 
+    case 'verification-by-email':
+        echo json_encode($CI->appointment_verifications_model->find_newest_by_email($arguments[0] ?? '')) . PHP_EOL;
+        break;
+
+    case 'verification-token':
+        $appointment_id = (int) ($arguments[0] ?? 0);
+        $minutes_back = (int) ($arguments[2] ?? 0);
+
+        $CI->db->set('token_hash', hash('sha256', $arguments[1] ?? ''));
+
+        foreach (['expires_datetime', 'last_sent_datetime', 'create_datetime'] as $field) {
+            $CI->db->set($field, 'DATE_SUB(`' . $field . '`, INTERVAL ' . $minutes_back . ' MINUTE)', false);
+        }
+
+        $CI->db->where('id_appointments', $appointment_id)->update('appointment_verifications');
+
+        echo json_encode($CI->appointment_verifications_model->find_by_appointment($appointment_id)) . PHP_EOL;
+        break;
+
     case 'purge':
+        $smoke_verifications = $CI->db
+            ->select('id, id_appointments')
+            ->like('email', 'smoke-', 'after')
+            ->like('email', '@example.com', 'before')
+            ->get('appointment_verifications')
+            ->result_array();
+
+        foreach ($smoke_verifications as $verification) {
+            if ($verification['id_appointments']) {
+                $CI->db->delete('appointments', [
+                    'id' => (int) $verification['id_appointments'],
+                    'id_users_customer' => null
+                ]);
+            }
+
+            $CI->db->delete('appointment_verifications', ['id' => (int) $verification['id']]);
+        }
+
         $customer_role_id = $CI->customers_model->get_customer_role_id();
 
         $smoke_customers = $CI->db
@@ -206,7 +250,9 @@ switch ($command) {
     default:
         fwrite(
             STDERR,
-            'Usage: fixtures.php setup|get|get-by-customer|customer|contact|setting|lang|cleanup|purge' . PHP_EOL
+            'Usage: fixtures.php setup|get|get-by-customer|customer|contact|setting|lang|cleanup|' .
+                'verification-by-email|verification-token|purge' .
+                PHP_EOL
         );
         exit(2);
 }

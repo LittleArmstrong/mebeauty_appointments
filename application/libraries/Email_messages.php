@@ -240,6 +240,47 @@ class Email_messages
     }
 
     /**
+     * Send the email verification link of a Vormerkung (fork, spec 0018).
+     *
+     * @param string $verification_link The verification URL.
+     * @param array $appointment Appointment data.
+     * @param array $service Service data.
+     * @param array $provider Provider data.
+     * @param string $recipient_email Recipient email address.
+     * @param array $settings App settings.
+     *
+     * @throws Exception
+     */
+    public function send_email_verification_link(
+        string $verification_link,
+        array $appointment,
+        array $service,
+        array $provider,
+        string $recipient_email,
+        array $settings,
+    ): void {
+        $subject = lang('email_verification_subject');
+
+        $html = $this->CI->load->view(
+            'emails/email_verification_email',
+            [
+                'subject' => $subject,
+                'message' => lang('email_verification_message'),
+                'verification_link' => $verification_link,
+                'appointment' => $appointment,
+                'service' => $service,
+                'provider' => $provider,
+                'settings' => $settings,
+            ],
+            true,
+        );
+
+        $php_mailer = $this->get_php_mailer($recipient_email, $subject, $html);
+
+        $php_mailer->send();
+    }
+
+    /**
      * Create PHP Mailer instance based on the email configuration.
      *
      * @param string|null $recipient_email

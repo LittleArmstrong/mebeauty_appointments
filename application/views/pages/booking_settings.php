@@ -578,6 +578,22 @@
 
                                     <div class="mb-3">
                                         <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="require-email-verification"
+                                                   data-field="require_email_verification">
+                                            <label class="form-check-label" for="require-email-verification">
+                                                <?= lang('require_email_verification') ?>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('require_email_verification_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox"
                                                    id="display-delete-personal-information"
                                                    data-field="display_delete_personal_information">

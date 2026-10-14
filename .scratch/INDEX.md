@@ -7,7 +7,7 @@
 | Spec | Status | Priorität | Erstellt | Abhängig von | Tickets offen/gesamt |
 |---|---|---|---|---|---|
 | [0017](0017-appointment-contacts/spec.md) Termin-Kontaktdaten: Kontaktdaten pro Termin, Kundendatensatz geschützt | needs-verification | P1 | 2026-10-13 | 0009 | 2/5 |
-| [0018](0018-email-verification/spec.md) E-Mail-Bestätigung mit Vormerkung | ready-for-agent | P1 | 2026-10-13 | 0017 | 5/5 |
+| [0018](0018-email-verification/spec.md) E-Mail-Bestätigung mit Vormerkung | in-progress | P1 | 2026-10-13 | 0017 | 5/5 |
 | [0019](0019-booking-footer/spec.md) Booking-Footer ausblenden: leer automatisch, per Einstellung immer | ready-for-agent | P3 | 2026-10-13 | 0017 | 1/1 |
 
 ## Abgeschlossen

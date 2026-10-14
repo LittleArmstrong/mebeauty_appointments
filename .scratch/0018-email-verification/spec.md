@@ -1,6 +1,6 @@
 # E-Mail-Bestätigung mit Vormerkung
 
-Status: ready-for-agent
+Status: in-progress
 Created: 2026-10-13
 Closed: –
 Priority: P1

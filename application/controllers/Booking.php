@@ -81,6 +81,7 @@ class Booking extends EA_Controller
         $this->load->library('availability');
         $this->load->library('booking_policy');
         $this->load->library('appointment_contact_rules');
+        $this->load->library('email_verification');
         $this->load->library('webhooks_client');
         $this->load->library('jitsi_client');
     }
@@ -551,6 +552,15 @@ class Booking extends EA_Controller
 
             $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
 
+            // With email verification a new booking is first stored as Vormerkung (spec 0018).
+            if ($this->email_verification->required($manage_mode, $customer['email'] ?? null)) {
+                $this->email_verification->start_booking($appointment, $customer, $service, $provider);
+
+                json_response(['verification_pending' => true]);
+
+                return;
+            }
+
             // The appointment is saved first; an existing customer record is only changed once it is stored.
             $this->db->trans_begin();
 
@@ -577,33 +587,7 @@ class Booking extends EA_Controller
                 throw $e;
             }
 
-            $customer = $this->customers_model->find($customer_id);
-            $appointment = $this->appointments_model->find($appointment_id);
-
-            $company_color = setting('company_color');
-
-            $settings = [
-                'company_name' => setting('company_name'),
-                'company_link' => setting('company_link'),
-                'company_email' => setting('company_email'),
-                'company_color' =>
-                    !empty($company_color) && $company_color != DEFAULT_COMPANY_COLOR ? $company_color : null,
-                'date_format' => setting('date_format'),
-                'time_format' => setting('time_format'),
-            ];
-
-            $this->synchronization->sync_appointment_saved($appointment, $service, $provider, $customer, $settings);
-
-            $this->notifications->notify_appointment_saved(
-                $appointment,
-                $service,
-                $provider,
-                $customer,
-                $settings,
-                $manage_mode,
-            );
-
-            $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_SAVE, $appointment);
+            $appointment = $this->after_appointment_saved($appointment_id, $customer_id, $manage_mode);
 
             $response = [
                 'appointment_id' => $appointment['id'],
@@ -614,6 +598,87 @@ class Booking extends EA_Controller
         } catch (Throwable $e) {
             json_exception($e);
         }
+    }
+
+    /**
+     * Confirm a Vormerkung with the link from the email verification mail (spec 0018).
+     *
+     * A valid link books the appointment like a regular online booking and redirects to the success page; an
+     * unknown or used link shows a neutral message.
+     *
+     * @param string $token Token from the link.
+     */
+    public function verify(string $token = ''): void
+    {
+        method('get');
+
+        $confirmed = $this->email_verification->confirm($token, $this->allowed_customer_fields);
+
+        if (!$confirmed) {
+            html_vars([
+                'show_message' => true,
+                'page_title' => lang('page_title') . ' ' . e(setting('company_name')),
+                ...Email_verification::invalid_page_vars(),
+                'google_analytics_code' => setting('google_analytics_code'),
+                'matomo_analytics_url' => setting('matomo_analytics_url'),
+                'matomo_analytics_site_id' => setting('matomo_analytics_site_id'),
+                'display_login_button' => setting('display_login_button'),
+                'legal_notice_url' => setting('legal_notice_url'),
+                'imprint_url' => setting('imprint_url'),
+            ]);
+
+            $this->load->view('pages/booking_message');
+
+            return;
+        }
+
+        $appointment = $this->after_appointment_saved($confirmed['appointment_id'], $confirmed['customer_id'], false);
+
+        redirect('booking_confirmation/of/' . $appointment['hash']);
+    }
+
+    /**
+     * Run Google sync, notifications and webhook of a stored online booking.
+     *
+     * @param int $appointment_id Appointment ID.
+     * @param int $customer_id Customer ID.
+     * @param bool $manage_mode Whether the booking was a reschedule.
+     *
+     * @return array Returns the stored appointment.
+     */
+    protected function after_appointment_saved(int $appointment_id, int $customer_id, bool $manage_mode): array
+    {
+        $customer = $this->customers_model->find($customer_id);
+        $appointment = $this->appointments_model->find($appointment_id);
+        $service = $this->services_model->find($appointment['id_services']);
+        $provider = $this->providers_model->find($appointment['id_users_provider']);
+
+        $company_color = setting('company_color');
+
+        $settings = [
+            'company_name' => setting('company_name'),
+            'company_link' => setting('company_link'),
+            'company_email' => setting('company_email'),
+            'company_color' =>
+                !empty($company_color) && $company_color != DEFAULT_COMPANY_COLOR ? $company_color : null,
+            'date_format' => setting('date_format'),
+            'time_format' => setting('time_format'),
+        ];
+
+        $this->synchronization->sync_appointment_saved($appointment, $service, $provider, $customer, $settings);
+
+        $this->notifications->notify_appointment_saved(
+            $appointment,
+            $service,
+            $provider,
+            $customer,
+            $settings,
+            $manage_mode,
+        );
+
+        $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_SAVE, $appointment);
+
+        return $appointment;
     }
 
     /**

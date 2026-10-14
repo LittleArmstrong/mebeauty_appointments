@@ -53,6 +53,10 @@
     'display_privacy_policy' => vars('display_privacy_policy'),
 ]); ?>
 
+<!-- Email Verification Notice -->
+
+<?php component('booking_verification_notice'); ?>
+
 <?php endif; ?>
 
 <?php end_section('content'); ?>

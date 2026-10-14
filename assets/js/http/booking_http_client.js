@@ -251,6 +251,14 @@ App.Http.Booking = (function () {
                     return false;
                 }
 
+                // Email verification (spec 0018): the appointment is reserved until the link in the mail is clicked.
+                if (response.verification_pending) {
+                    $('.wizard-frame').hide();
+                    $('#wizard-frame-verification').show();
+
+                    return false;
+                }
+
                 window.location.href = App.Utils.Url.siteUrl('booking_confirmation/of/' + response.appointment_hash);
             })
             .fail(() => {
