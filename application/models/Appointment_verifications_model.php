@@ -193,6 +193,52 @@ class Appointment_verifications_model extends EA_Model
     }
 
     /**
+     * Delete expired Vormerkungen and void verifications (cleanup, spec 0018).
+     *
+     * An expired verification with a purpose in $purposes_freeing_slot loses its appointment (only one without
+     * customer); the verification itself stays as restore data (foreign key ON DELETE SET NULL). A void verification
+     * is deleted.
+     *
+     * @param string $expired_cutoff Verifications with expires_datetime <= this are expired (Y-m-d H:i:s).
+     * @param string $void_cutoff Verifications with expires_datetime <= this are void (Y-m-d H:i:s).
+     * @param array $purposes_freeing_slot Purposes whose expiry deletes the appointment.
+     *
+     * @return array Returns ['appointments' => int, 'verifications' => int] with the numbers of deleted rows.
+     */
+    public function delete_expired(string $expired_cutoff, string $void_cutoff, array $purposes_freeing_slot): array
+    {
+        $deleted = ['appointments' => 0, 'verifications' => 0];
+
+        if ($purposes_freeing_slot !== []) {
+            $appointment_ids = array_column(
+                $this->db
+                    ->select('id_appointments')
+                    ->where('id_appointments IS NOT NULL')
+                    ->where('expires_datetime <=', $expired_cutoff)
+                    ->where_in('purpose', $purposes_freeing_slot)
+                    ->get('appointment_verifications')
+                    ->result_array(),
+                'id_appointments'
+            );
+
+            if ($appointment_ids !== []) {
+                $this->db
+                    ->where_in('id', array_map('intval', $appointment_ids))
+                    ->where('id_users_customer IS NULL')
+                    ->delete('appointments');
+
+                $deleted['appointments'] = $this->db->affected_rows();
+            }
+        }
+
+        $this->db->where('expires_datetime <=', $void_cutoff)->delete('appointment_verifications');
+
+        $deleted['verifications'] = $this->db->affected_rows();
+
+        return $deleted;
+    }
+
+    /**
      * Get the first verification of a prepared query.
      *
      * @param CI_DB_query_builder $query Query with where/order conditions.

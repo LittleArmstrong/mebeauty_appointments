@@ -33,6 +33,7 @@ class Cleanup
         $this->CI = &get_instance();
 
         $this->CI->load->model('customers_model');
+        $this->CI->load->library('email_verification');
     }
 
     /**
@@ -45,6 +46,7 @@ class Cleanup
         $this->cleanup_sessions();
         $this->cleanup_logs();
         $this->cleanup_cache();
+        $this->cleanup_email_verifications();
         $this->cleanup_customer_data();
     }
 
@@ -175,5 +177,19 @@ class Cleanup
         }
 
         response(PHP_EOL . "⇾ Data retention cleanup completed. Deleted {$deleted_count} customer(s)." . PHP_EOL . PHP_EOL);
+    }
+
+    /**
+     * Delete expired Vormerkungen and void email verification restore data (spec 0018).
+     */
+    public function cleanup_email_verifications(): void
+    {
+        $deleted = $this->CI->email_verification->cleanup_expired();
+
+        response(
+            "⇾ Email verification cleanup completed. Deleted {$deleted['appointments']} expired Vormerkung(s) and " .
+                "{$deleted['verifications']} void verification(s)." .
+                PHP_EOL,
+        );
     }
 }

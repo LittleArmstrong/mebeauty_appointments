@@ -18,6 +18,16 @@ class Email_verification
     public const SESSION_KEY = 'verified_emails';
 
     /**
+     * Result of confirm(): the booking is confirmed.
+     */
+    public const RESULT_CONFIRMED = 'confirmed';
+
+    /**
+     * Result of confirm(): the Vormerkung expired and its slot is taken ("Leider abgelaufen").
+     */
+    public const RESULT_EXPIRED = 'expired';
+
+    /**
      * @var EA_Controller|CI_Controller
      */
     protected EA_Controller|CI_Controller $CI;
@@ -32,6 +42,8 @@ class Email_verification
         $this->CI->load->model('appointments_model');
         $this->CI->load->model('customers_model');
         $this->CI->load->model('appointment_verifications_model');
+        $this->CI->load->model('appointment_contacts_model');
+        $this->CI->load->model('services_model');
 
         $this->CI->load->library('email_verification_rules');
         $this->CI->load->library('appointment_contact_rules');
@@ -120,45 +132,80 @@ class Email_verification
     }
 
     /**
+     * Delete expired Vormerkungen (their slots become free) and void restore data (lazy cleanup, spec 0018).
+     *
+     * Runs before availability requests, on submit, when the backend calendar loads and in `console cleanup`, so
+     * no cron job is needed.
+     *
+     * @return array Returns ['appointments' => int, 'verifications' => int] with the numbers of deleted rows.
+     */
+    public function cleanup_expired(): array
+    {
+        $rules = $this->CI->email_verification_rules;
+
+        $cutoffs = $rules->cleanup_cutoffs(new DateTimeImmutable('now'));
+
+        return $this->CI->appointment_verifications_model->delete_expired(
+            $cutoffs['expired'],
+            $cutoffs['void'],
+            $rules->purposes_freeing_slot()
+        );
+    }
+
+    /**
      * Confirm a Vormerkung with the token from the verification link.
      *
      * Assigns the customer with the verified email (or creates it), updates the customer record by the rules of
      * spec 0017 and removes the verification, all in one transaction. The link works only once. The email counts as
      * verified in the current browser session afterwards.
      *
+     * A late click (Vormerkung expired, restore data still there) books the appointment again from the restore data
+     * when $is_available confirms its slot is still free; otherwise the result is "expired".
+     *
      * @param string $token Token from the link.
      * @param array $allowed_customer_fields Customer fields an online booking may write.
+     * @param callable $is_available Availability check of the booking flow: fn(array $appointment): bool.
      *
-     * @return array|null Returns ['appointment_id' => int, 'customer_id' => int], or null when the link is unknown,
-     * already used or its Vormerkung is gone.
+     * @return array|null Returns ['result' => RESULT_CONFIRMED, 'appointment_id' => int, 'customer_id' => int],
+     * ['result' => RESULT_EXPIRED], or null when the link is unknown, used, void or its Vormerkung is gone.
      *
      * @throws Throwable
      */
-    public function confirm(string $token, array $allowed_customer_fields): ?array
+    public function confirm(string $token, array $allowed_customer_fields, callable $is_available): ?array
     {
         if (!preg_match('/^[a-zA-Z0-9]{1,128}$/', $token)) {
             return null;
         }
 
-        $verification = $this->CI->appointment_verifications_model->find_by_token_hash(
-            $this->CI->email_verification_rules->token_hash($token)
-        );
+        $this->cleanup_expired();
 
-        if (
-            !$verification ||
-            $verification['purpose'] !== Email_verification_rules::PURPOSE_BOOKING ||
-            empty($verification['id_appointments'])
-        ) {
+        $rules = $this->CI->email_verification_rules;
+
+        $verification = $this->CI->appointment_verifications_model->find_by_token_hash($rules->token_hash($token));
+
+        if (!$verification || $verification['purpose'] !== Email_verification_rules::PURPOSE_BOOKING) {
             return null;
         }
 
-        $appointment = $this->CI->appointments_model->get(['id' => $verification['id_appointments']])[0] ?? null;
+        $state = $rules->state($verification, new DateTimeImmutable('now'));
 
-        if (!$appointment || !empty($appointment['id_users_customer'])) {
+        if ($state === Email_verification_rules::STATE_VALID && !empty($verification['id_appointments'])) {
+            $appointment = $this->CI->appointments_model->get(['id' => $verification['id_appointments']])[0] ?? null;
+
+            if (!$appointment || !empty($appointment['id_users_customer'])) {
+                return null;
+            }
+        } elseif ($state === Email_verification_rules::STATE_RESTORABLE && empty($verification['id_appointments'])) {
+            $appointment = $this->restored_appointment($verification);
+
+            if (!$is_available($appointment)) {
+                return ['result' => self::RESULT_EXPIRED];
+            }
+        } else {
             return null;
         }
 
-        $customer = $this->CI->email_verification_rules->customer_input($verification);
+        $customer = $rules->customer_input($verification);
 
         $this->CI->customers_model->only($customer, $allowed_customer_fields);
 
@@ -190,7 +237,14 @@ class Email_verification
 
             $appointment['id_users_customer'] = $customer_id;
 
-            $this->CI->appointments_model->save($appointment);
+            $appointment_id = $this->CI->appointments_model->save($appointment);
+
+            if (empty($verification['id_appointments'])) {
+                $this->CI->appointment_contacts_model->save_for_appointment(
+                    $appointment_id,
+                    $this->CI->appointment_contact_rules->contact($customer)
+                );
+            }
 
             if ($existing_customer) {
                 $this->CI->customers_model->save($customer_record);
@@ -204,13 +258,35 @@ class Email_verification
         }
 
         session([
-            self::SESSION_KEY => $this->CI->email_verification_rules->remember_verified(
-                session(self::SESSION_KEY),
-                $verification['email']
-            )
+            self::SESSION_KEY => $rules->remember_verified(session(self::SESSION_KEY), $verification['email'])
         ]);
 
-        return ['appointment_id' => (int) $appointment['id'], 'customer_id' => (int) $customer_id];
+        return [
+            'result' => self::RESULT_CONFIRMED,
+            'appointment_id' => (int) $appointment_id,
+            'customer_id' => (int) $customer_id
+        ];
+    }
+
+    /**
+     * Get the message page variables for an expired Vormerkung whose slot is taken ("Leider abgelaufen").
+     *
+     * @return array Returns message_title, message_text and message_icon for the booking_message page.
+     */
+    public static function expired_page_vars(): array
+    {
+        return [
+            'message_title' => lang('email_verification_expired_title'),
+            'message_text' =>
+                '<p>' .
+                e(lang('email_verification_expired_text')) .
+                '</p><p><a href="' .
+                e(site_url()) .
+                '">' .
+                e(lang('go_to_booking_page')) .
+                '</a></p>',
+            'message_icon' => base_url('assets/img/error.png')
+        ];
     }
 
     /**
@@ -232,6 +308,34 @@ class Email_verification
                 '</a></p>',
             'message_icon' => base_url('assets/img/error.png')
         ];
+    }
+
+    /**
+     * Build the appointment of an expired Vormerkung again from its restore data, completed like an online booking.
+     *
+     * @param array $verification Stored verification record.
+     *
+     * @return array Returns the appointment fields without customer.
+     */
+    protected function restored_appointment(array $verification): array
+    {
+        $service = $this->CI->services_model->find((int) $verification['id_services']);
+
+        $status_options = json_decode(setting('appointment_status_options', '[]'), true) ?? [];
+
+        $appointment = $this->CI->email_verification_rules->restored_appointment(
+            $verification,
+            $service,
+            $status_options[0] ?? null
+        );
+
+        if (setting('jitsi_enabled') === '1') {
+            $this->CI->load->library('jitsi_client');
+
+            $appointment['meeting_link'] = $this->CI->jitsi_client->generate_link();
+        }
+
+        return $appointment;
     }
 
     /**

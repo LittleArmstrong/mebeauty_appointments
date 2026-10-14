@@ -8,7 +8,10 @@
 # - the verification link (known token set by tests/smoke/fixtures.php, opened in another "browser") assigns
 #   a customer, removes the verification and redirects to the success page;
 # - a second click shows the neutral "invalid" message;
-# - a second booking with the verified email in that browser session is booked right away.
+# - a second booking with the verified email in that browser session is booked right away;
+# - a backdated (expired) Vormerkung frees its slot on the next availability request; a late click books it again
+#   while the slot is free and shows "expired" once the slot is taken; after 24 hours the cleanup deletes the
+#   restore data and the link is invalid.
 # All test data is removed on exit.
 #
 # Requires the docker stack to be up (php-fpm, nginx, mysql, mailpit) and a provider with a service.
@@ -175,6 +178,79 @@ if [ "$STATUS" = "200" ] && json "'appointment_hash' in d" <"$TMP/body" | grep -
     fi
 else
     fail "second booking in the verified session (HTTP $STATUS, $(cat "$TMP/body"))"
+fi
+
+# 5. Expiry: a Vormerkung backdated by 11 minutes frees its slot (lazy cleanup before the availability request).
+fixtures cleanup "$SECOND_APPOINTMENT" "" >/dev/null
+LATE_EMAIL="smoke-verify-late-$$-$RANDOM@example.com"
+register "$TMP/late" "$SECOND" "$LATE_EMAIL" >/dev/null
+LATE_APPOINTMENT=$(fixtures verification-by-email "$LATE_EMAIL" | json "d and d['id_appointments']")
+CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$LATE_APPOINTMENT"
+LATE_TOKEN="smokelate$$$RANDOM"
+fixtures verification-token "$LATE_APPOINTMENT" "$LATE_TOKEN" 11 >/dev/null
+
+if available_hours | json "'$SECOND_HOUR' in d" | grep -q True \
+    && [ "$(fixtures get "$LATE_APPOINTMENT")" = "null" ] \
+    && [ "$(fixtures verification-by-email "$LATE_EMAIL" | json "d and d['id_appointments']")" = "None" ]; then
+    ok "expired Vormerkung is deleted and frees its slot, restore data stays"
+else
+    fail "after expiry: slots $(available_hours), appointment $(fixtures get "$LATE_APPOINTMENT"), verification $(fixtures verification-by-email "$LATE_EMAIL")"
+fi
+
+# 6. Late click while the slot is free: booked again with the customer of the email.
+RESULT=$(open_link "$TMP/late-phone" "$LATE_TOKEN")
+LATE_HASH="${RESULT##*booking_confirmation/of/}"
+LATE_BOOKED=$(fixtures appointment-by-hash "$LATE_HASH")
+LATE_CUSTOMER=$(echo "$LATE_BOOKED" | json "d and d['id_users_customer']")
+if [[ "${RESULT%% *}" == 30? ]] && [[ "$RESULT" == *"booking_confirmation/of/"* ]] \
+    && [ "$(echo "$LATE_BOOKED" | json "d and d['start_datetime']")" = "$SECOND" ] \
+    && [ "$LATE_CUSTOMER" != "None" ] \
+    && [ "$(fixtures customer "$LATE_CUSTOMER" | json "d['email']")" = "$LATE_EMAIL" ] \
+    && [ "$(contact_field "$(echo "$LATE_BOOKED" | json "d['id']")" first_name)" = "Vera" ] \
+    && [ "$(fixtures verification-by-email "$LATE_EMAIL")" = "null" ]; then
+    CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$(echo "$LATE_BOOKED" | json "d['id']")"
+    CREATED_CUSTOMERS="$CREATED_CUSTOMERS,$LATE_CUSTOMER"
+    ok "late click with a free slot books the appointment again"
+else
+    fail "late click with a free slot: $RESULT, appointment $LATE_BOOKED, verification $(fixtures verification-by-email "$LATE_EMAIL")"
+fi
+
+# 7. Late click after the slot was taken: "expired" page. The slot is taken by a booking in the verified phone
+#    session, whose submit cleans up the expired Vormerkung first.
+fixtures cleanup "$(echo "$LATE_BOOKED" | json "d and d['id']")" "" >/dev/null
+TAKEN_EMAIL="smoke-verify-taken-$$-$RANDOM@example.com"
+register "$TMP/taken" "$SECOND" "$TAKEN_EMAIL" >/dev/null
+TAKEN_APPOINTMENT=$(fixtures verification-by-email "$TAKEN_EMAIL" | json "d and d['id_appointments']")
+CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$TAKEN_APPOINTMENT"
+TAKEN_TOKEN="smoketaken$$$RANDOM"
+fixtures verification-token "$TAKEN_APPOINTMENT" "$TAKEN_TOKEN" 11 >/dev/null
+
+STATUS=$(register "$PHONE" "$SECOND" "$EMAIL")
+if [ "$STATUS" = "200" ] && json "'appointment_hash' in d" <"$TMP/body" | grep -q True; then
+    CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$(json "d['appointment_id']" <"$TMP/body")"
+    ok "submit cleans up the expired Vormerkung, the slot can be booked"
+else
+    fail "booking the slot of an expired Vormerkung (HTTP $STATUS, $(cat "$TMP/body"))"
+fi
+
+RESULT=$(open_link "$TMP/taken-phone" "$TAKEN_TOKEN")
+EXPIRED=$(fixtures lang email_verification_expired_title | tail -1)
+if [ "${RESULT%% *}" = "200" ] && grep -qF "$EXPIRED" "$TMP/page" \
+    && [ "$(fixtures verification-by-email "$TAKEN_EMAIL" | json "d and d['id_appointments']")" = "None" ]; then
+    ok "late click with a taken slot shows the expired page"
+else
+    fail "late click with a taken slot: $RESULT, verification $(fixtures verification-by-email "$TAKEN_EMAIL")"
+fi
+
+# 8. After 24 hours the cleanup (as in console cleanup) deletes the restore data and the link is invalid.
+fixtures verification-token "$TAKEN_EMAIL" "$TAKEN_TOKEN" 1440 >/dev/null
+fixtures cleanup-verifications >/dev/null
+RESULT=$(open_link "$TMP/taken-phone" "$TAKEN_TOKEN")
+if [ "$(fixtures verification-by-email "$TAKEN_EMAIL")" = "null" ] && [ "${RESULT%% *}" = "200" ] \
+    && grep -qF "$INVALID" "$TMP/page"; then
+    ok "after 24 hours the cleanup deletes the restore data, the link is invalid"
+else
+    fail "after 24 hours: verification $(fixtures verification-by-email "$TAKEN_EMAIL"), link $RESULT"
 fi
 
 exit $FAIL

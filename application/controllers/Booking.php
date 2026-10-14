@@ -425,6 +425,9 @@ class Booking extends EA_Controller
                 $this->check_manage_lock($original_appointment);
             }
 
+            // Expired Vormerkungen free their slots first (spec 0018).
+            $this->email_verification->cleanup_expired();
+
             // Check appointment availability before registering it to the database.
             $appointment['id_users_provider'] = $this->check_datetime_availability($appointment);
 
@@ -612,13 +615,19 @@ class Booking extends EA_Controller
     {
         method('get');
 
-        $confirmed = $this->email_verification->confirm($token, $this->allowed_customer_fields);
+        $confirmed = $this->email_verification->confirm(
+            $token,
+            $this->allowed_customer_fields,
+            fn(array $appointment) => (bool) $this->check_datetime_availability($appointment),
+        );
 
-        if (!$confirmed) {
+        if (($confirmed['result'] ?? null) !== Email_verification::RESULT_CONFIRMED) {
             html_vars([
                 'show_message' => true,
                 'page_title' => lang('page_title') . ' ' . e(setting('company_name')),
-                ...Email_verification::invalid_page_vars(),
+                ...($confirmed
+                    ? Email_verification::expired_page_vars()
+                    : Email_verification::invalid_page_vars()),
                 'google_analytics_code' => setting('google_analytics_code'),
                 'matomo_analytics_url' => setting('matomo_analytics_url'),
                 'matomo_analytics_site_id' => setting('matomo_analytics_site_id'),
@@ -895,6 +904,9 @@ class Booking extends EA_Controller
             check('manage_mode', 'bool|null');
             check('appointment_hash', 'string|null');
 
+            // Expired Vormerkungen free their slots first (spec 0018).
+            $this->email_verification->cleanup_expired();
+
             $provider_id = request('provider_id');
             $service_id = request('service_id');
             $selected_date = request('selected_date');
@@ -984,6 +996,9 @@ class Booking extends EA_Controller
             check('appointment_hash', 'string|null');
             check('manage_mode', 'bool|null');
             check('selected_date', 'date');
+
+            // Expired Vormerkungen free their slots first (spec 0018).
+            $this->email_verification->cleanup_expired();
 
             $provider_id = request('provider_id');
             $service_id = request('service_id');

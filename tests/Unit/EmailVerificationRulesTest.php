@@ -143,4 +143,90 @@ class EmailVerificationRulesTest extends TestCase
         $this->assertSame(self::CUSTOMER, $this->rules()->customer_input($record));
         $this->assertSame([], $this->rules()->customer_input(['customer_data' => 'not json']));
     }
+
+    private const SENT = ['expires_datetime' => '2026-10-14 12:10:00'];
+
+    public function testVormerkungIsValidUntilTenMinutesAfterTheMail(): void
+    {
+        $this->assertSame(
+            \Email_verification_rules::STATE_VALID,
+            $this->rules()->state(self::SENT, new DateTimeImmutable('2026-10-14 12:09:59'))
+        );
+    }
+
+    public function testVormerkungIsExpiredButRestorableFromTenMinutesAfterTheMail(): void
+    {
+        $this->assertSame(
+            \Email_verification_rules::STATE_RESTORABLE,
+            $this->rules()->state(self::SENT, new DateTimeImmutable('2026-10-14 12:10:00'))
+        );
+    }
+
+    public function testVormerkungIsRestorableUntilTwentyFourHoursAfterTheMail(): void
+    {
+        $this->assertSame(
+            \Email_verification_rules::STATE_RESTORABLE,
+            $this->rules()->state(self::SENT, new DateTimeImmutable('2026-10-15 11:59:59'))
+        );
+    }
+
+    public function testVormerkungIsVoidTwentyFourHoursAfterTheMail(): void
+    {
+        $this->assertSame(
+            \Email_verification_rules::STATE_VOID,
+            $this->rules()->state(self::SENT, new DateTimeImmutable('2026-10-15 12:00:00'))
+        );
+    }
+
+    public function testCleanupCutoffsMatchTheStateBoundaries(): void
+    {
+        $cutoffs = $this->rules()->cleanup_cutoffs(new DateTimeImmutable('2026-10-15 12:00:00'));
+
+        // Rows with expires_datetime <= cutoff: expired at 12:00:00 on the 15th, void when the mail went out at
+        // 12:00:00 on the 14th (expiry 12:10:00), see the state tests above.
+        $this->assertSame('2026-10-15 12:00:00', $cutoffs['expired']);
+        $this->assertSame('2026-10-14 12:10:00', $cutoffs['void']);
+    }
+
+    public function testExpiryOfANewBookingFreesItsSlot(): void
+    {
+        $this->assertTrue($this->rules()->expiry_frees_slot(\Email_verification_rules::PURPOSE_BOOKING));
+    }
+
+    public function testExpiryOfAnEmailChangeKeepsTheAppointment(): void
+    {
+        $this->assertFalse($this->rules()->expiry_frees_slot(\Email_verification_rules::PURPOSE_EMAIL_CHANGE));
+        $this->assertSame([\Email_verification_rules::PURPOSE_BOOKING], $this->rules()->purposes_freeing_slot());
+    }
+
+    public function testRestoredAppointmentComesFromTheStoredBookingAndTheService(): void
+    {
+        $record = $this->rules()->booking_verification(
+            self::APPOINTMENT,
+            self::CUSTOMER,
+            'token',
+            new DateTimeImmutable('2026-10-14 12:00:00')
+        );
+
+        $appointment = $this->rules()->restored_appointment(
+            $record,
+            ['color' => '#aabbcc', 'location' => 'Salon Mitte'],
+            'Booked'
+        );
+
+        $this->assertSame(
+            [
+                'id_services' => 3,
+                'id_users_provider' => 2,
+                'start_datetime' => '2026-11-02 10:00:00',
+                'end_datetime' => '2026-11-02 11:00:00',
+                'notes' => 'Bitte ruhig',
+                'location' => 'Salon Mitte',
+                'color' => '#aabbcc',
+                'status' => 'Booked',
+                'is_unavailability' => false
+            ],
+            $appointment
+        );
+    }
 }

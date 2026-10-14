@@ -11,6 +11,8 @@
  *       provider/service and free target slots.
  *   APP_ENV=testing php tests/smoke/fixtures.php get <appointment-id>
  *       Prints the stored appointment (JSON, or "null" when it does not exist).
+ *   APP_ENV=testing php tests/smoke/fixtures.php appointment-by-hash <hash>
+ *       Prints the appointment with that manage link hash (JSON, or "null").
  *   APP_ENV=testing php tests/smoke/fixtures.php get-by-customer <customer-id> <start Y-m-d H:i:s>
  *       Prints the customer's appointment with that start (JSON, or "null").
  *   APP_ENV=testing php tests/smoke/fixtures.php customer <customer-id> [<field> <value>]
@@ -25,10 +27,13 @@
  *       Deletes the given comma-separated appointments and customers.
  *   APP_ENV=testing php tests/smoke/fixtures.php verification-by-email <email>
  *       Prints the newest email verification for that email (JSON, or "null"), spec 0018.
- *   APP_ENV=testing php tests/smoke/fixtures.php verification-token <appointment-id> <token> [<minutes-back>]
- *       Gives the verification of the appointment a known token (the smoke test reads no mails) and, with
- *       minutes-back, moves its expiry, last mail and creation time that many minutes into the past. Prints the
- *       verification (JSON, or "null" when the appointment has none).
+ *   APP_ENV=testing php tests/smoke/fixtures.php verification-token <appointment-id|email> <token> [<minutes-back>]
+ *       Gives the verification of the appointment (or the newest one of the email, e.g. after its expired
+ *       Vormerkung was deleted) a known token (the smoke test reads no mails) and, with minutes-back, moves its
+ *       expiry, last mail and creation time that many minutes into the past. Prints the verification (JSON, or
+ *       "null" when there is none).
+ *   APP_ENV=testing php tests/smoke/fixtures.php cleanup-verifications
+ *       Runs the email verification part of `console cleanup` (Cleanup::cleanup_email_verifications()).
  *   APP_ENV=testing php tests/smoke/fixtures.php purge
  *       Deletes every smoke customer (email smoke-…@example.com) with their appointments and every email
  *       verification of a smoke email with its Vormerkung, e.g. left over by an aborted run.
@@ -147,6 +152,11 @@ switch ($command) {
         echo json_encode($rows[0] ?? null) . PHP_EOL;
         break;
 
+    case 'appointment-by-hash':
+        $rows = $CI->appointments_model->get(['hash' => (string) ($arguments[0] ?? '')]);
+        echo json_encode($rows[0] ?? null) . PHP_EOL;
+        break;
+
     case 'get-by-customer':
         $rows = $CI->appointments_model->get([
             'id_users_customer' => (int) ($arguments[0] ?? 0),
@@ -196,8 +206,17 @@ switch ($command) {
         break;
 
     case 'verification-token':
-        $appointment_id = (int) ($arguments[0] ?? 0);
+        $key = $arguments[0] ?? '';
         $minutes_back = (int) ($arguments[2] ?? 0);
+
+        $verification = str_contains($key, '@')
+            ? $CI->appointment_verifications_model->find_newest_by_email($key)
+            : $CI->appointment_verifications_model->find_by_appointment((int) $key);
+
+        if (!$verification) {
+            echo 'null' . PHP_EOL;
+            break;
+        }
 
         $CI->db->set('token_hash', hash('sha256', $arguments[1] ?? ''));
 
@@ -205,9 +224,16 @@ switch ($command) {
             $CI->db->set($field, 'DATE_SUB(`' . $field . '`, INTERVAL ' . $minutes_back . ' MINUTE)', false);
         }
 
-        $CI->db->where('id_appointments', $appointment_id)->update('appointment_verifications');
+        $CI->db->where('id', $verification['id'])->update('appointment_verifications');
 
-        echo json_encode($CI->appointment_verifications_model->find_by_appointment($appointment_id)) . PHP_EOL;
+        echo json_encode(
+            $CI->appointment_verifications_model->find_by_token_hash(hash('sha256', $arguments[1] ?? ''))
+        ) . PHP_EOL;
+        break;
+
+    case 'cleanup-verifications':
+        $CI->load->library('cleanup');
+        $CI->cleanup->cleanup_email_verifications();
         break;
 
     case 'purge':
@@ -250,8 +276,8 @@ switch ($command) {
     default:
         fwrite(
             STDERR,
-            'Usage: fixtures.php setup|get|get-by-customer|customer|contact|setting|lang|cleanup|' .
-                'verification-by-email|verification-token|purge' .
+            'Usage: fixtures.php setup|get|appointment-by-hash|get-by-customer|customer|contact|setting|lang|cleanup|' .
+                'verification-by-email|verification-token|cleanup-verifications|purge' .
                 PHP_EOL
         );
         exit(2);

@@ -88,6 +88,7 @@ class Calendar extends EA_Controller
         $this->load->library('permissions');
         $this->load->library('jitsi_client');
         $this->load->library('appointment_contact_rules');
+        $this->load->library('email_verification');
     }
 
     /**
@@ -686,6 +687,9 @@ class Calendar extends EA_Controller
             check('start_date', 'date');
             check('end_date', 'date');
 
+            // Expired Vormerkungen free their slots before the calendar loads (spec 0018).
+            $this->email_verification->cleanup_expired();
+
             $start_date = request('start_date') . ' 00:00:00';
 
             $end_date = request('end_date') . ' 23:59:59';
@@ -791,6 +795,9 @@ class Calendar extends EA_Controller
             check('filter_type', 'string|null');
             check('start_date', 'date');
             check('end_date', 'date');
+
+            // Expired Vormerkungen free their slots before the calendar loads (spec 0018).
+            $this->email_verification->cleanup_expired();
 
             $record_id = request('record_id');
 
