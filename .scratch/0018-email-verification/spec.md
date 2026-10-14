@@ -1,6 +1,6 @@
 # E-Mail-Bestätigung mit Vormerkung
 
-Status: in-progress
+Status: needs-verification
 Created: 2026-10-13
 Closed: –
 Priority: P1
