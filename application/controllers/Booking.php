@@ -647,6 +647,24 @@ class Booking extends EA_Controller
     }
 
     /**
+     * Send the verification mail of this browser session's Vormerkung again ("erneut senden", spec 0018).
+     *
+     * Takes no email or ID from the client: the Vormerkung comes from the session.
+     */
+    public function resend_verification(): void
+    {
+        try {
+            method('post');
+
+            $this->verify_csrf_token();
+
+            json_response($this->email_verification->resend());
+        } catch (Throwable $e) {
+            json_exception($e);
+        }
+    }
+
+    /**
      * Run Google sync, notifications and webhook of a stored online booking.
      *
      * @param int $appointment_id Appointment ID.

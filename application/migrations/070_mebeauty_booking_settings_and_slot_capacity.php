@@ -9,8 +9,8 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
      * booking deadline/buffer and timezone settings, the company-header setting, the
      * manage-deadline settings, the language-selector setting (formerly 071), the
      * per-service slot capacity column, the appointment_contacts table (spec 0017,
-     * ADR 0008) and the email verification setting and appointment_verifications table
-     * (spec 0018). Idempotent: only creates what is missing, so
+     * ADR 0008) and the email verification setting, the appointment_verifications table
+     * and the email_verification_limits table (spec 0018). Idempotent: only creates what is missing, so
      * an existing database can be re-migrated from version 69.
      */
     public function up(): void
@@ -119,13 +119,37 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                     ON UPDATE CASCADE'
             );
         }
+
+        // Send limit of the verification mails per email (spec 0018/03): the window of at most 5 mails per hour and
+        // the last mail (60 seconds until a resend). Kept apart from the verifications, so it counts across
+        // Vormerkungen and survives a confirmed or deleted one.
+        if (!$this->db->table_exists('email_verification_limits')) {
+            $this->dbforge->add_field([
+                'id' => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
+                'email' => ['type' => 'VARCHAR', 'constraint' => 512, 'null' => false],
+                'window_start_datetime' => ['type' => 'DATETIME', 'null' => false],
+                'window_count' => ['type' => 'INT', 'constraint' => 11, 'default' => 0],
+                'last_sent_datetime' => ['type' => 'DATETIME', 'null' => false]
+            ]);
+
+            $this->dbforge->add_key('id', true);
+            $this->dbforge->add_key('last_sent_datetime');
+
+            $this->dbforge->create_table('email_verification_limits', true, ['engine' => 'InnoDB']);
+
+            $this->db->query(
+                'ALTER TABLE `' .
+                    $this->db->dbprefix('email_verification_limits') .
+                    '` ADD UNIQUE KEY `email_verification_limits_email` (`email`)'
+            );
+        }
     }
 
     /**
      * Downgrade method.
      *
      * Destructive: deletes the settings, drops the services.slot_capacity column and
-     * the appointment_contacts and appointment_verifications tables, including any data
+     * the appointment_contacts, appointment_verifications and email_verification_limits tables, including any data
      * stored in them.
      */
     public function down(): void
@@ -151,6 +175,10 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
 
         if ($this->db->field_exists('slot_capacity', 'services')) {
             $this->dbforge->drop_column('services', 'slot_capacity');
+        }
+
+        if ($this->db->table_exists('email_verification_limits')) {
+            $this->dbforge->drop_table('email_verification_limits');
         }
 
         if ($this->db->table_exists('appointment_verifications')) {

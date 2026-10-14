@@ -1,7 +1,8 @@
 <?php
 /**
  * Notice after submitting a booking that needs email verification (fork, spec 0018): the appointment is reserved as
- * Vormerkung until the link in the mail is clicked. Hidden until the booking HTTP client shows it.
+ * Vormerkung until the link in the mail is clicked; the customer can request the mail again ("erneut senden", 60 seconds
+ * pause, at most 5 mails per email and hour). Hidden until the booking HTTP client shows it.
  */
 ?>
 
@@ -23,5 +24,12 @@
         <p class="text-muted small mb-4">
             <?= lang('check_spam_folder') ?>
         </p>
+
+        <button type="button" id="resend-verification" class="btn btn-outline-primary">
+            <i class="fas fa-paper-plane me-2"></i>
+            <?= lang('email_verification_resend') ?>
+        </button>
+
+        <p id="resend-verification-feedback" class="small mx-auto mt-3" style="display: none; max-width: 630px"></p>
     </div>
 </div>

@@ -188,6 +188,16 @@ class EmailVerificationRulesTest extends TestCase
         $this->assertSame('2026-10-14 12:10:00', $cutoffs['void']);
     }
 
+    public function testCleanupCutoffForSendLimitsIsOneHourAfterTheLastMail(): void
+    {
+        // A limit whose last mail went out at 11:00:00 or earlier: its window (started no later) has ended at
+        // 12:00:00 and its resend pause is long over, so it counts no more.
+        $this->assertSame(
+            '2026-10-15 11:00:00',
+            $this->rules()->cleanup_cutoffs(new DateTimeImmutable('2026-10-15 12:00:00'))['limits']
+        );
+    }
+
     public function testExpiryOfANewBookingFreesItsSlot(): void
     {
         $this->assertTrue($this->rules()->expiry_frees_slot(\Email_verification_rules::PURPOSE_BOOKING));
@@ -227,6 +237,140 @@ class EmailVerificationRulesTest extends TestCase
                 'is_unavailability' => false
             ],
             $appointment
+        );
+    }
+
+    private const LIMIT = [
+        'email' => 'lena@example.com',
+        'window_start_datetime' => '2026-10-14 12:00:00',
+        'window_count' => 1,
+        'last_sent_datetime' => '2026-10-14 12:00:00'
+    ];
+
+    public function testResendWithinSixtySecondsOfTheLastMailMustWait(): void
+    {
+        $this->assertSame(
+            ['decision' => \Email_verification_rules::SEND_WAIT, 'wait_seconds' => 1],
+            $this->rules()->send_decision(self::LIMIT, new DateTimeImmutable('2026-10-14 12:00:59'), true)
+        );
+    }
+
+    public function testResendSixtySecondsAfterTheLastMailIsAllowed(): void
+    {
+        $this->assertSame(
+            ['decision' => \Email_verification_rules::SEND_ALLOWED, 'wait_seconds' => 0],
+            $this->rules()->send_decision(self::LIMIT, new DateTimeImmutable('2026-10-14 12:01:00'), true)
+        );
+    }
+
+    public function testFirstMailToAnEmailIsAllowed(): void
+    {
+        $this->assertSame(
+            ['decision' => \Email_verification_rules::SEND_ALLOWED, 'wait_seconds' => 0],
+            $this->rules()->send_decision(null, new DateTimeImmutable('2026-10-14 12:00:00'), false)
+        );
+    }
+
+    public function testSixthMailWithinTheHourIsRefusedUntilTheWindowEnds(): void
+    {
+        $limit = ['window_count' => 5, 'last_sent_datetime' => '2026-10-14 12:40:00'] + self::LIMIT;
+
+        $this->assertSame(
+            ['decision' => \Email_verification_rules::SEND_LIMIT, 'wait_seconds' => 600],
+            $this->rules()->send_decision($limit, new DateTimeImmutable('2026-10-14 12:50:00'), true)
+        );
+    }
+
+    public function testHourlyLimitAlsoRefusesANewVormerkungWithTheSameEmail(): void
+    {
+        $limit = ['window_count' => 5, 'last_sent_datetime' => '2026-10-14 12:40:00'] + self::LIMIT;
+
+        $this->assertSame(
+            \Email_verification_rules::SEND_LIMIT,
+            $this->rules()->send_decision($limit, new DateTimeImmutable('2026-10-14 12:40:10'), false)['decision']
+        );
+    }
+
+    public function testNewVormerkungDoesNotWaitForTheResendPause(): void
+    {
+        $this->assertSame(
+            \Email_verification_rules::SEND_ALLOWED,
+            $this->rules()->send_decision(self::LIMIT, new DateTimeImmutable('2026-10-14 12:00:10'), false)['decision']
+        );
+    }
+
+    public function testLimitStartsAgainOneHourAfterTheFirstMailOfTheWindow(): void
+    {
+        $limit = ['window_count' => 5, 'last_sent_datetime' => '2026-10-14 12:40:00'] + self::LIMIT;
+
+        $this->assertSame(
+            ['decision' => \Email_verification_rules::SEND_ALLOWED, 'wait_seconds' => 0],
+            $this->rules()->send_decision($limit, new DateTimeImmutable('2026-10-14 13:00:00'), true)
+        );
+    }
+
+    public function testFirstMailStartsTheLimitWindowOfTheNormalizedEmail(): void
+    {
+        $this->assertSame(
+            [
+                'email' => 'lena@example.com',
+                'window_start_datetime' => '2026-10-14 12:00:00',
+                'window_count' => 1,
+                'last_sent_datetime' => '2026-10-14 12:00:00'
+            ],
+            $this->rules()->limit_after_send(null, ' Lena@Example.com ', new DateTimeImmutable('2026-10-14 12:00:00'))
+        );
+    }
+
+    public function testMailWithinTheWindowCountsUp(): void
+    {
+        $this->assertSame(
+            [
+                'email' => 'lena@example.com',
+                'window_start_datetime' => '2026-10-14 12:00:00',
+                'window_count' => 2,
+                'last_sent_datetime' => '2026-10-14 12:05:00'
+            ],
+            $this->rules()->limit_after_send(
+                self::LIMIT,
+                'lena@example.com',
+                new DateTimeImmutable('2026-10-14 12:05:00')
+            )
+        );
+    }
+
+    public function testMailAfterTheWindowStartsANewOne(): void
+    {
+        $limit = ['window_count' => 5, 'last_sent_datetime' => '2026-10-14 12:40:00'] + self::LIMIT;
+
+        $this->assertSame(
+            [
+                'email' => 'lena@example.com',
+                'window_start_datetime' => '2026-10-14 13:00:00',
+                'window_count' => 1,
+                'last_sent_datetime' => '2026-10-14 13:00:00'
+            ],
+            $this->rules()->limit_after_send($limit, 'lena@example.com', new DateTimeImmutable('2026-10-14 13:00:00'))
+        );
+    }
+
+    public function testResendReplacesTheTokenAndHoldsTheSlotTenMinutesFromTheNewMail(): void
+    {
+        $record = $this->rules()->booking_verification(
+            self::APPOINTMENT,
+            self::CUSTOMER,
+            'old-token',
+            new DateTimeImmutable('2026-10-14 12:00:00')
+        );
+
+        $this->assertSame(
+            [
+                'token_hash' => hash('sha256', 'new-token'),
+                'expires_datetime' => '2026-10-14 12:13:00',
+                'last_sent_datetime' => '2026-10-14 12:03:00',
+                'send_count' => 2
+            ],
+            $this->rules()->resent_verification($record, 'new-token', new DateTimeImmutable('2026-10-14 12:03:00'))
         );
     }
 }

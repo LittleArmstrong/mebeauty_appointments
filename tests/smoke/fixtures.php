@@ -32,11 +32,17 @@
  *       Vormerkung was deleted) a known token (the smoke test reads no mails) and, with minutes-back, moves its
  *       expiry, last mail and creation time that many minutes into the past. Prints the verification (JSON, or
  *       "null" when there is none).
+ *   APP_ENV=testing php tests/smoke/fixtures.php limit <email>
+ *       Prints the send limit of the verification mails to that email (JSON, or "null"), spec 0018/03.
+ *   APP_ENV=testing php tests/smoke/fixtures.php limit-backdate <email> <seconds>
+ *       Moves the last verification mail to that email the given seconds into the past (to end the resend pause
+ *       without waiting). Prints the send limit (JSON, or "null").
  *   APP_ENV=testing php tests/smoke/fixtures.php cleanup-verifications
  *       Runs the email verification part of `console cleanup` (Cleanup::cleanup_email_verifications()).
  *   APP_ENV=testing php tests/smoke/fixtures.php purge
- *       Deletes every smoke customer (email smoke-…@example.com) with their appointments and every email
- *       verification of a smoke email with its Vormerkung, e.g. left over by an aborted run.
+ *       Deletes every smoke customer (email smoke-…@example.com) with their appointments, every email
+ *       verification of a smoke email with its Vormerkung and the send limits of smoke emails, e.g. left over by
+ *       an aborted run.
  */
 
 $_SERVER['argv'] = ['fixtures', 'test'];
@@ -231,6 +237,23 @@ switch ($command) {
         ) . PHP_EOL;
         break;
 
+    case 'limit':
+        echo json_encode($CI->appointment_verifications_model->find_limit($arguments[0] ?? '')) . PHP_EOL;
+        break;
+
+    case 'limit-backdate':
+        $CI->db
+            ->set(
+                'last_sent_datetime',
+                'DATE_SUB(`last_sent_datetime`, INTERVAL ' . (int) ($arguments[1] ?? 0) . ' SECOND)',
+                false
+            )
+            ->where('email', $arguments[0] ?? '')
+            ->update('email_verification_limits');
+
+        echo json_encode($CI->appointment_verifications_model->find_limit($arguments[0] ?? '')) . PHP_EOL;
+        break;
+
     case 'cleanup-verifications':
         $CI->load->library('cleanup');
         $CI->cleanup->cleanup_email_verifications();
@@ -255,6 +278,11 @@ switch ($command) {
             $CI->db->delete('appointment_verifications', ['id' => (int) $verification['id']]);
         }
 
+        $CI->db
+            ->like('email', 'smoke-', 'after')
+            ->like('email', '@example.com', 'before')
+            ->delete('email_verification_limits');
+
         $customer_role_id = $CI->customers_model->get_customer_role_id();
 
         $smoke_customers = $CI->db
@@ -277,7 +305,7 @@ switch ($command) {
         fwrite(
             STDERR,
             'Usage: fixtures.php setup|get|appointment-by-hash|get-by-customer|customer|contact|setting|lang|cleanup|' .
-                'verification-by-email|verification-token|cleanup-verifications|purge' .
+                'verification-by-email|verification-token|limit|limit-backdate|cleanup-verifications|purge' .
                 PHP_EOL
         );
         exit(2);

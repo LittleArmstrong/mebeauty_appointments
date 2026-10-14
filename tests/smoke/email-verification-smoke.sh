@@ -11,7 +11,10 @@
 # - a second booking with the verified email in that browser session is booked right away;
 # - a backdated (expired) Vormerkung frees its slot on the next availability request; a late click books it again
 #   while the slot is free and shows "expired" once the slot is taken; after 24 hours the cleanup deletes the
-#   restore data and the link is invalid.
+#   restore data and the link is invalid;
+# - "erneut senden" (booking/resend_verification, Vormerkung of the browser session) waits 60 seconds after the
+#   last mail, replaces the link, stops after 5 mails per email and hour (also for a new Vormerkung) and neither
+#   reveals the manage link hash nor needs or accepts an email or ID from the client.
 # All test data is removed on exit.
 #
 # Requires the docker stack to be up (php-fpm, nginx, mysql, mailpit) and a provider with a service.
@@ -68,6 +71,16 @@ available_hours() {
 open_link() {
     curl -s -o "$TMP/page" -w '%{http_code} %{redirect_url}' -c "$1" -b "$1" "$BASE/index.php/booking/verify/$2"
 }
+
+# POST booking/resend_verification. Argument: cookie jar. Prints the HTTP status, body is in $TMP/resend.
+resend() {
+    local csrf
+    csrf=$(awk '$6 == "csrf_cookie" { print $7 }' "$1")
+    curl -s -o "$TMP/resend" -w '%{http_code}' -c "$1" -b "$1" --data-urlencode "csrf_token=$csrf" \
+        "$BASE/index.php/booking/resend_verification"
+}
+
+mail_count() { curl -fsS "$MAILPIT/api/v1/search?query=to:$1" 2>/dev/null | json "len(d.get('messages', []))"; }
 
 appointment_field() { fixtures get "$1" | json "d and d['$2']"; }
 contact_field() { fixtures contact "$1" | json "d and d['$2']"; }
@@ -227,7 +240,8 @@ fixtures verification-token "$TAKEN_APPOINTMENT" "$TAKEN_TOKEN" 11 >/dev/null
 
 STATUS=$(register "$PHONE" "$SECOND" "$EMAIL")
 if [ "$STATUS" = "200" ] && json "'appointment_hash' in d" <"$TMP/body" | grep -q True; then
-    CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$(json "d['appointment_id']" <"$TMP/body")"
+    SLOT_TAKER=$(json "d['appointment_id']" <"$TMP/body")
+    CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$SLOT_TAKER"
     ok "submit cleans up the expired Vormerkung, the slot can be booked"
 else
     fail "booking the slot of an expired Vormerkung (HTTP $STATUS, $(cat "$TMP/body"))"
@@ -251,6 +265,80 @@ if [ "$(fixtures verification-by-email "$TAKEN_EMAIL")" = "null" ] && [ "${RESUL
     ok "after 24 hours the cleanup deletes the restore data, the link is invalid"
 else
     fail "after 24 hours: verification $(fixtures verification-by-email "$TAKEN_EMAIL"), link $RESULT"
+fi
+
+# 9. "Erneut senden": the Vormerkung comes from the browser session, the client sends no email or ID.
+fixtures cleanup "${SLOT_TAKER:-}" "" >/dev/null
+RESEND_EMAIL="smoke-verify-resend-$$-$RANDOM@example.com"
+RESEND_JAR="$TMP/resend-laptop"
+register "$RESEND_JAR" "$SECOND" "$RESEND_EMAIL" >/dev/null
+RESEND_APPOINTMENT=$(fixtures verification-by-email "$RESEND_EMAIL" | json "d and d['id_appointments']")
+CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$RESEND_APPOINTMENT"
+
+STATUS=$(resend "$RESEND_JAR")
+if [ "$STATUS" = "200" ] && json "d['sent'] is False and 0 < d['wait_seconds'] <= 60" <"$TMP/resend" | grep -q True \
+    && [ "$(mail_count "$RESEND_EMAIL")" = "1" ]; then
+    ok "resend within 60 seconds asks to wait and sends no mail"
+else
+    fail "resend within 60 seconds (HTTP $STATUS, $(cat "$TMP/resend"), mails $(mail_count "$RESEND_EMAIL"))"
+fi
+
+OLD_TOKEN="smokeold$$$RANDOM"
+fixtures verification-token "$RESEND_APPOINTMENT" "$OLD_TOKEN" >/dev/null
+fixtures limit-backdate "$RESEND_EMAIL" 61 >/dev/null
+STATUS=$(resend "$RESEND_JAR")
+RESENT=$(fixtures verification-by-email "$RESEND_EMAIL")
+if [ "$STATUS" = "200" ] && json "d['sent'] is True and 'hash' not in json.dumps(d)" <"$TMP/resend" | grep -q True \
+    && [ "$(mail_count "$RESEND_EMAIL")" = "2" ] \
+    && [ "$(echo "$RESENT" | json "d['id_appointments'] == $RESEND_APPOINTMENT and d['send_count'] == 2")" = "True" ] \
+    && [ "$(echo "$RESENT" | json "d['token_hash']")" != "$(printf '%s' "$OLD_TOKEN" | sha256sum | cut -d' ' -f1)" ]; then
+    ok "resend after 60 seconds sends a new link for the same Vormerkung"
+else
+    fail "resend after 60 seconds (HTTP $STATUS, $(cat "$TMP/resend"), mails $(mail_count "$RESEND_EMAIL"), $RESENT)"
+fi
+
+RESULT=$(open_link "$TMP/resend-phone" "$OLD_TOKEN")
+if [ "${RESULT%% *}" = "200" ] && grep -qF "$INVALID" "$TMP/page" \
+    && [ "$(fixtures get "$RESEND_APPOINTMENT" | json "d and d['id_users_customer']")" = "None" ]; then
+    ok "the previous link is invalid after a resend"
+else
+    fail "previous link after a resend: $RESULT, appointment $(fixtures get "$RESEND_APPOINTMENT")"
+fi
+
+for _ in 1 2 3; do
+    fixtures limit-backdate "$RESEND_EMAIL" 61 >/dev/null
+    resend "$RESEND_JAR" >/dev/null
+done
+fixtures limit-backdate "$RESEND_EMAIL" 61 >/dev/null
+STATUS=$(resend "$RESEND_JAR")
+LIMIT_TEXT=$(fixtures lang email_verification_limit_reached | tail -1)
+if [ "$STATUS" = "200" ] && json "d['sent'] is False and d['wait_seconds'] > 60" <"$TMP/resend" | grep -q True \
+    && [ "$(json "d['message']" <"$TMP/resend")" = "$LIMIT_TEXT" ] \
+    && [ "$(mail_count "$RESEND_EMAIL")" = "5" ]; then
+    ok "the sixth mail within the hour is refused"
+else
+    fail "sixth mail (HTTP $STATUS, $(cat "$TMP/resend"), mails $(mail_count "$RESEND_EMAIL"))"
+fi
+
+# The hourly limit also refuses a new Vormerkung with that email (another browser, the confirmed first slot freed).
+fixtures cleanup "$APPOINTMENT" "" >/dev/null
+STATUS=$(register "$TMP/resend-other" "$TARGET" "$RESEND_EMAIL")
+if [ "$STATUS" != "200" ] && [ "$(json "d.get('message')" <"$TMP/body")" = "$LIMIT_TEXT" ] \
+    && [ "$(fixtures verification-by-email "$RESEND_EMAIL" | json "d['id_appointments']")" = "$RESEND_APPOINTMENT" ] \
+    && [ "$(mail_count "$RESEND_EMAIL")" = "5" ] && available_hours | json "'$TARGET_HOUR' in d" | grep -q True; then
+    ok "the hourly limit also refuses a new Vormerkung with the same email"
+else
+    fail "new Vormerkung over the limit (HTTP $STATUS, $(cat "$TMP/body"), mails $(mail_count "$RESEND_EMAIL"))"
+fi
+
+# A browser without Vormerkung gets the neutral answer and no mail goes out.
+curl -s -o /dev/null -c "$TMP/stranger" -b "$TMP/stranger" "$BASE/index.php/booking"
+STATUS=$(resend "$TMP/stranger")
+if [ "$STATUS" = "200" ] && json "d['sent'] is False and d['wait_seconds'] == 0" <"$TMP/resend" | grep -q True \
+    && [ "$(json "d['message']" <"$TMP/resend")" = "$(fixtures lang email_verification_resend_unavailable | tail -1)" ]; then
+    ok "resend without Vormerkung in the browser session sends nothing"
+else
+    fail "resend without Vormerkung (HTTP $STATUS, $(cat "$TMP/resend"))"
 fi
 
 exit $FAIL

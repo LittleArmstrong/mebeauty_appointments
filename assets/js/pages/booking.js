@@ -631,6 +631,13 @@ App.Pages.Booking = (function () {
         });
 
         /**
+         * Event: Send the email verification mail again (spec 0018).
+         */
+        $('#resend-verification').on('click', () => {
+            App.Http.Booking.resendVerification();
+        });
+
+        /**
          * Event: Refresh captcha image.
          */
         $captchaTitle.on('click', 'button', () => {

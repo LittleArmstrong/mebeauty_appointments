@@ -55,6 +55,36 @@ class Email_verification_rules
     public const STATE_VOID = 'void';
 
     /**
+     * Seconds a customer must wait after the last mail before the verification mail can be sent again.
+     */
+    public const RESEND_WAIT_SECONDS = 60;
+
+    /**
+     * Maximum number of verification mails per email within one limit window.
+     */
+    public const MAILS_PER_WINDOW = 5;
+
+    /**
+     * Length of the limit window in minutes; its counter starts again afterwards.
+     */
+    public const LIMIT_WINDOW_MINUTES = 60;
+
+    /**
+     * Send decision: the verification mail may be sent.
+     */
+    public const SEND_ALLOWED = 'allowed';
+
+    /**
+     * Send decision: the last mail went out less than RESEND_WAIT_SECONDS ago ("bitte warten").
+     */
+    public const SEND_WAIT = 'wait';
+
+    /**
+     * Send decision: MAILS_PER_WINDOW mails went to the email in the current window.
+     */
+    public const SEND_LIMIT = 'limit';
+
+    /**
      * Decide whether an online booking must be verified by email before it is booked.
      *
      * @param bool $enabled Value of the setting "require_email_verification".
@@ -201,8 +231,9 @@ class Email_verification_rules
      *
      * @param DateTimeImmutable $now Point in time (database time zone).
      *
-     * @return array Returns ['expired' => …, 'void' => …]: a verification with expires_datetime <= 'expired' is
-     * expired, one with expires_datetime <= 'void' is void (Y-m-d H:i:s).
+     * @return array Returns ['expired' => …, 'void' => …, 'limits' => …]: a verification with expires_datetime <=
+     * 'expired' is expired, one with expires_datetime <= 'void' is void, a send limit with last_sent_datetime <=
+     * 'limits' has ended: its window started before the last mail and its resend pause is over (Y-m-d H:i:s).
      */
     public function cleanup_cutoffs(DateTimeImmutable $now): array
     {
@@ -211,7 +242,8 @@ class Email_verification_rules
             'void' => $now
                 ->modify('+' . self::VALIDITY_MINUTES . ' minutes')
                 ->modify('-' . self::RESTORE_HOURS . ' hours')
-                ->format('Y-m-d H:i:s')
+                ->format('Y-m-d H:i:s'),
+            'limits' => $now->modify('-' . self::LIMIT_WINDOW_MINUTES . ' minutes')->format('Y-m-d H:i:s')
         ];
     }
 
@@ -259,5 +291,110 @@ class Email_verification_rules
             'status' => $status,
             'is_unavailability' => false
         ];
+    }
+
+    /**
+     * Decide whether a verification mail may be sent to an email now.
+     *
+     * A resend waits RESEND_WAIT_SECONDS after the last mail to the email. Every mail, the first one of a new
+     * Vormerkung included, counts against MAILS_PER_WINDOW per email; the window starts with its first mail and its
+     * counter starts again LIMIT_WINDOW_MINUTES later.
+     *
+     * @param array|null $limit Send limit of the email (window_start_datetime, window_count, last_sent_datetime) or
+     * null when no mail went to it yet.
+     * @param DateTimeImmutable $now Current time (database time zone).
+     * @param bool $resend Whether the mail is a resend for an existing Vormerkung.
+     *
+     * @return array Returns ['decision' => SEND_*, 'wait_seconds' => int] with the seconds until a mail may be sent
+     * (0 when allowed).
+     */
+    public function send_decision(?array $limit, DateTimeImmutable $now, bool $resend): array
+    {
+        if ($resend && !empty($limit['last_sent_datetime'])) {
+            $wait_until = (new DateTimeImmutable($limit['last_sent_datetime']))->modify(
+                '+' . self::RESEND_WAIT_SECONDS . ' seconds'
+            );
+
+            if ($now < $wait_until) {
+                return [
+                    'decision' => self::SEND_WAIT,
+                    'wait_seconds' => $wait_until->getTimestamp() - $now->getTimestamp()
+                ];
+            }
+        }
+
+        $window_end = $this->window_end($limit);
+
+        if ($window_end && $now < $window_end && (int) $limit['window_count'] >= self::MAILS_PER_WINDOW) {
+            return [
+                'decision' => self::SEND_LIMIT,
+                'wait_seconds' => $window_end->getTimestamp() - $now->getTimestamp()
+            ];
+        }
+
+        return ['decision' => self::SEND_ALLOWED, 'wait_seconds' => 0];
+    }
+
+    /**
+     * Update the send limit of an email after a verification mail went out.
+     *
+     * @param array|null $limit Send limit of the email or null when no mail went to it yet.
+     * @param string $email Email the mail went to.
+     * @param DateTimeImmutable $now Time of the mail (database time zone).
+     *
+     * @return array Returns the send limit to store (email, window_start_datetime, window_count, last_sent_datetime).
+     */
+    public function limit_after_send(?array $limit, string $email, DateTimeImmutable $now): array
+    {
+        $window_end = $this->window_end($limit);
+
+        $same_window = $window_end && $now < $window_end;
+
+        return [
+            'email' => $this->normalize_email($email),
+            'window_start_datetime' => $same_window ? $limit['window_start_datetime'] : $now->format('Y-m-d H:i:s'),
+            'window_count' => $same_window ? (int) $limit['window_count'] + 1 : 1,
+            'last_sent_datetime' => $now->format('Y-m-d H:i:s')
+        ];
+    }
+
+    /**
+     * Get the changed fields of a verification whose mail is sent again with a new link.
+     *
+     * The new token replaces the old one (the old link becomes invalid), and the Vormerkung holds its slot for
+     * VALIDITY_MINUTES from the new mail.
+     *
+     * @param array $verification Stored verification record.
+     * @param string $token Token of the new link (only its hash is stored).
+     * @param DateTimeImmutable $now Time of the mail (database time zone).
+     *
+     * @return array Returns token_hash, expires_datetime, last_sent_datetime and send_count.
+     */
+    public function resent_verification(array $verification, string $token, DateTimeImmutable $now): array
+    {
+        return [
+            'token_hash' => $this->token_hash($token),
+            'expires_datetime' => $now->modify('+' . self::VALIDITY_MINUTES . ' minutes')->format('Y-m-d H:i:s'),
+            'last_sent_datetime' => $now->format('Y-m-d H:i:s'),
+            'send_count' => (int) ($verification['send_count'] ?? 0) + 1
+        ];
+    }
+
+    /**
+     * Get the end of the limit window of an email.
+     *
+     * @param array|null $limit Send limit of the email or null.
+     *
+     * @return DateTimeImmutable|null Returns the end or null when no window was started.
+     */
+    protected function window_end(?array $limit): ?DateTimeImmutable
+    {
+        if (empty($limit['window_start_datetime'])) {
+            return null;
+        }
+
+        return (new DateTimeImmutable($limit['window_start_datetime']))->modify(
+            '+' . self::LIMIT_WINDOW_MINUTES . ' minutes'
+        );
     }
 }

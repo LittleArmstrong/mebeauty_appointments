@@ -433,8 +433,36 @@ App.Http.Booking = (function () {
         });
     }
 
+    /**
+     * Send the verification mail of the Vormerkung in this browser session again (spec 0018).
+     *
+     * The server takes the Vormerkung from the session; the answer is shown below the button, which stays disabled
+     * until the next mail may be sent.
+     */
+    function resendVerification() {
+        const $button = $('#resend-verification');
+        const $feedback = $('#resend-verification-feedback');
+
+        $button.prop('disabled', true);
+
+        $.post(App.Utils.Url.siteUrl('booking/resend_verification'), { csrf_token: vars('csrf_token') })
+            .done((response) => {
+                $feedback
+                    .text(response.message)
+                    .toggleClass('text-success', response.sent)
+                    .toggleClass('text-danger', !response.sent)
+                    .show();
+
+                setTimeout(() => $button.prop('disabled', false), (response.wait_seconds || 0) * 1000);
+            })
+            .fail(() => {
+                $button.prop('disabled', false);
+            });
+    }
+
     return {
         registerAppointment,
+        resendVerification,
         getAvailableHours,
         getUnavailableDates,
         applyPreviousUnavailableDates,

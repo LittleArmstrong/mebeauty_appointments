@@ -18,6 +18,11 @@ class Email_verification
     public const SESSION_KEY = 'verified_emails';
 
     /**
+     * Session key with the appointment ID of the Vormerkung started in this browser session ("erneut senden").
+     */
+    public const SESSION_PENDING_KEY = 'pending_verification_appointment';
+
+    /**
      * Result of confirm(): the booking is confirmed.
      */
     public const RESULT_CONFIRMED = 'confirmed';
@@ -44,6 +49,7 @@ class Email_verification
         $this->CI->load->model('appointment_verifications_model');
         $this->CI->load->model('appointment_contacts_model');
         $this->CI->load->model('services_model');
+        $this->CI->load->model('providers_model');
 
         $this->CI->load->library('email_verification_rules');
         $this->CI->load->library('appointment_contact_rules');
@@ -93,13 +99,23 @@ class Email_verification
             throw new InvalidArgumentException(lang('email_verification_email_required'));
         }
 
+        $rules = $this->CI->email_verification_rules;
+
+        $now = new DateTimeImmutable('now');
+
+        $limit = $this->CI->appointment_verifications_model->find_limit($rules->normalize_email($email));
+
+        if ($rules->send_decision($limit, $now, false)['decision'] !== Email_verification_rules::SEND_ALLOWED) {
+            throw new RuntimeException(lang('email_verification_limit_reached'));
+        }
+
         $token = $this->new_token();
 
         $verification = $this->CI->email_verification_rules->booking_verification(
             $appointment,
             $customer,
             $token,
-            new DateTimeImmutable('now')
+            $now
         );
 
         $appointment_id = $this->CI->appointment_verifications_model->create_vormerkung(
@@ -128,7 +144,111 @@ class Email_verification
             throw new RuntimeException(lang('email_verification_send_failed'));
         }
 
+        $this->CI->appointment_verifications_model->save_limit($rules->limit_after_send($limit, $email, $now));
+
+        session([self::SESSION_PENDING_KEY => $appointment_id]);
+
         return $appointment_id;
+    }
+
+    /**
+     * Send the verification mail of the Vormerkung started in this browser session again, with a new link.
+     *
+     * The Vormerkung comes from the browser session only, so nobody can trigger mails to other addresses, and the
+     * answer never contains the manage link hash or tells whether an address is known. A resend waits 60 seconds
+     * after the last mail and counts against the limit of 5 mails per email and hour. The new link replaces the old
+     * one and holds the slot for 10 minutes from the new mail.
+     *
+     * @return array Returns ['sent' => bool, 'message' => string, 'wait_seconds' => int] for the booking wizard.
+     *
+     * @throws Throwable
+     */
+    public function resend(): array
+    {
+        $rules = $this->CI->email_verification_rules;
+
+        $appointment_id = session(self::SESSION_PENDING_KEY);
+
+        $this->cleanup_expired();
+
+        $verification = is_int($appointment_id)
+            ? $this->CI->appointment_verifications_model->find_by_appointment($appointment_id)
+            : null;
+
+        $now = new DateTimeImmutable('now');
+
+        $appointment = $verification ? $this->CI->appointments_model->get(['id' => $appointment_id])[0] ?? null : null;
+
+        if (
+            !$appointment ||
+            !empty($appointment['id_users_customer']) ||
+            $verification['purpose'] !== Email_verification_rules::PURPOSE_BOOKING ||
+            $rules->state($verification, $now) !== Email_verification_rules::STATE_VALID
+        ) {
+            return ['sent' => false, 'message' => lang('email_verification_resend_unavailable'), 'wait_seconds' => 0];
+        }
+
+        $limit = $this->CI->appointment_verifications_model->find_limit($verification['email']);
+
+        $decision = $rules->send_decision($limit, $now, true);
+
+        if ($decision['decision'] !== Email_verification_rules::SEND_ALLOWED) {
+            return [
+                'sent' => false,
+                'message' =>
+                    $decision['decision'] === Email_verification_rules::SEND_WAIT
+                        ? sprintf(lang('email_verification_resend_wait'), $decision['wait_seconds'])
+                        : lang('email_verification_limit_reached'),
+                'wait_seconds' => $decision['wait_seconds']
+            ];
+        }
+
+        $token = $this->new_token();
+
+        $previous = array_intersect_key(
+            $verification,
+            array_flip(['token_hash', 'expires_datetime', 'last_sent_datetime', 'send_count'])
+        );
+
+        if (
+            !$this->CI->appointment_verifications_model->update(
+                (int) $verification['id'],
+                $rules->resent_verification($verification, $token, $now)
+            )
+        ) {
+            return ['sent' => false, 'message' => lang('email_verification_resend_unavailable'), 'wait_seconds' => 0];
+        }
+
+        try {
+            $this->CI->email_messages->send_email_verification_link(
+                site_url('booking/verify/' . $token),
+                $appointment,
+                $this->CI->services_model->find((int) $appointment['id_services']),
+                $this->CI->providers_model->find((int) $appointment['id_users_provider']),
+                $verification['email'],
+                $this->mail_settings()
+            );
+        } catch (Throwable $e) {
+            log_message(
+                'error',
+                'Email verification resend for appointment ' . $appointment_id . ': ' . $e->getMessage()
+            );
+
+            // The previous link stays valid when the new one could not be sent.
+            $this->CI->appointment_verifications_model->update((int) $verification['id'], $previous);
+
+            throw new RuntimeException(lang('email_verification_send_failed'));
+        }
+
+        $this->CI->appointment_verifications_model->save_limit(
+            $rules->limit_after_send($limit, $verification['email'], $now)
+        );
+
+        return [
+            'sent' => true,
+            'message' => lang('email_verification_resent'),
+            'wait_seconds' => Email_verification_rules::RESEND_WAIT_SECONDS
+        ];
     }
 
     /**
@@ -137,7 +257,10 @@ class Email_verification
      * Runs before availability requests, on submit, when the backend calendar loads and in `console cleanup`, so
      * no cron job is needed.
      *
-     * @return array Returns ['appointments' => int, 'verifications' => int] with the numbers of deleted rows.
+     * Ended send limits are deleted as well.
+     *
+     * @return array Returns ['appointments' => int, 'verifications' => int, 'limits' => int] with the numbers of
+     * deleted rows.
      */
     public function cleanup_expired(): array
     {
@@ -145,11 +268,15 @@ class Email_verification
 
         $cutoffs = $rules->cleanup_cutoffs(new DateTimeImmutable('now'));
 
-        return $this->CI->appointment_verifications_model->delete_expired(
+        $deleted = $this->CI->appointment_verifications_model->delete_expired(
             $cutoffs['expired'],
             $cutoffs['void'],
             $rules->purposes_freeing_slot()
         );
+
+        $deleted['limits'] = $this->CI->appointment_verifications_model->delete_ended_limits($cutoffs['limits']);
+
+        return $deleted;
     }
 
     /**

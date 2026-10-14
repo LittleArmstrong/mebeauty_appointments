@@ -239,6 +239,71 @@ class Appointment_verifications_model extends EA_Model
     }
 
     /**
+     * Change the fields of a verification (e.g. a new link after a resend).
+     *
+     * @param int $verification_id Verification ID.
+     * @param array $fields Changed fields.
+     *
+     * @return bool Returns false when the verification is gone.
+     */
+    public function update(int $verification_id, array $fields): bool
+    {
+        $fields['update_datetime'] = date('Y-m-d H:i:s');
+
+        $this->db->update('appointment_verifications', $fields, ['id' => $verification_id]);
+
+        return $this->db->affected_rows() === 1;
+    }
+
+    /**
+     * Find the send limit of an email (spec 0018/03).
+     *
+     * @param string $email Normalized email.
+     *
+     * @return array|null Returns email, window_start_datetime, window_count and last_sent_datetime, or null when no
+     * mail went to the email in a current window.
+     */
+    public function find_limit(string $email): ?array
+    {
+        $limit = $this->db
+            ->select('email, window_start_datetime, window_count, last_sent_datetime')
+            ->get_where('email_verification_limits', ['email' => $email], 1)
+            ->row_array();
+
+        if (!$limit) {
+            return null;
+        }
+
+        $limit['window_count'] = (int) $limit['window_count'];
+
+        return $limit;
+    }
+
+    /**
+     * Store the send limit of an email (one row per email).
+     *
+     * @param array $limit Send limit (see Email_verification_rules::limit_after_send()).
+     */
+    public function save_limit(array $limit): void
+    {
+        $this->db->replace('email_verification_limits', $limit);
+    }
+
+    /**
+     * Delete send limits that count no more (window ended, resend pause over).
+     *
+     * @param string $cutoff Limits with last_sent_datetime <= this have ended (Y-m-d H:i:s).
+     *
+     * @return int Returns the number of deleted limits.
+     */
+    public function delete_ended_limits(string $cutoff): int
+    {
+        $this->db->where('last_sent_datetime <=', $cutoff)->delete('email_verification_limits');
+
+        return $this->db->affected_rows();
+    }
+
+    /**
      * Get the first verification of a prepared query.
      *
      * @param CI_DB_query_builder $query Query with where/order conditions.
