@@ -64,6 +64,7 @@ run "phpunit" composer_in_container test
 run "check:format" bash scripts/check-format.sh
 run "check:migrations" composer_in_container check:migrations
 run "migration rerun" bash scripts/migration-test-db.sh rerun easyappointments
+run "migration drift" bash scripts/migration-test-db.sh drift easyappointments
 run "check:assets" composer_in_container check:assets
 run "check:scratch" composer_in_container check:scratch
 run "check:views" composer_in_container check:views

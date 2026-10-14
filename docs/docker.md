@@ -80,6 +80,7 @@ Test migrations against a throwaway database instead of pointing `config.php` at
 scripts/migration-test-db.sh fresh                                    # empty DB → console install
 scripts/migration-test-db.sh copy easyappointments --set-version 73   # copy, force tracker, console migrate
 scripts/migration-test-db.sh rerun easyappointments                   # newest migration idempotent + down/up
+scripts/migration-test-db.sh drift easyappointments                   # dev DB schema = fresh install (read only)
 ```
 
 The script creates `ea_test_*`, runs the console command with `EA_DB_NAME=<test-db>`

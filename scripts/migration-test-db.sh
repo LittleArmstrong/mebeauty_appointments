@@ -17,6 +17,11 @@
 #       <source-db>: migrate to the newest version, mark every setting value, run the newest migration again
 #       from the previous version (schema and marked values must stay unchanged = idempotent), then `migrate
 #       down` and `up` (schema and setting names must match again). Exits 1 on a difference.
+#   scripts/migration-test-db.sh drift <source-db> [--keep]
+#       Schema drift: `console install` into an empty database, then compares the schema of every table with
+#       <source-db> (read only). Catches a table that an idempotent migration skipped because it already
+#       existed with an older definition (070 until the first prod release, ADR 0005). Exits 1 on a difference,
+#       printed per table.
 #
 # Options:
 #   --keep   Keep the test database for inspection (prints its name and a drop command).
@@ -30,17 +35,17 @@ MYSQL_ROOT_PASSWORD=secret # dev-only value from docker-compose.yml
 DB_APP_USER=user
 
 usage() {
-    sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
     exit "${1:-1}"
 }
 
 mode="${1:-}"
 [[ "$mode" == "-h" || "$mode" == "--help" ]] && usage 0
-[[ "$mode" == "fresh" || "$mode" == "copy" || "$mode" == "rerun" ]] || usage
+[[ "$mode" == "fresh" || "$mode" == "copy" || "$mode" == "rerun" || "$mode" == "drift" ]] || usage
 shift
 
 source_db=""
-if [[ "$mode" == "copy" || "$mode" == "rerun" ]]; then
+if [[ "$mode" == "copy" || "$mode" == "rerun" || "$mode" == "drift" ]]; then
     source_db="${1:-}"
     [[ "$source_db" =~ ^[A-Za-z0-9_]+$ ]] || { echo "copy: valid <source-db> required" >&2; usage; }
     shift
@@ -94,13 +99,36 @@ if [[ "$mode" == "copy" || "$mode" == "rerun" ]]; then
 fi
 
 console_command=(migrate)
-[[ "$mode" == "fresh" ]] && console_command=(install)
+[[ "$mode" == "fresh" || "$mode" == "drift" ]] && console_command=(install)
 
 echo "⇾ Running console ${console_command[*]} on $test_db"
 docker compose exec -T -e EA_DB_NAME="$test_db" php-fpm php index.php console "${console_command[@]}"
 
 echo "⇾ Migration tracker:"
 mysql_root "$test_db" -e "SELECT version FROM ea_migrations;"
+
+# Schema of database $1 without volatile parts, every line prefixed with its table. AUTO_INCREMENT counters
+# depend on the data; a copied or older table prints an explicit column CHARACTER SET that a newly created one
+# omits, the collation (which implies it) is compared.
+schema_by_table() {
+    docker compose exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
+        mysqldump -uroot --no-data --skip-comments --skip-dump-date --single-transaction "$1" |
+        sed -e 's/ AUTO_INCREMENT=[0-9]*//' -e 's/ CHARACTER SET [a-z0-9_]* COLLATE/ COLLATE/' |
+        awk '/^CREATE TABLE `/ { table = $3; gsub(/`/, "", table) } table != "" { print table ": " $0 } /^\) ENGINE/ { table = "" }'
+}
+
+if [[ "$mode" == "drift" ]]; then
+    echo "⇾ Comparing the schema of $source_db with a fresh install"
+    if differences=$(diff <(schema_by_table "$test_db") <(schema_by_table "$source_db")); then
+        echo "OK   schema of $source_db matches a fresh install"
+        exit 0
+    fi
+    echo "FAIL schema of $source_db differs from a fresh install (< fresh, > $source_db):"
+    grep '^[<>]' <<<"$differences"
+    echo "     Fix: drop the affected fork table in $source_db, then"
+    echo "     UPDATE ea_migrations SET version = 69; and docker compose exec -T php-fpm php index.php console migrate"
+    exit 1
+fi
 
 [[ "$mode" == "rerun" ]] || exit 0
 
