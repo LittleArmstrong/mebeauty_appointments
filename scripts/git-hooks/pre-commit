@@ -4,14 +4,14 @@
 # staged, and block accidentally staged backup/temporary files (.backup/.bak/.orig).
 #
 # JS syntax and format are checked on the host (`node --check`, `npx prettier`).
-# PHP must run inside the php-fpm container (the host `php` binary is a ddev shim).
+# PHP must run inside the php-fpm container (the host `php` binary is a ddev shim); in a linked worktree it
+# runs through the main checkout's stack (scripts/lib/stack.sh).
 # When a tool is not available, its check is skipped with a warning instead of failing.
 
 set -u
 
-php_container_running() {
-    [ -n "$(docker compose ps -q --status running php-fpm 2>/dev/null)" ]
-}
+. "$(dirname "$0")/../lib/stack.sh"
+stack_php_running && stack_link_host_path
 
 fail=0
 staged=$(git diff --cached --name-only --diff-filter=ACM)
@@ -40,8 +40,8 @@ for file in $staged; do
             fi
             ;;
         *.php)
-            if php_container_running; then
-                if ! docker compose exec -T php-fpm php -l "$file"; then
+            if stack_php_running; then
+                if ! stack_exec php-fpm php -l "$file"; then
                     echo "pre-commit: PHP syntax error in $file" >&2
                     fail=1
                 fi
@@ -70,8 +70,8 @@ fi
 
 # Spec tracker: headers, numbering and generated INDEX.md (docs/agents/issue-tracker.md).
 if staged_matches '^\.scratch/'; then
-    if php_container_running; then
-        if ! docker compose exec -T php-fpm php scripts/scratch-index.php check; then
+    if stack_php_running; then
+        if ! stack_exec php-fpm php scripts/scratch-index.php check; then
             echo "pre-commit: .scratch ungültig – composer scratch:index ausführen bzw. Kopfzeilen korrigieren" >&2
             fail=1
         fi

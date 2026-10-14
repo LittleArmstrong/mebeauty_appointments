@@ -19,9 +19,10 @@
 #       down` and `up` (schema and setting names must match again). Exits 1 on a difference.
 #   scripts/migration-test-db.sh drift <source-db> [--keep]
 #       Schema drift: `console install` into an empty database, then compares the schema of every table with
-#       <source-db> (read only). Catches a table that an idempotent migration skipped because it already
-#       existed with an older definition (070 until the first prod release, ADR 0005). Exits 1 on a difference,
-#       printed per table.
+#       <source-db> (read only) and checks that every setting of the fresh install exists there. Catches a table
+#       that an idempotent migration skipped because it already existed with an older definition, and a setting
+#       a changed migration added after <source-db> had already run it (070 until the first prod release,
+#       ADR 0005). Exits 1 on a difference, printed per table and setting.
 #
 # Options:
 #   --keep   Keep the test database for inspection (prints its name and a drop command).
@@ -30,6 +31,8 @@
 #   docker compose exec -T -e MYSQL_PWD=secret mysql mysql -uroot -e "SHOW DATABASES LIKE 'ea\_test\_%'"
 
 set -euo pipefail
+
+. "$(dirname "$0")/lib/stack.sh"
 
 MYSQL_ROOT_PASSWORD=secret # dev-only value from docker-compose.yml
 DB_APP_USER=user
@@ -69,7 +72,7 @@ done
 test_db="ea_test_${mode}_$(date +%s)_$$"
 
 mysql_root() {
-    docker compose exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql mysql -uroot "$@"
+    stack exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql mysql -uroot "$@"
 }
 
 cleanup() {
@@ -89,7 +92,7 @@ trap cleanup EXIT
 
 if [[ "$mode" == "copy" || "$mode" == "rerun" ]]; then
     echo "⇾ Copying $source_db → $test_db"
-    docker compose exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql bash -o pipefail -c \
+    stack exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql bash -o pipefail -c \
         'mysqldump -uroot --single-transaction --no-tablespaces "$1" | mysql -uroot "$2"' bash "$source_db" "$test_db"
 
     if [[ -n "$set_version" ]]; then
@@ -102,7 +105,7 @@ console_command=(migrate)
 [[ "$mode" == "fresh" || "$mode" == "drift" ]] && console_command=(install)
 
 echo "⇾ Running console ${console_command[*]} on $test_db"
-docker compose exec -T -e EA_DB_NAME="$test_db" php-fpm php index.php console "${console_command[@]}"
+stack_exec -e EA_DB_NAME="$test_db" php-fpm php index.php console "${console_command[@]}"
 
 echo "⇾ Migration tracker:"
 mysql_root "$test_db" -e "SELECT version FROM ea_migrations;"
@@ -111,33 +114,52 @@ mysql_root "$test_db" -e "SELECT version FROM ea_migrations;"
 # depend on the data; a copied or older table prints an explicit column CHARACTER SET that a newly created one
 # omits, the collation (which implies it) is compared.
 schema_by_table() {
-    docker compose exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
+    stack exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
         mysqldump -uroot --no-data --skip-comments --skip-dump-date --single-transaction "$1" |
         sed -e 's/ AUTO_INCREMENT=[0-9]*//' -e 's/ CHARACTER SET [a-z0-9_]* COLLATE/ COLLATE/' |
         awk '/^CREATE TABLE `/ { table = $3; gsub(/`/, "", table) } table != "" { print table ": " $0 } /^\) ENGINE/ { table = "" }'
 }
 
+setting_names() {
+    mysql_root "$1" -N -e "SELECT DISTINCT name FROM ea_settings ORDER BY name;"
+}
+
 if [[ "$mode" == "drift" ]]; then
-    echo "⇾ Comparing the schema of $source_db with a fresh install"
+    echo "⇾ Comparing the schema and setting names of $source_db with a fresh install"
+    failed=0
     if differences=$(diff <(schema_by_table "$test_db") <(schema_by_table "$source_db")); then
         echo "OK   schema of $source_db matches a fresh install"
-        exit 0
+    else
+        echo "FAIL schema of $source_db differs from a fresh install (< fresh, > $source_db):"
+        grep '^[<>]' <<<"$differences"
+        echo "     Fix: drop the affected fork table in $source_db, then rerun the newest migration (below)"
+        failed=1
     fi
-    echo "FAIL schema of $source_db differs from a fresh install (< fresh, > $source_db):"
-    grep '^[<>]' <<<"$differences"
-    echo "     Fix: drop the affected fork table in $source_db, then"
-    echo "     UPDATE ea_migrations SET version = 69; and docker compose exec -T php-fpm php index.php console migrate"
-    exit 1
+    # Only missing settings count: the settings page creates some (e.g. legal_notice_url) on its first save.
+    missing=$(comm -23 <(setting_names "$test_db") <(setting_names "$source_db"))
+    if [[ -z "$missing" ]]; then
+        echo "OK   every setting of a fresh install exists in $source_db"
+    else
+        echo "FAIL settings of a fresh install missing in $source_db:"
+        sed 's/^/     /' <<<"$missing"
+        echo "     Fix: rerun the newest migration (below)"
+        failed=1
+    fi
+    if [[ "$failed" -eq 1 ]]; then
+        echo "     Rerun: docker compose exec -T -e MYSQL_PWD=$MYSQL_ROOT_PASSWORD mysql mysql -uroot $source_db -e \"UPDATE ea_migrations SET version = 69;\""
+        echo "            docker compose exec -T php-fpm php index.php console migrate"
+    fi
+    exit "$failed"
 fi
 
 [[ "$mode" == "rerun" ]] || exit 0
 
-console() { docker compose exec -T -e EA_DB_NAME="$test_db" php-fpm php index.php console "$@"; }
+console() { stack_exec -e EA_DB_NAME="$test_db" php-fpm php index.php console "$@"; }
 
 # Schema without volatile parts, plus the settings (with values only when asked for). A copied table prints an
 # explicit column CHARACTER SET that a newly created one omits; the collation (which implies it) is compared.
 snapshot() {
-    docker compose exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
+    stack exec -T -e MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql \
         mysqldump -uroot --no-data --skip-comments --skip-dump-date "$test_db" |
         sed -e 's/ AUTO_INCREMENT=[0-9]*//' -e 's/ CHARACTER SET [a-z0-9_]* COLLATE/ COLLATE/'
     if [[ "${1:-}" == "--with-values" ]]; then

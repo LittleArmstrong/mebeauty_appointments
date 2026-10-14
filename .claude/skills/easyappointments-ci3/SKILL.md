@@ -91,7 +91,7 @@ Then expose it on the matching settings page (`data-field="my_setting"`), add tr
 
 **API v1 endpoint** — mirror an existing controller: `$this->load->library('api'); $this->api->auth();` then `request_keyword()`, `request_limit()`, `request_offset()`, `request_order_by()`, `request_fields()`, `request_with()`; encode records with the model's `api_encode()`.
 
-**Views** — escape every dynamic value with `e()`; translations via `lang('key')`; brand values via `setting('company_name', DEFAULT_COMPANY_NAME)` (see `CODING_STANDARDS.md`). Layout variables come from `html_vars()` (PHP) and `script_vars()` (exposed to JS as `vars('…')`).
+**Views** — escape every dynamic value with `e()`; translations via `lang('key')`; brand values via `setting('company_name', DEFAULT_COMPANY_NAME)` (see `CODING_STANDARDS.md`). Layout variables come from `html_vars()` (PHP) and `script_vars()` (exposed to JS as `vars('…')`). A fork decision in an upstream view goes into a rule library the view only calls (e.g. `booking_layout.php` → `Booking_footer_rules::is_shown()`, loaded via `get_instance()->load->library()`).
 
 **Booking flow** — `application/controllers/Booking.php` renders the wizard (`index()`, manage mode via `reschedule($hash)`), registers bookings (`register()`), and serves availability (`get_available_hours()`, `get_unavailable_dates()`); slot computation lives in `application/libraries/Availability.php`. The appointment hash (manage link) is the only customer credential for rescheduling and cancelling.
 

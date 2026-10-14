@@ -179,6 +179,34 @@ class ScratchIndexTest extends TestCase
         $this->assertNull(\scratch_ticket_status("# 01\n"));
     }
 
+    public function testFinishedTicketWithoutRedEvidenceIsReported(): void
+    {
+        $this->writeSpec('0017-feature', $this->header('needs-verification', '2026-10-13', '–', 'P1', '–'));
+        $this->writeTicket('0017-feature', '01-a.md', 'needs-verification');
+
+        $this->assertErrorContains('0017-feature/issues/01-a.md: Beleg "Rot vor Fix:" fehlt');
+    }
+
+    public function testRedEvidenceOrWaiverSatisfiesFinishedTickets(): void
+    {
+        $this->writeSpec('0017-feature', $this->header('resolved', '2026-10-13', '2026-10-14', 'P1', '–'));
+        $this->writeTicket('0017-feature', '01-a.md', 'resolved', '- Rot vor Fix: `FooTest` – Failed asserting');
+        $this->writeTicket('0017-feature', '02-b.md', 'resolved', '- Rot vor Fix: entfällt – Refactoring');
+
+        $this->assertStringNotContainsString('Rot vor Fix', implode("\n", \scratch_check($this->tmpDir)));
+    }
+
+    public function testRedEvidenceIsNotRequiredForOpenTicketsOrSpecsBeforeTheRule(): void
+    {
+        $this->writeSpec('0016-old', $this->header('resolved', '2026-10-11', '2026-10-11', 'P2', '–'));
+        $this->writeTicket('0016-old', '01-a.md', 'resolved');
+        $this->writeSpec('0017-feature', $this->header('ready-for-agent', '2026-10-13', '–', 'P1', '–'));
+        $this->writeTicket('0017-feature', '01-a.md', 'ready-for-agent');
+        $this->writeTicket('0017-feature', '02-b.md', 'wontfix');
+
+        $this->assertStringNotContainsString('Rot vor Fix', implode("\n", \scratch_check($this->tmpDir)));
+    }
+
     private function header(string $status, string $created, string $closed, string $priority, string $depends): string
     {
         return "# Title\n\nStatus: $status\nCreated: $created\nClosed: $closed\nPriority: $priority\nDepends-on: $depends\n\n## Problem Statement\n";
@@ -191,9 +219,12 @@ class ScratchIndexTest extends TestCase
         file_put_contents($this->tmpDir . '/' . $dir . '/spec.md', $content);
     }
 
-    private function writeTicket(string $dir, string $file, string $status): void
+    private function writeTicket(string $dir, string $file, string $status, string $comments = ''): void
     {
-        file_put_contents($this->tmpDir . '/' . $dir . '/issues/' . $file, "# Ticket\n\n**Status:** $status\n");
+        file_put_contents(
+            $this->tmpDir . '/' . $dir . '/issues/' . $file,
+            "# Ticket\n\n**Status:** $status\n" . ($comments === '' ? '' : "\n## Comments\n\n$comments\n")
+        );
     }
 
     private function generateIndex(): void

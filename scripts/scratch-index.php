@@ -33,6 +33,16 @@ const SCRATCH_HEADER_KEYS = ['Status', 'Created', 'Closed', 'Priority', 'Depends
 const SCRATCH_INDEX_FILE = 'INDEX.md';
 
 /**
+ * Ticket statuses that claim finished work and so need the red evidence of CODING_STANDARDS.md "Tests go red".
+ */
+const SCRATCH_RED_EVIDENCE_STATUSES = ['needs-verification', 'resolved'];
+
+/**
+ * First spec written after the rule "Tests go red" (0016/05); earlier tickets predate it.
+ */
+const SCRATCH_RED_EVIDENCE_FROM_SPEC = 17;
+
+/**
  * Check whether a header value means "none" (en dash or hyphen).
  *
  * @param string $value Header value.
@@ -120,6 +130,19 @@ function scratch_ticket_status(string $content): ?string
 }
 
 /**
+ * Check whether a ticket records its red evidence ("Rot vor Fix: …", or "Rot vor Fix: entfällt – <reason>" for
+ * refactor and docs tickets).
+ *
+ * @param string $content Ticket file content.
+ *
+ * @return bool
+ */
+function scratch_ticket_has_red_evidence(string $content): bool
+{
+    return preg_match('/^\s*(?:[-*]\s+)?Rot vor Fix:\s*\S/m', $content) === 1;
+}
+
+/**
  * Read all spec directories of a scratch directory.
  *
  * @param string $directory Path to the scratch directory.
@@ -151,9 +174,12 @@ function scratch_collect(string $directory): array
         $parsed = scratch_parse_spec((string) file_get_contents($path . '/' . $spec_file));
 
         $tickets = [];
+        $red_evidence = [];
 
         foreach (glob($path . '/issues/*.md') ?: [] as $ticket_path) {
-            $tickets[basename($ticket_path)] = scratch_ticket_status((string) file_get_contents($ticket_path));
+            $content = (string) file_get_contents($ticket_path);
+            $tickets[basename($ticket_path)] = scratch_ticket_status($content);
+            $red_evidence[basename($ticket_path)] = scratch_ticket_has_red_evidence($content);
         }
 
         ksort($tickets);
@@ -164,7 +190,8 @@ function scratch_collect(string $directory): array
             'file' => $spec_file,
             'title' => $parsed['title'],
             'header' => $parsed['header'],
-            'tickets' => $tickets
+            'tickets' => $tickets,
+            'red_evidence' => $red_evidence
         ];
     }
 
@@ -289,6 +316,18 @@ function scratch_validate(array $specs): array
         foreach ($spec['tickets'] as $ticket => $ticket_status) {
             if ($ticket_status === null) {
                 $errors[] = sprintf('%s/issues/%s: Status-Zeile fehlt', $spec['dir'], $ticket);
+            }
+
+            if (
+                $spec['number'] >= SCRATCH_RED_EVIDENCE_FROM_SPEC &&
+                in_array($ticket_status, SCRATCH_RED_EVIDENCE_STATUSES, true) &&
+                !($spec['red_evidence'][$ticket] ?? false)
+            ) {
+                $errors[] = sprintf(
+                    '%s/issues/%s: Beleg "Rot vor Fix:" fehlt (CODING_STANDARDS.md "Tests go red"; bei Refactor/Doku "Rot vor Fix: entfällt – <Grund>")',
+                    $spec['dir'],
+                    $ticket
+                );
             }
         }
 

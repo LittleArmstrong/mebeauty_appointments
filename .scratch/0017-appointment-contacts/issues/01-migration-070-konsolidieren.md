@@ -19,3 +19,4 @@
 - Beleg (`scripts/migration-test-db.sh`): `fresh` → Version 70; `copy easyappointments --set-version 69` → Version 70, Tabelle + Einstellungen vorhanden; zweiter Lauf ab 69 nach `display_language_selector = 0` → Wert bleibt 0 (idempotent); `migrate down` → Version 69, Fork-Einstellungen 0, `appointment_contacts` und `slot_capacity` weg; `migrate up` → wieder 70.
 - Lokale DB: `UPDATE ea_migrations SET version = 69` + `console migrate` → 70. Doku (ADR 0005, `docs/deployment.md`) war bereits angepasst; Hinweis in Spec 0019 aktualisiert. Historische Erwähnungen in 0006/0007/0014 und `docs/superpowers/` bleiben als Geschichte stehen.
 - `bash scripts/test.sh` grün.
+- Rot vor Fix: entfällt – Refactoring ohne Verhaltensänderung (Migration 071 in 070 aufgegangen), Beleg über `migration-test-db.sh` oben.

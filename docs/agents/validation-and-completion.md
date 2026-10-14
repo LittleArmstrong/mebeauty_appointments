@@ -24,13 +24,16 @@ After making changes:
    ```
 
    It starts the stack, waits until it responds, runs PHPUnit, every check and every smoke test,
-   and ends with a summary (exit 1 on any failure; the script header lists the steps).
+   and ends with a summary (exit 1 on any failure, 3 when green but the smokes were skipped; the script
+   header lists the steps).
    Prerequisites you provide:
 
    - `config.php` in the repository root (`cp config-sample.php config.php`); PHPUnit boots the
      framework and needs it plus MySQL.
-   - Run it from the main checkout: the containers mount the repository directory, so the smoke
-     tests see only that checkout (a worktree elsewhere stays untested).
+   - In a linked worktree under `.claude/worktrees/` it runs PHPUnit and the checks against the
+     worktree through the main checkout's stack, then exits 3: nginx serves only the main checkout,
+     so the smoke tests run there after the merge. A worktree outside the repository directory is
+     not visible to the containers and aborts.
 
 3. Check for accidental modifications.
 4. Report exactly what was executed and the result.

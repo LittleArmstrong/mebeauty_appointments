@@ -48,4 +48,6 @@ behaviour before it turns green with the change. Its test data produces exactly 
 edge case the test name claims (a test about breaks has a break in its working plan).
 The ticket comment records the evidence: `Rot vor Fix: <test(s)> – <failure message>`,
 from running the test against the old code or a simulated old behaviour. Refactors and
-docs-only tickets keep their existing tests green instead.
+docs-only tickets keep their existing tests green instead and record `Rot vor Fix: entfällt – <reason>`.
+`check:scratch` enforces that the line exists (tickets from spec 0017 on, status `needs-verification`/`resolved`);
+the review judges whether the evidence is real.
