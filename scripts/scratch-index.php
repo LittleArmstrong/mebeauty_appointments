@@ -19,6 +19,7 @@ const SCRATCH_STATUSES = [
     'ready-for-agent',
     'ready-for-human',
     'in-progress',
+    'needs-verification',
     'resolved',
     'wontfix'
 ];

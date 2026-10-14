@@ -12,21 +12,11 @@
 
 set -uo pipefail
 
-BASE="${BASE_URL:-http://localhost}"
-FAIL=0
-TMP=$(mktemp -d)
+. "$(dirname "$0")/lib.sh"
+
 CREATED_APPOINTMENTS=""
 CREATED_CUSTOMERS=""
 RESTORE_SETTINGS=()
-
-fail() { echo "FAIL $1"; FAIL=1; }
-ok() { echo "OK   $1"; }
-
-fixtures() {
-    docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/fixtures.php $*"
-}
-
-json() { python3 -c "import sys, json; d = json.load(sys.stdin); print($1)"; }
 
 set_setting() {
     local old
@@ -40,7 +30,7 @@ cleanup() {
         fixtures setting "${RESTORE_SETTINGS[i]}" "'${RESTORE_SETTINGS[i + 1]}'" >/dev/null
     done
     fixtures cleanup "${CREATED_APPOINTMENTS#,}" "${CREATED_CUSTOMERS#,}" >/dev/null
-    rm -rf "$TMP"
+    smoke_cleanup
 }
 trap cleanup EXIT
 

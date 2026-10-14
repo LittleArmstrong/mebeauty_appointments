@@ -10,12 +10,17 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 | `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
 | `wontfix`                  | `wontfix`            | Will not be actioned                     |
 
-Besides the triage labels, specs and tickets use two lifecycle values:
+Besides the triage labels, specs and tickets use three lifecycle values:
 
-| Value         | Meaning                                         |
-| ------------- | ----------------------------------------------- |
-| `in-progress` | Work has started but is not finished            |
-| `resolved`    | Implemented (or answered) and verified          |
+| Value                | Meaning                                                                    |
+| -------------------- | -------------------------------------------------------------------------- |
+| `in-progress`        | Work has started but is not finished                                       |
+| `needs-verification` | Implemented and automatically validated; a manual check by the user is open |
+| `resolved`           | Implemented (or answered) and verified                                     |
+
+A ticket whose acceptance criteria include a manual check by the user (visual check, Google Calendar, …)
+ends the agent's work as `needs-verification`, with the open check named in its comment; its spec stays
+`needs-verification` too. The user sets both to `resolved` after the check.
 
 No other values (e.g. `done`) are allowed; `composer check:scratch` rejects them for specs.
 

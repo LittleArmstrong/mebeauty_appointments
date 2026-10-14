@@ -4,7 +4,7 @@
 
 **Blocked by:** 02
 
-**Status:** resolved
+**Status:** needs-verification
 
 - [x] Kachel und Dialog zeigen die Termin-Kontaktdaten, Rückfall auf den Datensatz bei Altbestand
 - [x] Anlegen im Backend speichert Termin-Kontaktdaten
@@ -19,6 +19,7 @@
 - Kachel, Tabellenansicht und Dialog: `apply_to_customers()` legt die Termin-Kontaktdaten über `appointment.customer` (Kalender-JS unverändert); `calendar/reschedule/<hash>` ebenso. Rückfall auf den Datensatz ohne Kontaktzeile.
 - `Appointment_contact_rules::backend_save()` entscheidet: Bearbeiten des Kunden des Termins → nur gegenüber den Termin-Kontaktdaten (Altbestand: Datensatz) geänderte Felder gehen in Kontakt und Datensatz; neuer Termin oder anderer Kunde → Dialogeingabe wird Kontakt. Verschieben (Drag & Drop sendet keine Kundendaten) ändert nichts. Berechtigungsprüfungen unverändert.
 - Per HTTP mit Admin-Login geprüft (Wegwerfskript): Telefon geändert → Kontakt + Datensatz 0999; nur Nachname geändert, Datensatz-Vorname vorher extern auf „Anders“ → Datensatz behält „Anders“, Kontakt „Smoke“; Verschieben → Kontakt unverändert; Neuanlage → Kontakt aus Dialog; Liste zeigt Kontaktdaten, Altbestand den Datensatz.
+- Rot vor Fix: `AppointmentContactRulesTest` (Backend-Diff `changed_fields`) – Error „Failed opening required …/Appointment_contact_rules.php“. Die `backend_save`-Tests kamen im Review-Refactor dazu (Logik aus `Calendar.php` verschoben) und waren sofort grün; das Verhalten belegen zusätzlich die HTTP-Prüfungen oben.
 - Bekannter Grenzfall: Wählt das Personal im Dialog denselben Kunden erneut aus der Liste, füllt das die Felder mit dem Datensatz; weichen diese vom Kontakt ab, zählt das als Änderung.
 - **Manuelle Sichtprüfung durch den Nutzer ausstehend** (Kachel, Dialog, Anlegen, Bearbeiten, Verschieben).
 - `bash scripts/test.sh` grün.

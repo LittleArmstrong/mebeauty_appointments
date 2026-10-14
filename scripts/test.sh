@@ -63,9 +63,13 @@ composer_in_container() {
 run "phpunit" composer_in_container test
 run "check:format" bash scripts/check-format.sh
 run "check:migrations" composer_in_container check:migrations
+run "migration rerun" bash scripts/migration-test-db.sh rerun easyappointments
 run "check:assets" composer_in_container check:assets
 run "check:scratch" composer_in_container check:scratch
 run "check:views" composer_in_container check:views
+
+# Smoke customers left over by an aborted earlier run (tests/smoke/fixtures.php purge).
+docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/fixtures.php purge" >/dev/null
 
 for smoke in tests/smoke/*-smoke.sh; do
     run "smoke $(basename "$smoke" -smoke.sh)" bash "$smoke"

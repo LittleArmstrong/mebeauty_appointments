@@ -6,6 +6,7 @@
 
 | Spec | Status | Priorität | Erstellt | Abhängig von | Tickets offen/gesamt |
 |---|---|---|---|---|---|
+| [0017](0017-appointment-contacts/spec.md) Termin-Kontaktdaten: Kontaktdaten pro Termin, Kundendatensatz geschützt | needs-verification | P1 | 2026-10-13 | 0009 | 2/5 |
 | [0018](0018-email-verification/spec.md) E-Mail-Bestätigung mit Vormerkung | ready-for-agent | P1 | 2026-10-13 | 0017 | 5/5 |
 | [0019](0019-booking-footer/spec.md) Booking-Footer ausblenden: leer automatisch, per Einstellung immer | ready-for-agent | P3 | 2026-10-13 | 0017 | 1/1 |
 
@@ -29,4 +30,3 @@
 | [0014](0014-theme-site-chrome/spec.md) Site-Chrome pro Theme und mehrsprachige Site-Chrome-Texte | resolved | 2026-10-11 | 2026-10-11 | 4 |
 | [0015](0015-scratch-tracking/spec.md) Nachvollziehbares lokales Tracking: Nummern, Kopfzeilen, INDEX | resolved | 2026-10-11 | 2026-10-11 | 4 |
 | [0016](0016-retro-guardrails/spec.md) Retro-Guardrails: Testskript, Pre-commit, View-Escaping, Regeln | resolved | 2026-10-11 | 2026-10-11 | 5 |
-| [0017](0017-appointment-contacts/spec.md) Termin-Kontaktdaten: Kontaktdaten pro Termin, Kundendatensatz geschützt | resolved | 2026-10-13 | 2026-10-14 | 5 |

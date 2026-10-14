@@ -118,6 +118,10 @@ jobs:
       - name: Install application
         run: docker compose exec -T php-fpm php index.php console install
 
+      # The newest migration (070 until the first prod release, ADR 0005) must be re-runnable and reversible.
+      - name: Check newest migration (re-run, down/up)
+        run: bash scripts/migration-test-db.sh rerun easyappointments
+
       - name: Configure smoke-test data (uploaded logo)
         run: |
           docker compose exec -T mysql mysql -uuser -ppassword easyappointments -e "UPDATE ea_settings SET value='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' WHERE name='company_logo';"
@@ -139,7 +143,11 @@ jobs:
           echo "Application did not become ready" && docker compose logs --tail=50 nginx php-fpm && exit 1
 
       - name: Run smoke tests
+        # Same selection as scripts/test.sh: every tests/smoke/*-smoke.sh, all run even after a failure.
         run: |
-          bash tests/smoke/email-logo-smoke.sh
-          bash tests/smoke/manage-link-smoke.sh
-          bash tests/smoke/language-selector-smoke.sh
+          failed=0
+          for smoke in tests/smoke/*-smoke.sh; do
+            echo "== $smoke"
+            bash "$smoke" || failed=1
+          done
+          exit $failed

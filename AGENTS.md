@@ -37,6 +37,7 @@ Otherwise ask first. Never push or merge. See `docs/agents/git-workflow.md`.
 
 ## Load when relevant
 
+- `CODING_STANDARDS.md` — review rules (judgement calls the checks cannot enforce)
 - `docs/agents/git-workflow.md` — branches, existing user changes, inspection, commit discipline
 - `docs/agents/development-conventions.md` — code conventions, DB migrations, API v1, security, scope
 - `docs/agents/validation-and-completion.md` — full validation and completion report

@@ -11,8 +11,10 @@
  *       provider/service and free target slots.
  *   APP_ENV=testing php tests/smoke/fixtures.php get <appointment-id>
  *       Prints the stored appointment (JSON, or "null" when it does not exist).
- *   APP_ENV=testing php tests/smoke/fixtures.php customer <customer-id>
- *       Prints the stored customer (JSON).
+ *   APP_ENV=testing php tests/smoke/fixtures.php get-by-customer <customer-id> <start Y-m-d H:i:s>
+ *       Prints the customer's appointment with that start (JSON, or "null").
+ *   APP_ENV=testing php tests/smoke/fixtures.php customer <customer-id> [<field> <value>]
+ *       Prints the stored customer (JSON); with field and value, changes that field first.
  *   APP_ENV=testing php tests/smoke/fixtures.php contact <appointment-id>
  *       Prints the stored appointment contact (JSON, or "null" when the appointment has none).
  *   APP_ENV=testing php tests/smoke/fixtures.php setting <name> [<value>]
@@ -21,6 +23,9 @@
  *       Prints a translation (to compare error messages).
  *   APP_ENV=testing php tests/smoke/fixtures.php cleanup <appointment-ids> <customer-ids>
  *       Deletes the given comma-separated appointments and customers.
+ *   APP_ENV=testing php tests/smoke/fixtures.php purge
+ *       Deletes every smoke customer (email smoke-…@example.com) with their appointments, e.g. left over by an
+ *       aborted run.
  */
 
 $_SERVER['argv'] = ['fixtures', 'test'];
@@ -135,7 +140,20 @@ switch ($command) {
         echo json_encode($rows[0] ?? null) . PHP_EOL;
         break;
 
+    case 'get-by-customer':
+        $rows = $CI->appointments_model->get([
+            'id_users_customer' => (int) ($arguments[0] ?? 0),
+            // The start arrives as two arguments (date, time) through the shell.
+            'start_datetime' => implode(' ', array_slice($arguments, 1))
+        ]);
+        echo json_encode($rows[0] ?? null) . PHP_EOL;
+        break;
+
     case 'customer':
+        if (array_key_exists(2, $arguments)) {
+            $CI->db->update('users', [$arguments[1] => $arguments[2]], ['id' => (int) $arguments[0]]);
+        }
+
         echo json_encode($CI->customers_model->find((int) ($arguments[0] ?? 0))) . PHP_EOL;
         break;
 
@@ -166,7 +184,29 @@ switch ($command) {
         }
         break;
 
+    case 'purge':
+        $customer_role_id = $CI->customers_model->get_customer_role_id();
+
+        $smoke_customers = $CI->db
+            ->select('id')
+            ->like('email', 'smoke-', 'after')
+            ->like('email', '@example.com', 'before')
+            ->where('id_roles', $customer_role_id)
+            ->get('users')
+            ->result_array();
+
+        foreach ($smoke_customers as $customer) {
+            $CI->db->delete('appointments', ['id_users_customer' => (int) $customer['id']]);
+            $CI->db->delete('users', ['id' => (int) $customer['id']]);
+        }
+
+        echo count($smoke_customers) . PHP_EOL;
+        break;
+
     default:
-        fwrite(STDERR, 'Usage: fixtures.php setup|get|customer|contact|setting|lang|cleanup' . PHP_EOL);
+        fwrite(
+            STDERR,
+            'Usage: fixtures.php setup|get|get-by-customer|customer|contact|setting|lang|cleanup|purge' . PHP_EOL
+        );
         exit(2);
 }

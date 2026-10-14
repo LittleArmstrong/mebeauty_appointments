@@ -14,7 +14,7 @@ Before changing code, read what applies:
 - `AGENTS.md` — validation commands, commit checkpoints, where docs live.
 - `docs/agents/development-conventions.md` — scope, migrations, API, security.
 - `docs/agents/git-workflow.md` — branches (`staging` → PR → `main`), never push/merge without request.
-- `CODING_STANDARDS.md` — brand values from settings, asset roles.
+- `CODING_STANDARDS.md` — review rules: fork logic outside upstream files, brand values from settings, asset roles, `e()` in views, tests go red.
 - `GLOSSARY.md` — domain vocabulary (Buchungsfrist, Umbuchungs-/Stornierungsfrist, Pufferzeit, Arbeitsende, Manage-Link, Theme, Site-Chrome …).
 - `docs/adr/` — fork decisions, notably 0002/0003 (deadlines, buffer, slot capacity), 0005 (upstream sync, migration numbering), 0006 (site chrome per theme), 0007 (PHP versions).
 - `.scratch/INDEX.md` — specs and tickets (schema in `docs/agents/issue-tracker.md`).
@@ -34,7 +34,7 @@ All PHP and Composer commands run inside the `php-fpm` container (`docker compos
 | Migrations | `application/migrations/NNN_name.php` | Gapless sequence (currently 001–070); see ADR 0005 |
 | Views | `application/views/{layouts,pages,components,emails,errors}` | `extend()`, `section()`, `slot()`, `component()` |
 | Frontend | `assets/js/`, `assets/css/` (SCSS, built by gulp) | Themes in `assets/css/themes/<theme>.scss` |
-| Tests | `tests/Unit/` (PHPUnit), `tests/smoke/*.sh` (HTTP smoke against the running site) | |
+| Tests | `tests/Unit/` (PHPUnit), `tests/smoke/*-smoke.sh` (HTTP smoke against the running site; shared helpers incl. backend login in `tests/smoke/lib.sh`, test data via `tests/smoke/fixtures.php`) | |
 
 ## Verified patterns
 

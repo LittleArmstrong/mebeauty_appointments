@@ -16,6 +16,6 @@
 ## Comments
 
 - Umbuchung löst den Kunden über `resolve_customer_id($original_appointment, …)` auf; `customer_record` übernimmt eine geänderte E-Mail nur, wenn kein anderer Kunde sie hat (Unit-Tests `testRescheduleKeepsTheEmailWhenAnotherCustomerHasIt`, `testRescheduleTakesOverAFreeNewEmail`).
-- Rot vor Umsetzung (Smoke gegen altes `Booking.php`): „FAIL reschedule with another customer's email: appointment customer 90“ (Termin wanderte zu Anna) und „FAIL reschedule with a free new email“. Danach OK.
+- Rot vor Fix: Smoke `appointment-contacts` gegen altes `Booking.php` – „FAIL reschedule with another customer's email: appointment customer 90“ (Termin wanderte zu Anna) und „FAIL reschedule with a free new email“. Danach OK.
 - Die Doppelbuchungsprüfung „customer_is_already_booked“ greift jetzt auch bei Umbuchungen (mit dem Original-Kunden, eigener Termin ausgenommen).
 - `bash scripts/test.sh` grün.

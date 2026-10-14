@@ -1,8 +1,8 @@
 # Termin-Kontaktdaten: Kontaktdaten pro Termin, Kundendatensatz geschützt
 
-Status: resolved
+Status: needs-verification
 Created: 2026-10-13
-Closed: 2026-10-14
+Closed: –
 Priority: P1
 Depends-on: 0009
 

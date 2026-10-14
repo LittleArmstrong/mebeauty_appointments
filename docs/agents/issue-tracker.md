@@ -28,7 +28,7 @@ Depends-on: 0009, 0012
 
 | Key | Required | Values |
 |---|---|---|
-| `Status` | yes | a value from `triage-labels.md` (triage labels plus `in-progress`, `resolved`) |
+| `Status` | yes | a value from `triage-labels.md` (triage labels plus `in-progress`, `needs-verification`, `resolved`) |
 | `Created` | yes | `YYYY-MM-DD`, date of the spec's first commit |
 | `Closed` | yes | `YYYY-MM-DD` when `resolved`/`wontfix`, otherwise `–` |
 | `Priority` | yes | `P1` (security/correctness), `P2` (functionality/maintainability), `P3` (clean-up); `–` allowed for closed specs |

@@ -91,6 +91,28 @@ class ScratchIndexTest extends TestCase
         $this->assertErrorContains('Status resolved, aber 1 Ticket(s) offen');
     }
 
+    public function testTicketAwaitingVerificationKeepsTheSpecOpen(): void
+    {
+        $this->writeSpec('0001-first', $this->header('resolved', '2026-10-01', '2026-10-02', '–', '–'));
+        $this->writeTicket('0001-first', '01-a.md', 'needs-verification');
+
+        $this->assertErrorContains('Status resolved, aber 1 Ticket(s) offen');
+    }
+
+    public function testSpecAwaitingVerificationIsAnOpenSpec(): void
+    {
+        $this->writeSpec('0001-first', $this->header('needs-verification', '2026-10-01', '–', 'P1', '–'));
+        $this->writeTicket('0001-first', '01-a.md', 'needs-verification');
+
+        $this->generateIndex();
+
+        $this->assertSame([], \scratch_check($this->tmpDir));
+        $this->assertStringContainsString(
+            '| needs-verification | P1 |',
+            file_get_contents($this->tmpDir . '/INDEX.md')
+        );
+    }
+
     public function testDuplicateNumberIsReported(): void
     {
         $this->writeSpec('0001-first', $this->header('ready-for-agent', '2026-10-01', '–', 'P2', '–'));

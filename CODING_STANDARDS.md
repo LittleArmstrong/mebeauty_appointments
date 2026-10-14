@@ -4,6 +4,13 @@ Conventions enforced during code review. Tooling already catches syntax and the
 email-logo smoke test catches the base64 gotcha; these are the judgement calls a
 guardrail cannot enforce.
 
+## Upstream files only call fork code
+
+The logic of a fork feature lives in fork-owned libraries and models (pattern: `Booking_policy`,
+`Appointment_contact_rules` as pure rule modules with unit tests). Upstream controllers, libraries and views
+only gain calls into them and display adjustments; a decision (if-cascade, merge, branch choice) written
+inline in an upstream file belongs in the rule module (ADR 0005, keeps the upstream diff and sync conflicts small).
+
 ## Brand values come from settings
 
 Original Easy!Appointments surfaces (backend header, emails, booking wizard

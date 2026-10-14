@@ -19,6 +19,7 @@
 
 - Tabelle `appointment_contacts` in 070 (Unique auf `id_appointments`, FK mit `ON DELETE CASCADE`), Model `Appointment_contacts_model`, Regel-Modul `Appointment_contact_rules` (reine Funktionen: `resolve_customer_id`, `customer_record`, `contact`, `display_customer`).
 - `Booking::register`: leere Defaults für address/city/zip_code/notes/phone_number entfernt; Neukunde → Termin → Termin-Kontaktdaten → Datensatz-Update in einer Transaktion (ein neuer Kunde muss wegen des FK vor dem Termin eingefügt werden, ein bestehender Datensatz wird erst nach dem Termin geändert); Sync, Mails, Webhook nach dem Commit. Salon-Mails (Provider/Admin/Sekretär) bekommen die Termin-Kontaktdaten, die Kundenmail den Datensatz.
-- Rot vor Umsetzung: `AppointmentContactRulesTest` → Error „Failed opening required …/Appointment_contact_rules.php“. Smoke `appointment-contacts` gegen das alte `Booking.php`: „FAIL booking with another person's email (HTTP 500, Not all required fields are provided …)“ (leeres Telefon wurde als Löschung gespeichert), dazu FAIL bei beiden Umbuchungsfällen und „contact of rescheduled appointment: null“. Danach 5/5 OK.
+- Rot vor Fix: `AppointmentContactRulesTest` – Error „Failed opening required …/Appointment_contact_rules.php“.
+- Rot vor Fix: Smoke `appointment-contacts` gegen das alte `Booking.php` – „FAIL booking with another person's email (HTTP 500, Not all required fields are provided …)“ (leeres Telefon wurde als Löschung gespeichert), dazu FAIL bei beiden Umbuchungsfällen und „contact of rescheduled appointment: null“. Danach 5/5 OK.
 - Rollback bei Fehlern ist nicht automatisch getestet (kein Fehlerinjektionspunkt über HTTP).
 - `bash scripts/test.sh` grün.
