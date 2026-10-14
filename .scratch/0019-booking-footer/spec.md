@@ -1,6 +1,6 @@
 # Booking-Footer ausblenden: leer automatisch, per Einstellung immer
 
-Status: ready-for-agent
+Status: needs-verification
 Created: 2026-10-13
 Closed: –
 Priority: P3

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # HTTP smoke test of the setting display_language_selector (spec 0014): with 0 the booking flow has no language
-# selector, with 1 it has one. The original value is restored on exit.
+# selector, with 1 it has one. The footer itself is forced on (display_booking_footer, spec 0019). The original values
+# are restored on exit.
 #
 # Requires the docker stack to be up (php-fpm, nginx, mysql).
 
@@ -19,7 +20,10 @@ setting() {
 }
 
 ORIGINAL=$(setting display_language_selector)
-trap 'setting display_language_selector "'"'"'$ORIGINAL'"'"'" >/dev/null' EXIT
+ORIGINAL_FOOTER=$(setting display_booking_footer)
+trap 'setting display_language_selector "'"'"'$ORIGINAL'"'"'" >/dev/null; setting display_booking_footer "'"'"'$ORIGINAL_FOOTER'"'"'" >/dev/null' EXIT
+
+setting display_booking_footer "'1'" >/dev/null
 
 setting display_language_selector "'0'" >/dev/null
 if has_selector; then

@@ -8,7 +8,7 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
      * Collects all fork changes until the first production release (ADR 0005): the
      * booking deadline/buffer and timezone settings, the company-header setting, the
      * manage-deadline settings, the language-selector setting (formerly 071), the
-     * per-service slot capacity column, the appointment_contacts table (spec 0017,
+     * booking-footer setting (spec 0019), the per-service slot capacity column, the appointment_contacts table (spec 0017,
      * ADR 0008) and the email verification setting, the appointment_verifications table
      * and the email_verification_limits table (spec 0018). Idempotent: only creates what is missing, so
      * an existing database can be re-migrated from version 69.
@@ -29,6 +29,7 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
             'manage_deadline_time' => '18:00',
             'manage_deadline_days' => '1',
             'display_language_selector' => '1',
+            'display_booking_footer' => '1',
             'require_email_verification' => '0'
         ];
 
@@ -171,6 +172,7 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                 'manage_deadline_time',
                 'manage_deadline_days',
                 'display_language_selector',
+                'display_booking_footer',
                 'require_email_verification'
             ])
             ->delete('settings');

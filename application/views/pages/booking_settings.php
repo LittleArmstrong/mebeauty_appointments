@@ -546,6 +546,22 @@
 
                                     <div class="mb-3">
                                         <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="display-booking-footer"
+                                                   data-field="display_booking_footer">
+                                            <label class="form-check-label" for="display-booking-footer">
+                                                <?= lang('display_booking_footer') ?>
+                                            </label>
+                                        </div>
+
+                                        <div class="form-text text-muted">
+                                            <small>
+                                                <?= lang('display_booking_footer_hint') ?>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" id="display-language-selector"
                                                    data-field="display_language_selector">
                                             <label class="form-check-label" for="display-language-selector">

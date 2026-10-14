@@ -67,6 +67,7 @@ function validate_setting_value(string $name, mixed $value): ?string
         'appointment_buffer_end_of_day' => ['0', '1'],
         'booking_show_company_header' => ['0', '1'],
         'display_language_selector' => ['0', '1'],
+        'display_booking_footer' => ['0', '1'],
         'require_email_verification' => ['0', '1'],
     ];
 

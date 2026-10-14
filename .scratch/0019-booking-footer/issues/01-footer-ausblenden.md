@@ -4,11 +4,11 @@
 
 **Blocked by:** 0017/01
 
-**Status:** ready-for-agent
+**Status:** needs-verification
 
-- [ ] Einstellung `display_booking_footer` (0/1, Default 1) in Migration 070 (idempotent), Regel im zentralen Einstellungs-Mechanismus (Unit-Test), pflegbar in den Buchungseinstellungen
-- [ ] Booking-Layout bindet den Footer nicht ein, wenn er leer ist oder die Einstellung 0 ist
-- [ ] Einzelne Footer-Elemente bleiben wie bisher steuerbar
-- [ ] Deployment-Doku nennt das Ausschalten für MeBeauty (bereits vorbereitet, prüfen)
+- [x] Einstellung `display_booking_footer` (0/1, Default 1) in Migration 070 (idempotent), Regel im zentralen Einstellungs-Mechanismus (Unit-Test), pflegbar in den Buchungseinstellungen
+- [x] Booking-Layout bindet den Footer nicht ein, wenn er leer ist oder die Einstellung 0 ist
+- [x] Einzelne Footer-Elemente bleiben wie bisher steuerbar
+- [x] Deployment-Doku nennt das Ausschalten für MeBeauty (bereits vorbereitet, prüfen)
 - [ ] Kein Layout-Smoke; Sichtprüfung durch den Nutzer (Theme `mebeauty` und `default`, Footer an/aus, mit/ohne Elemente)
-- [ ] `bash scripts/test.sh` grün
+- [ ] `bash scripts/test.sh` grün (nicht gelaufen: Docker-Stack mountet nur den Haupt-Checkout; nach Merge im Haupt-Checkout ausführen)
