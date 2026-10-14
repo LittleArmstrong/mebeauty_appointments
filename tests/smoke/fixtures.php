@@ -32,6 +32,12 @@
  *       Vormerkung was deleted) a known token (the smoke test reads no mails) and, with minutes-back, moves its
  *       expiry, last mail and creation time that many minutes into the past. Prints the verification (JSON, or
  *       "null" when there is none).
+ *   APP_ENV=testing php tests/smoke/fixtures.php vormerkung <provider-id> <service-id> <Y-m-d> <H:i:s> <email>
+ *       Stores a Vormerkung (appointment without customer, contact "Vera Vormerkung", booking verification) like
+ *       booking/register with the setting on, without mail. Prints JSON with its ID and hash, spec 0018/04.
+ *   APP_ENV=testing php tests/smoke/fixtures.php email-change-verification <appointment-id> <email>
+ *       Stores an email change verification for a confirmed appointment (like a reschedule with a new email,
+ *       without mail). Prints the verification (JSON).
  *   APP_ENV=testing php tests/smoke/fixtures.php limit <email>
  *       Prints the send limit of the verification mails to that email (JSON, or "null"), spec 0018/03.
  *   APP_ENV=testing php tests/smoke/fixtures.php limit-backdate <email> <seconds>
@@ -235,6 +241,62 @@ switch ($command) {
         echo json_encode(
             $CI->appointment_verifications_model->find_by_token_hash(hash('sha256', $arguments[1] ?? ''))
         ) . PHP_EOL;
+        break;
+
+    case 'vormerkung':
+        $CI->load->library('email_verification_rules');
+        $CI->load->library('appointment_contact_rules');
+
+        $service = $CI->services_model->find((int) ($arguments[1] ?? 0));
+        $start = ($arguments[2] ?? '') . ' ' . ($arguments[3] ?? '');
+        $email = $arguments[4] ?? '';
+        $appointment = [
+            'start_datetime' => $start,
+            'end_datetime' => date('Y-m-d H:i:s', strtotime($start) + $service['duration'] * 60),
+            'id_users_provider' => (int) ($arguments[0] ?? 0),
+            'id_services' => (int) $service['id'],
+            'is_unavailability' => 0,
+            'notes' => 'smoke vormerkung'
+        ];
+        $customer = [
+            'first_name' => 'Vera',
+            'last_name' => 'Vormerkung',
+            'email' => $email,
+            'phone_number' => '0170 444',
+            'timezone' => 'UTC',
+            'language' => 'english'
+        ];
+
+        $appointment_id = $CI->appointment_verifications_model->create_vormerkung(
+            $appointment,
+            $CI->appointment_contact_rules->contact($customer),
+            $CI->email_verification_rules->booking_verification(
+                $appointment,
+                $customer,
+                bin2hex(random_bytes(32)),
+                new DateTimeImmutable('now')
+            )
+        );
+
+        echo json_encode([
+            'id' => $appointment_id,
+            'hash' => $CI->appointments_model->find($appointment_id)['hash']
+        ]) . PHP_EOL;
+        break;
+
+    case 'email-change-verification':
+        $CI->load->library('email_verification_rules');
+
+        $verification = $CI->email_verification_rules->email_change_verification(
+            $CI->appointments_model->find((int) ($arguments[0] ?? 0)),
+            $arguments[1] ?? '',
+            bin2hex(random_bytes(32)),
+            new DateTimeImmutable('now')
+        );
+        $CI->appointment_verifications_model->insert($verification);
+
+        echo json_encode($CI->appointment_verifications_model->find_by_token_hash($verification['token_hash'])) .
+            PHP_EOL;
         break;
 
     case 'limit':

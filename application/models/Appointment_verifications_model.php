@@ -193,6 +193,16 @@ class Appointment_verifications_model extends EA_Model
     }
 
     /**
+     * Delete all verifications of an appointment (e.g. before staff deletes the appointment).
+     *
+     * @param int $appointment_id Appointment ID.
+     */
+    public function delete_by_appointment(int $appointment_id): void
+    {
+        $this->db->delete('appointment_verifications', ['id_appointments' => $appointment_id]);
+    }
+
+    /**
      * Delete a Vormerkung with its verification (only an appointment without customer).
      *
      * @param int $appointment_id Appointment ID.

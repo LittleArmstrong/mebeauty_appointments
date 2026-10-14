@@ -439,4 +439,20 @@ class EmailVerificationRulesTest extends TestCase
             $record
         );
     }
+
+    public function testOnlyABookingVerificationMarksItsAppointmentAsUnconfirmed(): void
+    {
+        $verifications = [
+            ['id_appointments' => 7, 'purpose' => 'booking'],
+            ['id_appointments' => 8, 'purpose' => 'email_change'],
+            ['id_appointments' => null, 'purpose' => 'booking']
+        ];
+
+        $this->assertSame([7], $this->rules()->unconfirmed_appointment_ids($verifications));
+    }
+
+    public function testNoVerificationsMarkNoAppointment(): void
+    {
+        $this->assertSame([], $this->rules()->unconfirmed_appointment_ids([]));
+    }
 }

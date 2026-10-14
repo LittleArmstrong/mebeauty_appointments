@@ -72,19 +72,19 @@ class Appointment_contacts_model extends EA_Model
     /**
      * Show the appointment contact in the "customer" data of loaded appointments (fallback: customer record).
      *
-     * @param array $appointments Appointments with a loaded "customer" entry.
+     * An appointment without customer (Vormerkung, spec 0018) shows only its contact.
+     *
+     * @param array $appointments Appointments with a loaded "customer" entry (empty array or null without customer).
      */
     public function apply_to_customers(array &$appointments): void
     {
         $contacts = $this->find_by_appointments(array_column($appointments, 'id'));
 
         foreach ($appointments as &$appointment) {
-            if (!empty($appointment['customer']) && is_array($appointment['customer'])) {
-                $appointment['customer'] = $this->appointment_contact_rules->display_customer(
-                    $appointment['customer'],
-                    $contacts[(int) $appointment['id']] ?? null
-                );
-            }
+            $appointment['customer'] = $this->appointment_contact_rules->display_customer(
+                is_array($appointment['customer'] ?? null) ? $appointment['customer'] : [],
+                $contacts[(int) $appointment['id']] ?? null
+            );
         }
     }
 
@@ -92,13 +92,13 @@ class Appointment_contacts_model extends EA_Model
      * Get the customer data to display for one appointment: its contact over the customer record.
      *
      * @param array $appointment Appointment (an appointment without ID shows the record).
-     * @param array $customer Customer record (empty without customer).
+     * @param array $customer Customer record (empty without customer, e.g. a Vormerkung shows only its contact).
      *
      * @return array Returns the customer data to display.
      */
     public function display_customer(array $appointment, array $customer): array
     {
-        if (empty($customer) || empty($appointment['id'])) {
+        if (empty($appointment['id'])) {
             return $customer;
         }
 

@@ -263,6 +263,12 @@ App.Utils.CalendarEventPopover = (function () {
      */
     function buildAppointmentPopover(info, displayEdit, displayDelete) {
         const data = info.event.extendedProps.data;
+
+        // A Vormerkung (spec 0018) can only be deleted, not edited or confirmed.
+        if (data.is_unconfirmed) {
+            displayEdit = 'd-none';
+        }
+
         const customer = data.customer;
         const provider = data.provider;
         const customerName = [customer.first_name, customer.last_name].filter(Boolean).join(' ') || '-';
@@ -278,7 +284,7 @@ App.Utils.CalendarEventPopover = (function () {
                 ...createPopoverRow('start', formatDateTime(info.event.start)),
                 ...createPopoverRow('end', formatDateTime(info.event.end)),
                 ...createPopoverRow('timezone', vars('timezones')[provider.timezone]),
-                ...createPopoverRow('status', data.status || '-'),
+                ...createPopoverRow('status', data.is_unconfirmed ? lang('unconfirmed') : data.status || '-'),
                 ...createPopoverRow('service', data.service.name),
                 $('<strong/>', {class: 'd-inline-block me-2', text: lang('provider')}),
                 renderMapIcon(provider),
@@ -329,6 +335,17 @@ App.Utils.CalendarEventPopover = (function () {
         });
     }
 
+    /**
+     * Prefix the title of a Vormerkung (appointment waiting for the email verification, spec 0018) with "unconfirmed".
+     *
+     * @param {String} title - Event or dialog title.
+     * @param {Object} appointment - Appointment data.
+     * @returns {String} Title.
+     */
+    function unconfirmedTitle(title, appointment) {
+        return appointment?.is_unconfirmed ? '(' + lang('unconfirmed') + ') ' + title : title;
+    }
+
     // Public API
 
     return {
@@ -345,5 +362,6 @@ App.Utils.CalendarEventPopover = (function () {
         buildWorkingPlanExceptionPopover,
         buildAppointmentPopover,
         buildBlockedPeriodPopover,
+        unconfirmedTitle,
     };
 })();

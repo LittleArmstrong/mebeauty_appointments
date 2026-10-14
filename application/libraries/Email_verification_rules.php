@@ -334,6 +334,31 @@ class Email_verification_rules
     }
 
     /**
+     * Get the appointments that are Vormerkungen ("unbestätigt" in the backend calendar, no external sync).
+     *
+     * Only a booking verification marks its appointment; an email change belongs to a confirmed appointment.
+     *
+     * @param array $verifications Verification records (with id_appointments and purpose).
+     *
+     * @return array Returns the appointment IDs (int).
+     */
+    public function unconfirmed_appointment_ids(array $verifications): array
+    {
+        $ids = [];
+
+        foreach ($verifications as $verification) {
+            if (
+                ($verification['purpose'] ?? null) === self::PURPOSE_BOOKING &&
+                !empty($verification['id_appointments'])
+            ) {
+                $ids[] = (int) $verification['id_appointments'];
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
      * Build the appointment of an expired Vormerkung again from its restore data (late click).
      *
      * @param array $verification Stored verification record.

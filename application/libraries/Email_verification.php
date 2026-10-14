@@ -389,6 +389,77 @@ class Email_verification
     }
 
     /**
+     * Mark the Vormerkungen among loaded appointments for the backend calendar (ticket 0018/04).
+     *
+     * Sets "is_unconfirmed" (bool) on every appointment.
+     *
+     * @param array $appointments Appointments with ID.
+     */
+    public function mark_unconfirmed(array &$appointments): void
+    {
+        $unconfirmed_ids = $this->unconfirmed_ids(array_column($appointments, 'id'));
+
+        foreach ($appointments as &$appointment) {
+            $appointment['is_unconfirmed'] = in_array((int) $appointment['id'], $unconfirmed_ids, true);
+        }
+    }
+
+    /**
+     * Check whether an appointment is a Vormerkung (staff can delete it, but neither edit nor confirm it).
+     *
+     * @param int $appointment_id Appointment ID.
+     *
+     * @return bool
+     */
+    public function is_unconfirmed(int $appointment_id): bool
+    {
+        return $this->unconfirmed_ids([$appointment_id]) !== [];
+    }
+
+    /**
+     * Remove the Vormerkungen from appointments that go to an external calendar (no sync before confirmation).
+     *
+     * @param array $appointments Appointments with ID.
+     *
+     * @return array Returns the confirmed appointments.
+     */
+    public function without_unconfirmed(array $appointments): array
+    {
+        $unconfirmed_ids = $this->unconfirmed_ids(array_column($appointments, 'id'));
+
+        return array_values(
+            array_filter(
+                $appointments,
+                fn(array $appointment): bool => !in_array((int) $appointment['id'], $unconfirmed_ids, true)
+            )
+        );
+    }
+
+    /**
+     * Delete the verifications of an appointment before staff deletes it, so no link restores it afterwards.
+     *
+     * @param int $appointment_id Appointment ID.
+     */
+    public function forget_appointment(int $appointment_id): void
+    {
+        $this->CI->appointment_verifications_model->delete_by_appointment($appointment_id);
+    }
+
+    /**
+     * Get the IDs of the Vormerkungen among appointments.
+     *
+     * @param array $appointment_ids Appointment IDs.
+     *
+     * @return array Returns the IDs (int) of the appointments with a booking verification.
+     */
+    protected function unconfirmed_ids(array $appointment_ids): array
+    {
+        return $this->CI->email_verification_rules->unconfirmed_appointment_ids(
+            $this->CI->appointment_verifications_model->find_by_appointments($appointment_ids)
+        );
+    }
+
+    /**
      * Confirm a Vormerkung with the token from the verification link.
      *
      * Assigns the customer with the verified email (or creates it), updates the customer record by the rules of
