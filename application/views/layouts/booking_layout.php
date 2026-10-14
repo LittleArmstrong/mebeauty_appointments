@@ -64,23 +64,17 @@ $has_site_chrome = array_filter(
             <?php slot('content'); ?>
 
             <?php
-            // Spec 0019: an empty footer (no legal URL, no language selector, no login button) is not rendered at
-            // all, including its border; display_booking_footer = 0 always hides it.
-            $booking_footer = [
+            $booking_footer_vars = [
                 'display_login_button' => vars('display_login_button'),
                 'display_language_selector' => setting('display_language_selector', '1') === '1',
                 'legal_notice_url' => vars('legal_notice_url'),
                 'imprint_url' => vars('imprint_url'),
             ];
-            $booking_footer_has_content =
-                !empty($booking_footer['display_login_button']) ||
-                $booking_footer['display_language_selector'] ||
-                !empty($booking_footer['legal_notice_url']) ||
-                !empty($booking_footer['imprint_url']);
+            get_instance()->load->library('booking_footer_rules');
             ?>
 
-            <?php if (setting('display_booking_footer', '1') === '1' && $booking_footer_has_content): ?>
-                <?php component('booking_footer', $booking_footer); ?>
+            <?php if (get_instance()->booking_footer_rules->is_shown(setting('display_booking_footer', '1'), $booking_footer_vars)): ?>
+                <?php component('booking_footer', $booking_footer_vars); ?>
             <?php endif; ?>
 
         </div>
