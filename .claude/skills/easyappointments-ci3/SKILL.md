@@ -107,6 +107,7 @@ Then expose it on the matching settings page (`data-field="my_setting"`), add tr
 - Unescaped output in views, or brand literals instead of settings.
 - Formatting whole upstream files (keeps the upstream diff small; see `docs/agents/development-conventions.md`).
 - Running PHP on the host instead of the `php-fpm` container.
+- Checking a JS change in the browser without a build: with `DEBUG_MODE = false` the site loads the gitignored `*.min.js` (`asset_helper.php`). `scripts/test.sh` rebuilds them with `npx gulp scripts` when a source is newer; outside it, run that yourself.
 
 ## Maintenance
 

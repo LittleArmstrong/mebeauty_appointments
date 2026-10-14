@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Full local validation in one command: starts the Docker stack, waits until MySQL and the site respond,
-# then runs PHPUnit, all repository checks and all smoke tests. Keeps going after a failure and ends with a
+# rebuilds stale minified JS, then runs PHPUnit, all repository checks and all smoke tests. Keeps going after a failure and ends with a
 # summary; exits 1 when at least one check failed, 2 when a prerequisite is missing.
 #
 # Usage (on the host, from anywhere):
@@ -39,6 +39,23 @@ wait_for "vendor/autoload.php fehlt nach 120 s – Composer-Installation im php-
     docker compose exec -T php-fpm test -f vendor/autoload.php
 wait_for "${BASE_URL:-http://localhost}/ antwortet nicht nach 120 s (docker compose logs nginx php-fpm)" 60 \
     curl -fsS -o /dev/null "${BASE_URL:-http://localhost}/"
+
+# With DEBUG_MODE = false the site loads the gitignored assets/js/**/*.min.js. The smokes do not run JS, but
+# the stack they leave behind is what the user checks by eye: rebuild when a source is newer than its .min.js
+# and abort when the build fails or leaves one stale. gulp gives the .min.js the source's mtime truncated to
+# milliseconds, so whole seconds are compared.
+stale_scripts() {
+    find assets/js -name '*.js' ! -name '*.min.js' -print0 | while IFS= read -r -d '' src; do
+        local min="${src%.js}.min.js"
+        [ -f "$min" ] && [ "$(stat -c %Y "$src")" -le "$(stat -c %Y "$min")" ] || echo "$src"
+    done
+}
+if [ -n "$(stale_scripts)" ]; then
+    [ -x node_modules/.bin/gulp ] || abort "veraltetes .min.js, aber node_modules fehlt – npm ci"
+    echo "== JS-Build (npx gulp scripts): $(stale_scripts | wc -l) Quelle(n) neuer als ihr .min.js"
+    npx gulp scripts || abort "npx gulp scripts fehlgeschlagen"
+    [ -z "$(stale_scripts)" ] || abort "nach npx gulp scripts noch veraltet: $(stale_scripts | tr '\n' ' ')"
+fi
 
 results=()
 failed=0
