@@ -7,7 +7,9 @@
 #   blocks its slot and does not reveal the manage link hash; only the verification mail goes out (Mailpit);
 # - opening the verification link (known token set by tests/smoke/fixtures.php, opened in another "browser") only
 #   shows a confirm button and changes nothing (mail scanners open links); the button (POST with CSRF token) assigns
-#   a customer, removes the verification and redirects to the success page;
+#   a customer, removes the verification and redirects to the success page; opened in the browser session that
+#   started that verification (booking or email change), the link confirms right away, any other session (also one
+#   with another Vormerkung) only gets the button;
 # - a second confirmation shows the neutral "invalid" message;
 # - a second booking with the verified email in that browser session is booked right away;
 # - a backdated (expired) Vormerkung frees its slot on the next availability request; a late click books it again
@@ -78,10 +80,10 @@ available_hours() {
         --data-urlencode "selected_date=$DATE"
 }
 
-# GET the verification link (shows the confirm button). Arguments: cookie jar, token. Prints the HTTP status, body in
-# $TMP/page.
+# GET the verification link (the confirm button, or the confirmation itself in the browser session that started the
+# verification). Arguments: cookie jar, token. Prints "<status> <redirect URL>", body in $TMP/page.
 open_link() {
-    curl -s -o "$TMP/page" -w '%{http_code}' -c "$1" -b "$1" "$BASE/index.php/booking/verify/$2"
+    curl -s -o "$TMP/page" -w '%{http_code} %{redirect_url}' -c "$1" -b "$1" "$BASE/index.php/booking/verify/$2"
 }
 
 # Open the verification link and press its confirm button (POST with the CSRF token of the page's cookie).
@@ -182,7 +184,7 @@ TOKEN="smoketoken$$$RANDOM"
 fixtures verification-token "$APPOINTMENT" "$TOKEN" >/dev/null
 HASH=$(appointment_field "$APPOINTMENT" hash)
 STATUS=$(open_link "$PHONE" "$TOKEN")
-if [ "$STATUS" = "200" ] && grep -q 'booking/confirm_verification' "$TMP/page" && grep -qF "value=\"$TOKEN\"" "$TMP/page" \
+if [ "${STATUS%% *}" = "200" ] && grep -q 'booking/confirm_verification' "$TMP/page" && grep -qF "value=\"$TOKEN\"" "$TMP/page" \
     && [ "$(appointment_field "$APPOINTMENT" id_users_customer)" = "None" ] \
     && [ "$(fixtures verification-by-email "$EMAIL" | json "d and d['id_appointments']")" = "$APPOINTMENT" ]; then
     ok "opening the link only shows the confirm button and changes nothing"
@@ -324,8 +326,57 @@ else
     fail "late click on a deleted Vormerkung: $RESULT, verification $(fixtures verification-by-email "$DELETED_EMAIL"), slots $(available_hours)"
 fi
 
-# 10. "Erneut senden": the Vormerkung comes from the browser session, the client sends no email or ID.
+# 10. The link opened in the browser session that submitted the booking confirms right away (no button); in any
+#     other browser (another device, a mail scanner without the session cookie) it only shows the button.
 #     (This smoke test sends more than the 100 requests per two minutes of rate_limit(); its counter is reset.)
+fixtures rate-limit-reset
+OWN_EMAIL="smoke-verify-own-$$-$RANDOM@example.com"
+OWN_JAR="$TMP/own-laptop"
+register "$OWN_JAR" "$SECOND" "$OWN_EMAIL" >/dev/null
+OWN_APPOINTMENT=$(fixtures verification-by-email "$OWN_EMAIL" | json "d and d['id_appointments']")
+CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$OWN_APPOINTMENT"
+OWN_TOKEN="smokeown$$$RANDOM"
+fixtures verification-token "$OWN_APPOINTMENT" "$OWN_TOKEN" >/dev/null
+OWN_HASH=$(appointment_field "$OWN_APPOINTMENT" hash)
+
+RESULT=$(open_link "$TMP/own-scanner" "$OWN_TOKEN")
+if [ "${RESULT%% *}" = "200" ] && grep -q 'booking/confirm_verification' "$TMP/page" \
+    && [ "$(appointment_field "$OWN_APPOINTMENT" id_users_customer)" = "None" ] \
+    && [ "$(fixtures verification-by-email "$OWN_EMAIL" | json "d and d['id_appointments']")" = "$OWN_APPOINTMENT" ]; then
+    ok "the link opened in another browser session only shows the confirm button and changes nothing"
+else
+    fail "link in another browser session: $RESULT, appointment $(fixtures get "$OWN_APPOINTMENT"), verification $(fixtures verification-by-email "$OWN_EMAIL")"
+fi
+
+RESULT=$(open_link "$OWN_JAR" "$OWN_TOKEN")
+OWN_CUSTOMER=$(appointment_field "$OWN_APPOINTMENT" id_users_customer)
+if [[ "${RESULT%% *}" == 30? ]] && [[ "${RESULT#* }" == *"booking_confirmation/of/$OWN_HASH" ]] \
+    && [ "$OWN_CUSTOMER" != "None" ] && [ "$(fixtures customer "$OWN_CUSTOMER" | json "d['email']")" = "$OWN_EMAIL" ] \
+    && [ "$(fixtures verification-by-email "$OWN_EMAIL")" = "null" ]; then
+    CREATED_CUSTOMERS="$CREATED_CUSTOMERS,$OWN_CUSTOMER"
+    ok "the link opened in the browser session of the booking confirms it right away"
+else
+    fail "link in the browser session of the booking: $RESULT, appointment $(fixtures get "$OWN_APPOINTMENT"), verification $(fixtures verification-by-email "$OWN_EMAIL")"
+fi
+
+# The session knows only its own Vormerkung: the link of another one opened there still shows the button.
+fixtures cleanup "$OWN_APPOINTMENT" "" >/dev/null
+OTHER_EMAIL="smoke-verify-other-$$-$RANDOM@example.com"
+register "$TMP/other-laptop" "$SECOND" "$OTHER_EMAIL" >/dev/null
+OTHER_APPOINTMENT=$(fixtures verification-by-email "$OTHER_EMAIL" | json "d and d['id_appointments']")
+CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$OTHER_APPOINTMENT"
+OTHER_TOKEN="smokeother$$$RANDOM"
+fixtures verification-token "$OTHER_APPOINTMENT" "$OTHER_TOKEN" >/dev/null
+RESULT=$(open_link "$OWN_JAR" "$OTHER_TOKEN")
+if [ "${RESULT%% *}" = "200" ] && grep -q 'booking/confirm_verification' "$TMP/page" \
+    && [ "$(appointment_field "$OTHER_APPOINTMENT" id_users_customer)" = "None" ]; then
+    ok "the link of another browser's Vormerkung only shows the confirm button"
+else
+    fail "link of another Vormerkung: $RESULT, appointment $(fixtures get "$OTHER_APPOINTMENT")"
+fi
+fixtures cleanup "$OTHER_APPOINTMENT" "" >/dev/null
+
+# 11. "Erneut senden": the Vormerkung comes from the browser session, the client sends no email or ID.
 fixtures rate-limit-reset
 RESEND_EMAIL="smoke-verify-resend-$$-$RANDOM@example.com"
 RESEND_JAR="$TMP/resend-laptop"
@@ -399,7 +450,7 @@ else
     fail "resend without Vormerkung (HTTP $STATUS, $(cat "$TMP/resend"))"
 fi
 
-# 11. A booking with the email of a customer who already has an appointment at that time (two attendants, so the
+# 12. A booking with the email of a customer who already has an appointment at that time (two attendants, so the
 #     slot itself is free) answers like any other; the check runs on confirmation, with a neutral page.
 fixtures rate-limit-reset
 OWNER_EMAIL=$(fixtures customer "$OWNER" | json "d['email']")
@@ -430,7 +481,7 @@ fi
 fixtures service-attendants "$SERVICE" "$ORIGINAL_ATTENDANTS" >/dev/null
 ORIGINAL_ATTENDANTS=""
 
-# 12. Reschedule with a changed email (spec 0018/05): the new time applies right away, the email waits for the link.
+# 13. Reschedule with a changed email (spec 0018/05): the new time applies right away, the email waits for the link.
 VICTIM_EMAIL=$(fixtures customer "$VICTIM" | json "d['email']")
 CHANGED_EMAIL="smoke-verify-change-$$-$RANDOM@example.com"
 OWNER_JAR="$TMP/owner-laptop"
@@ -497,21 +548,32 @@ else
     fail "reschedule without email change (HTTP $STATUS, $(cat "$TMP/body"), verification $(fixtures verification-by-email "$CHANGED_EMAIL"), mails $(mail_count "$CHANGED_EMAIL"))"
 fi
 
-# The email of another customer reaches the appointment contact only, both customer records stay unchanged.
+# The email of another customer reaches the appointment contact only, both customer records stay unchanged. The
+# link opened in the browser session that started the email change confirms it right away (no button).
 register "$OWNER_JAR" "$OWNER_START" "$VICTIM_EMAIL" "$OWNER_HASH" >/dev/null
 TAKEN_CHANGE_TOKEN="smoketakenchange$$$RANDOM"
 fixtures verification-token "$OWNER_APPOINTMENT" "$TAKEN_CHANGE_TOKEN" >/dev/null
-RESULT=$(confirm_link "$TMP/owner-phone" "$TAKEN_CHANGE_TOKEN")
-if [[ "${RESULT%% *}" == 30? ]] && [ "$(contact_field "$OWNER_APPOINTMENT" email)" = "$VICTIM_EMAIL" ] \
+RESULT=$(open_link "$TMP/owner-scanner" "$TAKEN_CHANGE_TOKEN")
+if [ "${RESULT%% *}" = "200" ] && grep -q 'booking/confirm_verification' "$TMP/page" \
+    && [ "$(contact_field "$OWNER_APPOINTMENT" email)" != "$VICTIM_EMAIL" ] \
+    && [ "$(fixtures verification-by-email "$VICTIM_EMAIL" | json "d and d['purpose']")" = "email_change" ]; then
+    ok "the email change link opened in another browser session only shows the confirm button"
+else
+    fail "email change link in another browser session: $RESULT, contact $(fixtures contact "$OWNER_APPOINTMENT"), verification $(fixtures verification-by-email "$VICTIM_EMAIL")"
+fi
+
+RESULT=$(open_link "$OWNER_JAR" "$TAKEN_CHANGE_TOKEN")
+if [[ "${RESULT%% *}" == 30? ]] && [[ "${RESULT#* }" == *"booking_confirmation/of/$OWNER_HASH" ]] \
+    && [ "$(contact_field "$OWNER_APPOINTMENT" email)" = "$VICTIM_EMAIL" ] \
     && [ "$(fixtures customer "$OWNER" | json "d['email']")" = "$CHANGED_EMAIL" ] \
     && [ "$(fixtures customer "$VICTIM" | json "d['email']")" = "$VICTIM_EMAIL" ] \
     && [ "$(appointment_field "$OWNER_APPOINTMENT" id_users_customer)" = "$OWNER" ]; then
-    ok "email change to another customer's email changes only the appointment contact"
+    ok "email change confirmed in its own browser session; another customer's email changes only the appointment contact"
 else
     fail "email change to a taken email: $RESULT, contact $(fixtures contact "$OWNER_APPOINTMENT"), owner $(fixtures customer "$OWNER"), appointment $(fixtures get "$OWNER_APPOINTMENT")"
 fi
 
-# 13. A new email that reached its hourly mail limit: the reschedule applies, the email stays the old one, no link.
+# 14. A new email that reached its hourly mail limit: the reschedule applies, the email stays the old one, no link.
 LIMITED_EMAIL="smoke-verify-limited-$$-$RANDOM@example.com"
 fixtures limit-fill "$LIMITED_EMAIL" >/dev/null
 CONTACT_EMAIL=$(contact_field "$OWNER_APPOINTMENT" email)

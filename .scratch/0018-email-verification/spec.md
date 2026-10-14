@@ -74,6 +74,12 @@ Bei einer Umbuchung über den Manage-Link gelten neue Zeit und übrige Angaben s
     Seite „Termin bestätigen“ (bzw. „E-Mail-Adresse bestätigen“) mit einer Schaltfläche. Erst die Schaltfläche
     (`POST booking/confirm_verification` mit CSRF-Token) bestätigt. Ein unbekannter oder verfallener Link zeigt gleich
     „Link ungültig“.
+  - Ausnahme: In der Browser-Sitzung, die genau diese Bestätigung begonnen hat (Absenden der Buchung bzw. Umbuchung
+    mit E-Mail-Änderung), bestätigt schon das Öffnen des Links, ohne Schaltfläche und mit denselben Ergebnissen
+    (Erfolgsseite, „abgelaufen“, „Termin nicht gebucht“). Die Sitzung merkt sich die IDs ihrer Bestätigungen (höchstens
+    20), nicht die Adresse; ein Link einer anderen Bestätigung zeigt auch dort die Schaltfläche. Die Entscheidung trifft
+    `Email_verification_rules::confirms_on_open()`, `Booking::verify()` ruft nur `Email_verification::open_link()` auf.
+    Mail-Apps mit eigenem In-App-Browser haben die Sitzung nicht und zeigen die Schaltfläche.
   - Prüft den Token und nimmt ihn auf. Die Markierung bleibt dabei gesperrt (`SELECT … FOR UPDATE`), so dass ein
     gleichzeitiger Klick, „erneut senden“ oder das Aufräumen nicht dazwischenkommt; die Verfügbarkeitsprüfung beim
     späten Klick läuft in derselben Transaktion.
@@ -194,3 +200,19 @@ Bei einer Umbuchung über den Manage-Link gelten neue Zeit und übrige Angaben s
 - Nicht automatisch testbar: die Nebenläufigkeit von C1/S10 (Sperren per Review geprüft).
 - Offen für den Nutzer (manuell): Seite „Termin bestätigen“ / „E-Mail-Adresse bestätigen“ nach dem Öffnen des Links
   (Deutsch/Englisch, Theme), Seite „Termin nicht gebucht“.
+
+**2026-10-14 (Bestätigungslink in derselben Sitzung direkt bestätigen):**
+
+- Entscheidung des Nutzers (hybrid): Öffnet die Browser-Sitzung, die die Bestätigung begonnen hat, den Link, bestätigt
+  das GET direkt; jede andere Sitzung sieht unverändert die Schaltfläche und das GET ändert nichts. Die Sitzung merkt
+  sich die Bestätigungs-IDs (`Email_verification_session::remember_own()` bei `start_booking()` und
+  `start_email_change()`), die Regel `Email_verification_rules::confirms_on_open()` entscheidet, `open_link()` ersetzt
+  `link_page()`. Implementation Decisions und ADR 0008 ergänzt.
+- Smoke `email-verification-smoke.sh` jetzt 34 Checks: neuer Abschnitt 10 (anderer Cookie-Jar → Schaltfläche, Zustand
+  unverändert; derselbe Cookie-Jar → direkte Weiterleitung zur Erfolgsseite mit Kunde; Link einer fremden Vormerkung
+  in dieser Sitzung → Schaltfläche) und bei der E-Mail-Änderung (fremde Sitzung → Schaltfläche, Sitzung der Umbuchung
+  → direkt übernommen).
+- Rot vor Fix: `FAIL link in the browser session of the booking: 200 , appointment {… "id_users_customer":null …},
+  verification {"id":84, …}` und `FAIL email change to a taken email: 200 , contact {… "email":"smoke-verify-change-…"}`;
+  Unit `EmailVerificationRulesTest` (3 neue Tests) `Error: Call to undefined method
+  Email_verification_rules::confirms_on_open()` bzw. `remember_own_verification()`. Danach alle grün.

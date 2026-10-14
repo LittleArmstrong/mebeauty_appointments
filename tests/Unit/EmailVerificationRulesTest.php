@@ -85,6 +85,32 @@ class EmailVerificationRulesTest extends TestCase
         $this->assertSame(['lena@example.com'], $this->rules()->remember_verified(null, 'lena@example.com'));
     }
 
+    public function testLinkOpenedInTheSessionThatStartedItsVerificationConfirmsRightAway(): void
+    {
+        $this->assertTrue($this->rules()->confirms_on_open(['id' => 7], [3, 7]));
+    }
+
+    public function testLinkOpenedInAnotherSessionOnlyShowsTheButton(): void
+    {
+        $this->assertFalse($this->rules()->confirms_on_open(['id' => 7], []));
+        $this->assertFalse($this->rules()->confirms_on_open(['id' => 7], [3, 8]));
+        $this->assertFalse($this->rules()->confirms_on_open(['id' => 7], null));
+        $this->assertFalse($this->rules()->confirms_on_open(['id' => 7], ['7']));
+    }
+
+    public function testRememberOwnVerificationAddsItOnceAndKeepsOnlyTheNewestTwenty(): void
+    {
+        $rules = $this->rules();
+
+        $this->assertSame([3, 7], $rules->remember_own_verification([3, 7], 7));
+        $this->assertSame([7], $rules->remember_own_verification('garbage', 7));
+        $this->assertSame([7], $rules->remember_own_verification(['x', null], 7));
+
+        $ids = $rules->remember_own_verification(range(1, 20), 21);
+
+        $this->assertSame(range(2, 21), $ids);
+    }
+
     public function testBookingVerificationExpiresAfterTenMinutesAndStoresOnlyTheTokenHash(): void
     {
         $token = str_repeat('ab', 32);

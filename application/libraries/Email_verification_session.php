@@ -4,8 +4,9 @@
  * Email verification session library (fork, spec 0018, ADR 0008).
  *
  * Keeps what the "E-Mail-Bestätigung" remembers in the browser session: the emails verified in it (a second booking
- * or an email change with such an email needs no further link) and the Vormerkung started in it (the only one
- * "erneut senden" may send again, so no client input can trigger mails to other addresses).
+ * or an email change with such an email needs no further link), the Vormerkung started in it (the only one
+ * "erneut senden" may send again, so no client input can trigger mails to other addresses) and the verifications
+ * started in it (their links opened in this session confirm right away, without the button).
  *
  * @package Libraries
  */
@@ -20,6 +21,11 @@ class Email_verification_session
      * Session key with the appointment ID of the Vormerkung started in this browser session.
      */
     public const PENDING_KEY = 'pending_verification_appointment';
+
+    /**
+     * Session key with the IDs of the verifications started in this browser session.
+     */
+    public const OWN_KEY = 'own_verifications';
 
     /**
      * @var EA_Controller|CI_Controller
@@ -83,5 +89,32 @@ class Email_verification_session
     public function remember_pending(int $appointment_id): void
     {
         session([self::PENDING_KEY => $appointment_id]);
+    }
+
+    /**
+     * Check whether a verification was started in this browser session (its link then confirms right away).
+     *
+     * @param array $verification Verification of the link.
+     *
+     * @return bool
+     */
+    public function owns(array $verification): bool
+    {
+        return $this->CI->email_verification_rules->confirms_on_open($verification, session(self::OWN_KEY));
+    }
+
+    /**
+     * Remember a verification as started in this browser session.
+     *
+     * @param int $verification_id ID of the verification.
+     */
+    public function remember_own(int $verification_id): void
+    {
+        session([
+            self::OWN_KEY => $this->CI->email_verification_rules->remember_own_verification(
+                session(self::OWN_KEY),
+                $verification_id
+            )
+        ]);
     }
 }

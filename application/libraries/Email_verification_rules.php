@@ -83,6 +83,11 @@ class Email_verification_rules
     public const CONFIRM_INVALID = 'invalid';
 
     /**
+     * Number of verifications a browser session remembers as its own (a link opened there confirms right away).
+     */
+    public const OWN_VERIFICATIONS_MAX = 20;
+
+    /**
      * Seconds a customer must wait after the last mail before the verification mail can be sent again.
      */
     public const RESEND_WAIT_SECONDS = 60;
@@ -183,6 +188,45 @@ class Email_verification_rules
         }
 
         return $verified_emails;
+    }
+
+    /**
+     * Decide whether opening a verification link confirms it right away (spec 0018).
+     *
+     * Only the browser session that started this verification (the submit of the booking, or the reschedule with
+     * the email change) confirms by opening the link. Any other session (another device, a mail scanner without the
+     * session cookie) gets the confirm button, so opening the link there changes nothing.
+     *
+     * @param array $verification Verification of the link.
+     * @param mixed $own_verification_ids Verification IDs started in this browser session (see
+     * remember_own_verification(); anything else than a list of integer IDs counts as empty).
+     *
+     * @return bool
+     */
+    public function confirms_on_open(array $verification, mixed $own_verification_ids): bool
+    {
+        return is_array($own_verification_ids) &&
+            isset($verification['id']) &&
+            in_array((int) $verification['id'], $own_verification_ids, true);
+    }
+
+    /**
+     * Add a verification to the verifications started in this browser session.
+     *
+     * @param mixed $own_verification_ids Stored list (anything else than an array counts as empty).
+     * @param int $verification_id ID of the started verification.
+     *
+     * @return array Returns the list with the ID added once, at most the newest OWN_VERIFICATIONS_MAX IDs.
+     */
+    public function remember_own_verification(mixed $own_verification_ids, int $verification_id): array
+    {
+        $ids = is_array($own_verification_ids) ? array_values(array_filter($own_verification_ids, 'is_int')) : [];
+
+        if (!in_array($verification_id, $ids, true)) {
+            $ids[] = $verification_id;
+        }
+
+        return array_slice($ids, -self::OWN_VERIFICATIONS_MAX);
     }
 
     /**

@@ -118,6 +118,10 @@ class Email_verification
 
         $this->CI->email_verification_session->remember_pending($appointment_id);
 
+        $this->CI->email_verification_session->remember_own(
+            (int) $this->CI->appointment_verifications_model->find_by_appointment($appointment_id)['id']
+        );
+
         return $appointment_id;
     }
 
@@ -208,6 +212,8 @@ class Email_verification
 
             return false;
         }
+
+        $this->CI->email_verification_session->remember_own($verification_id);
 
         return true;
     }
@@ -326,15 +332,21 @@ class Email_verification
     }
 
     /**
-     * Get the page a verification link opens: the confirm button, or "Link ungültig".
+     * Open a verification link: the confirm button, the confirmation itself, or "Link ungültig".
      *
-     * Opening the link changes nothing (mail scanners open links); only the button confirms, see confirm().
+     * Opening the link changes nothing (mail scanners open links) and only shows the button, see confirm(). Only in
+     * the browser session that started this verification does opening the link confirm right away, with the same
+     * outcomes as the button.
      *
      * @param string $token Token from the link.
+     * @param array $allowed_customer_fields Customer fields an online booking may write.
+     * @param callable $is_available Availability check of the booking flow: fn(array $appointment): bool.
      *
-     * @return array Returns the page for Email_verification_pages::show().
+     * @return array Returns the outcome of confirm(), or ['page' => array] with the button or "Link ungültig".
+     *
+     * @throws Throwable
      */
-    public function link_page(string $token): array
+    public function open_link(string $token, array $allowed_customer_fields, callable $is_available): array
     {
         $rules = $this->CI->email_verification_rules;
 
@@ -346,10 +358,14 @@ class Email_verification
             !$verification ||
             $rules->state($verification, new DateTimeImmutable('now')) === Email_verification_rules::STATE_VOID
         ) {
-            return $this->CI->email_verification_pages->invalid();
+            return ['page' => $this->CI->email_verification_pages->invalid()];
         }
 
-        return $this->CI->email_verification_pages->confirm($token, $verification['purpose']);
+        if ($this->CI->email_verification_session->owns($verification)) {
+            return $this->confirm($token, $allowed_customer_fields, $is_available);
+        }
+
+        return ['page' => $this->CI->email_verification_pages->confirm($token, $verification['purpose'])];
     }
 
     /**

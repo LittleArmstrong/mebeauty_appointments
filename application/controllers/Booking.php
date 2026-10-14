@@ -615,9 +615,10 @@ class Booking extends EA_Controller
     }
 
     /**
-     * Show the page of a link from the email verification mail (spec 0018).
+     * Open a link from the email verification mail (spec 0018).
      *
-     * Opening the link changes nothing (mail scanners open links): the page only offers the confirm button.
+     * Opening the link changes nothing (mail scanners open links): the page only offers the confirm button. In the
+     * browser session that started the verification, the link confirms right away like the button.
      *
      * @param string $token Token from the link.
      */
@@ -625,14 +626,17 @@ class Booking extends EA_Controller
     {
         method('get');
 
-        $this->email_verification_pages->show($this->email_verification->link_page($token));
+        $this->finish_verification(
+            $this->email_verification->open_link(
+                $token,
+                $this->allowed_customer_fields,
+                fn(array $appointment) => (bool) $this->check_datetime_availability($appointment),
+            ),
+        );
     }
 
     /**
-     * Confirm a verification link with its button (spec 0018).
-     *
-     * A confirmed booking runs like a regular online booking (a confirmed email change of a reschedule updates Google
-     * and the webhook only) and redirects to the success page; otherwise a message page follows.
+     * Confirm a verification link with its button (spec 0018); the outcome follows in finish_verification().
      */
     public function confirm_verification(): void
     {
@@ -640,12 +644,24 @@ class Booking extends EA_Controller
 
         $this->verify_csrf_token();
 
-        $confirmed = $this->email_verification->confirm(
-            request('token'),
-            $this->allowed_customer_fields,
-            fn(array $appointment) => (bool) $this->check_datetime_availability($appointment),
+        $this->finish_verification(
+            $this->email_verification->confirm(
+                request('token'),
+                $this->allowed_customer_fields,
+                fn(array $appointment) => (bool) $this->check_datetime_availability($appointment),
+            ),
         );
+    }
 
+    /**
+     * Show the outcome of a verification link (spec 0018): a message page, or the confirmed appointment's follow-up
+     * like a regular online booking (a confirmed email change of a reschedule updates Google and the webhook only)
+     * and the redirect to the success page.
+     *
+     * @param array $confirmed Outcome of Email_verification::confirm() or open_link().
+     */
+    private function finish_verification(array $confirmed): void
+    {
         if (isset($confirmed['page'])) {
             $this->email_verification_pages->show($confirmed['page']);
 
