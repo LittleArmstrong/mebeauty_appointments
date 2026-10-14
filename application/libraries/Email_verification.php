@@ -4,39 +4,21 @@
  * Email verification library (fork, spec 0018, ADR 0008).
  *
  * Runs the "E-Mail-Bestätigung" of online bookings: stores a new booking as "Vormerkung" (an appointment without
- * customer that holds its slot), sends the verification link and confirms the Vormerkung when the link is clicked.
- * A changed email of a reschedule waits for a link to the new address ("E-Mail-Änderung", ticket 0018/05).
- * The decisions live in the pure Email_verification_rules library, the records in Appointment_verifications_model.
- * Mails, Google sync and webhooks of a confirmed booking are triggered by the caller, like for a regular booking.
+ * customer that holds its slot), sends the verification link and confirms the Vormerkung when the button behind the
+ * link is pressed. A changed email of a reschedule waits for a link to the new address ("E-Mail-Änderung").
+ * The decisions live in the pure Email_verification_rules library, the records in Appointment_verifications_model,
+ * the browser session in Email_verification_session, the link pages in Email_verification_pages and the backend
+ * and external calendar handling of Vormerkungen in Email_verification_calendar. Mails, Google sync and webhooks of
+ * a confirmed booking are triggered by the caller, like for a regular booking.
  *
  * @package Libraries
  */
 class Email_verification
 {
     /**
-     * Session key with the emails verified in this browser session.
+     * Format of a link token (new_token() creates 64 hex characters).
      */
-    public const SESSION_KEY = 'verified_emails';
-
-    /**
-     * Session key with the appointment ID of the Vormerkung started in this browser session ("erneut senden").
-     */
-    public const SESSION_PENDING_KEY = 'pending_verification_appointment';
-
-    /**
-     * Result of confirm(): the booking is confirmed.
-     */
-    public const RESULT_CONFIRMED = 'confirmed';
-
-    /**
-     * Result of confirm(): the Vormerkung expired and its slot is taken ("Leider abgelaufen").
-     */
-    public const RESULT_EXPIRED = 'expired';
-
-    /**
-     * Result of confirm(): the new email of a reschedule is confirmed and taken over.
-     */
-    public const RESULT_EMAIL_CHANGED = 'email_changed';
+    protected const TOKEN_PATTERN = '/^[a-zA-Z0-9]{1,128}$/';
 
     /**
      * @var EA_Controller|CI_Controller
@@ -58,12 +40,17 @@ class Email_verification
         $this->CI->load->model('providers_model');
 
         $this->CI->load->library('email_verification_rules');
+        $this->CI->load->library('email_verification_session');
+        $this->CI->load->library('email_verification_pages');
         $this->CI->load->library('appointment_contact_rules');
         $this->CI->load->library('email_messages');
     }
 
     /**
      * Check whether an online booking must be stored as Vormerkung first.
+     *
+     * The caller then also leaves the check for another appointment of the email's customer at the same time to the
+     * confirmation, so the answer before it does not tell whether the email belongs to a known customer.
      *
      * @param bool $manage_mode Whether the request is a reschedule via manage link.
      * @param string|null $email Entered email.
@@ -72,13 +59,11 @@ class Email_verification
      */
     public function required(bool $manage_mode, ?string $email): bool
     {
-        $verified_emails = session(self::SESSION_KEY);
-
         return $this->CI->email_verification_rules->requires_verification(
-            filter_var(setting('require_email_verification', '0'), FILTER_VALIDATE_BOOLEAN),
+            $this->enabled(),
             $manage_mode,
             $email,
-            is_array($verified_emails) ? $verified_emails : []
+            $this->CI->email_verification_session->verified_emails()
         );
     }
 
@@ -86,18 +71,17 @@ class Email_verification
      * Store a new online booking as Vormerkung and send the verification link to the entered email.
      *
      * No customer is assigned or changed, and no booking mail, Google sync or webhook happens until the link is
-     * clicked. When the mail cannot be sent, the Vormerkung is removed again (without mail no online booking).
+     * confirmed. When the mail cannot be sent, the Vormerkung is removed again (without mail no online booking); the
+     * attempt still counts against the hourly limit.
      *
      * @param array $appointment Completed appointment of the online booking (without customer).
      * @param array $customer Customer fields entered in the booking form (incl. language and timezone).
-     * @param array $service Service of the appointment.
-     * @param array $provider Provider of the appointment.
      *
      * @return int Returns the ID of the Vormerkung.
      *
      * @throws Throwable
      */
-    public function start_booking(array $appointment, array $customer, array $service, array $provider): int
+    public function start_booking(array $appointment, array $customer): int
     {
         $email = trim((string) ($customer['email'] ?? ''));
 
@@ -105,40 +89,22 @@ class Email_verification
             throw new InvalidArgumentException(lang('email_verification_email_required'));
         }
 
-        $rules = $this->CI->email_verification_rules;
-
         $now = new DateTimeImmutable('now');
 
-        $limit = $this->CI->appointment_verifications_model->find_limit($rules->normalize_email($email));
-
-        if ($rules->send_decision($limit, $now, false)['decision'] !== Email_verification_rules::SEND_ALLOWED) {
+        if ($this->reserve_mail($email, false, $now)['decision'] !== Email_verification_rules::SEND_ALLOWED) {
             throw new RuntimeException(lang('email_verification_limit_reached'));
         }
 
         $token = $this->new_token();
 
-        $verification = $this->CI->email_verification_rules->booking_verification(
-            $appointment,
-            $customer,
-            $token,
-            $now
-        );
-
         $appointment_id = $this->CI->appointment_verifications_model->create_vormerkung(
             $appointment,
             $this->CI->appointment_contact_rules->contact($customer),
-            $verification
+            $this->CI->email_verification_rules->booking_verification($appointment, $customer, $token, $now)
         );
 
         try {
-            $this->CI->email_messages->send_email_verification_link(
-                site_url('booking/verify/' . $token),
-                $appointment,
-                $service,
-                $provider,
-                $email,
-                $this->mail_settings()
-            );
+            $this->send_link($token, $appointment, $email, false);
         } catch (Throwable $e) {
             log_message(
                 'error',
@@ -150,9 +116,7 @@ class Email_verification
             throw new RuntimeException(lang('email_verification_send_failed'));
         }
 
-        $this->CI->appointment_verifications_model->save_limit($rules->limit_after_send($limit, $email, $now));
-
-        session([self::SESSION_PENDING_KEY => $appointment_id]);
+        $this->CI->email_verification_session->remember_pending($appointment_id);
 
         return $appointment_id;
     }
@@ -165,42 +129,31 @@ class Email_verification
      * appointment contact and the customer record and its mail goes there. Time and the other entries apply right
      * away. The caller sends the link with start_email_change() once the reschedule is saved.
      *
-     * @param array $original_appointment Stored appointment of the manage link.
+     * @param array|null $original_appointment Stored appointment of the manage link (null for a new booking).
      * @param array $customer Customer fields entered in the reschedule (email replaced when held back).
      *
      * @return string|null Returns the entered new email when it waits for verification, otherwise null.
-     *
-     * @throws RuntimeException When the hourly mail limit of the new email is reached (nothing is saved then).
      */
-    public function hold_back_email_change(array $original_appointment, array &$customer): ?string
+    public function hold_back_email_change(?array $original_appointment, array &$customer): ?string
     {
-        $rules = $this->CI->email_verification_rules;
+        if ($original_appointment === null) {
+            return null;
+        }
 
         $stored_email = $this->appointment_email($original_appointment);
 
-        $verified_emails = session(self::SESSION_KEY);
-
         if (
-            !$rules->requires_email_change_verification(
-                filter_var(setting('require_email_verification', '0'), FILTER_VALIDATE_BOOLEAN),
+            !$this->CI->email_verification_rules->requires_email_change_verification(
+                $this->enabled(),
                 $stored_email,
                 $customer['email'] ?? null,
-                is_array($verified_emails) ? $verified_emails : []
+                $this->CI->email_verification_session->verified_emails()
             )
         ) {
             return null;
         }
 
         $email = trim((string) $customer['email']);
-
-        $limit = $this->CI->appointment_verifications_model->find_limit($rules->normalize_email($email));
-
-        if (
-            $rules->send_decision($limit, new DateTimeImmutable('now'), false)['decision'] !==
-            Email_verification_rules::SEND_ALLOWED
-        ) {
-            throw new RuntimeException(lang('email_verification_limit_reached'));
-        }
 
         $customer['email'] = $stored_email;
 
@@ -211,18 +164,27 @@ class Email_verification
      * Send the verification link for the new email of a saved reschedule (purpose "email_change").
      *
      * A previous open email change of the appointment is replaced (its link becomes invalid). The reschedule stays
-     * saved when the mail fails; the email then simply stays the old one.
+     * saved when no link goes out (hourly limit of the new email reached, mail failure); the email then simply stays
+     * the old one.
      *
      * @param array $appointment Saved appointment of the reschedule.
-     * @param string $email New email returned by hold_back_email_change().
+     * @param string|null $email New email returned by hold_back_email_change() (null: nothing to do).
      *
      * @return bool Returns whether the link was sent.
      */
-    public function start_email_change(array $appointment, string $email): bool
+    public function start_email_change(array $appointment, ?string $email): bool
     {
-        $rules = $this->CI->email_verification_rules;
+        if ($email === null) {
+            return false;
+        }
 
         $now = new DateTimeImmutable('now');
+
+        if ($this->reserve_mail($email, false, $now)['decision'] !== Email_verification_rules::SEND_ALLOWED) {
+            log_message('info', 'Email change of appointment ' . $appointment['id'] . ' not sent: hourly limit.');
+
+            return false;
+        }
 
         $token = $this->new_token();
 
@@ -230,18 +192,12 @@ class Email_verification
 
         $model->delete_for_appointment((int) $appointment['id'], Email_verification_rules::PURPOSE_EMAIL_CHANGE);
 
-        $verification_id = $model->insert($rules->email_change_verification($appointment, $email, $token, $now));
+        $verification_id = $model->insert(
+            $this->CI->email_verification_rules->email_change_verification($appointment, $email, $token, $now)
+        );
 
         try {
-            $this->CI->email_messages->send_email_verification_link(
-                site_url('booking/verify/' . $token),
-                $appointment,
-                $this->CI->services_model->find((int) $appointment['id_services']),
-                $this->CI->providers_model->find((int) $appointment['id_users_provider']),
-                $email,
-                $this->mail_settings(),
-                true
-            );
+            $this->send_link($token, $appointment, $email, true);
         } catch (Throwable $e) {
             log_message(
                 'error',
@@ -253,10 +209,6 @@ class Email_verification
             return false;
         }
 
-        $limit = $model->find_limit($rules->normalize_email($email));
-
-        $model->save_limit($rules->limit_after_send($limit, $email, $now));
-
         return true;
     }
 
@@ -266,7 +218,7 @@ class Email_verification
      * The Vormerkung comes from the browser session only, so nobody can trigger mails to other addresses, and the
      * answer never contains the manage link hash or tells whether an address is known. A resend waits 60 seconds
      * after the last mail and counts against the limit of 5 mails per email and hour. The new link replaces the old
-     * one and holds the slot for 10 minutes from the new mail.
+     * one; the Vormerkung holds its slot 10 minutes from the new mail, at most 20 minutes after the submit.
      *
      * @return array Returns ['sent' => bool, 'message' => string, 'wait_seconds' => int] for the booking wizard.
      *
@@ -276,30 +228,26 @@ class Email_verification
     {
         $rules = $this->CI->email_verification_rules;
 
-        $appointment_id = session(self::SESSION_PENDING_KEY);
+        $appointment_id = $this->CI->email_verification_session->pending_appointment_id();
 
         $this->cleanup_expired();
 
-        $verification = is_int($appointment_id)
+        $verification = $appointment_id
             ? $this->CI->appointment_verifications_model->find_by_appointment($appointment_id)
             : null;
 
+        $appointment = $verification ? $this->find_appointment($appointment_id) : null;
+
         $now = new DateTimeImmutable('now');
 
-        $appointment = $verification ? $this->CI->appointments_model->get(['id' => $appointment_id])[0] ?? null : null;
-
         if (
-            !$appointment ||
-            !empty($appointment['id_users_customer']) ||
-            $verification['purpose'] !== Email_verification_rules::PURPOSE_BOOKING ||
-            $rules->state($verification, $now) !== Email_verification_rules::STATE_VALID
+            !$verification ||
+            $rules->confirm_action($verification, $appointment, $now) !== Email_verification_rules::CONFIRM_HELD
         ) {
             return ['sent' => false, 'message' => lang('email_verification_resend_unavailable'), 'wait_seconds' => 0];
         }
 
-        $limit = $this->CI->appointment_verifications_model->find_limit($verification['email']);
-
-        $decision = $rules->send_decision($limit, $now, true);
+        $decision = $this->reserve_mail($verification['email'], true, $now);
 
         if ($decision['decision'] !== Email_verification_rules::SEND_ALLOWED) {
             return [
@@ -329,14 +277,7 @@ class Email_verification
         }
 
         try {
-            $this->CI->email_messages->send_email_verification_link(
-                site_url('booking/verify/' . $token),
-                $appointment,
-                $this->CI->services_model->find((int) $appointment['id_services']),
-                $this->CI->providers_model->find((int) $appointment['id_users_provider']),
-                $verification['email'],
-                $this->mail_settings()
-            );
+            $this->send_link($token, $appointment, $verification['email'], false);
         } catch (Throwable $e) {
             log_message(
                 'error',
@@ -349,10 +290,6 @@ class Email_verification
             throw new RuntimeException(lang('email_verification_send_failed'));
         }
 
-        $this->CI->appointment_verifications_model->save_limit(
-            $rules->limit_after_send($limit, $verification['email'], $now)
-        );
-
         return [
             'sent' => true,
             'message' => lang('email_verification_resent'),
@@ -361,15 +298,15 @@ class Email_verification
     }
 
     /**
-     * Delete expired Vormerkungen (their slots become free) and void restore data (lazy cleanup, spec 0018).
+     * Delete expired Vormerkungen (their slots become free, their links restorable) and void restore data.
      *
      * Runs before availability requests, on submit, when the backend calendar loads and in `console cleanup`, so
-     * no cron job is needed.
-     *
-     * Ended send limits are deleted as well.
+     * no cron job is needed. Ended send limits are deleted as well.
      *
      * @return array Returns ['appointments' => int, 'verifications' => int, 'limits' => int] with the numbers of
      * deleted rows.
+     *
+     * @throws Throwable
      */
     public function cleanup_expired(): array
     {
@@ -389,144 +326,165 @@ class Email_verification
     }
 
     /**
-     * Mark the Vormerkungen among loaded appointments for the backend calendar (ticket 0018/04).
+     * Get the page a verification link opens: the confirm button, or "Link ungültig".
      *
-     * Sets "is_unconfirmed" (bool) on every appointment.
-     *
-     * @param array $appointments Appointments with ID.
-     */
-    public function mark_unconfirmed(array &$appointments): void
-    {
-        $unconfirmed_ids = $this->unconfirmed_ids(array_column($appointments, 'id'));
-
-        foreach ($appointments as &$appointment) {
-            $appointment['is_unconfirmed'] = in_array((int) $appointment['id'], $unconfirmed_ids, true);
-        }
-    }
-
-    /**
-     * Check whether an appointment is a Vormerkung (staff can delete it, but neither edit nor confirm it).
-     *
-     * @param int $appointment_id Appointment ID.
-     *
-     * @return bool
-     */
-    public function is_unconfirmed(int $appointment_id): bool
-    {
-        return $this->unconfirmed_ids([$appointment_id]) !== [];
-    }
-
-    /**
-     * Remove the Vormerkungen from appointments that go to an external calendar (no sync before confirmation).
-     *
-     * @param array $appointments Appointments with ID.
-     *
-     * @return array Returns the confirmed appointments.
-     */
-    public function without_unconfirmed(array $appointments): array
-    {
-        $unconfirmed_ids = $this->unconfirmed_ids(array_column($appointments, 'id'));
-
-        return array_values(
-            array_filter(
-                $appointments,
-                fn(array $appointment): bool => !in_array((int) $appointment['id'], $unconfirmed_ids, true)
-            )
-        );
-    }
-
-    /**
-     * Delete the verifications of an appointment before staff deletes it, so no link restores it afterwards.
-     *
-     * @param int $appointment_id Appointment ID.
-     */
-    public function forget_appointment(int $appointment_id): void
-    {
-        $this->CI->appointment_verifications_model->delete_by_appointment($appointment_id);
-    }
-
-    /**
-     * Get the IDs of the Vormerkungen among appointments.
-     *
-     * @param array $appointment_ids Appointment IDs.
-     *
-     * @return array Returns the IDs (int) of the appointments with a booking verification.
-     */
-    protected function unconfirmed_ids(array $appointment_ids): array
-    {
-        return $this->CI->email_verification_rules->unconfirmed_appointment_ids(
-            $this->CI->appointment_verifications_model->find_by_appointments($appointment_ids)
-        );
-    }
-
-    /**
-     * Confirm a Vormerkung with the token from the verification link.
-     *
-     * Assigns the customer with the verified email (or creates it), updates the customer record by the rules of
-     * spec 0017 and removes the verification, all in one transaction. The link works only once. The email counts as
-     * verified in the current browser session afterwards.
-     *
-     * A late click (Vormerkung expired, restore data still there) books the appointment again from the restore data
-     * when $is_available confirms its slot is still free; otherwise the result is "expired".
-     *
-     * The link of an email change (reschedule) takes the new email over while it is valid, see
-     * confirm_email_change().
+     * Opening the link changes nothing (mail scanners open links); only the button confirms, see confirm().
      *
      * @param string $token Token from the link.
+     *
+     * @return array Returns the page for Email_verification_pages::show().
+     */
+    public function link_page(string $token): array
+    {
+        $rules = $this->CI->email_verification_rules;
+
+        $verification = preg_match(self::TOKEN_PATTERN, $token)
+            ? $this->CI->appointment_verifications_model->find_by_token_hash($rules->token_hash($token))
+            : null;
+
+        if (
+            !$verification ||
+            $rules->state($verification, new DateTimeImmutable('now')) === Email_verification_rules::STATE_VOID
+        ) {
+            return $this->CI->email_verification_pages->invalid();
+        }
+
+        return $this->CI->email_verification_pages->confirm($token, $verification['purpose']);
+    }
+
+    /**
+     * Confirm a verification with the token from the link (the confirm button).
+     *
+     * A Vormerkung that holds its slot is booked: the customer with the verified email is assigned (or created) and
+     * updated by the rules of spec 0017. A Vormerkung released by the expiry cleanup is booked again when
+     * $is_available confirms its slot is still free (late click), otherwise the page "Leider abgelaufen" follows.
+     * When the email's customer already has an appointment at that time, the Vormerkung is dropped and a neutral
+     * page follows (checked only now, so the booking form never told whether the email is known). The link of an
+     * email change takes the new email over while it is valid.
+     *
+     * The verification is locked for the whole check and write, so a concurrent click, resend or expiry cleanup
+     * cannot change it in between, and the link works only once. The email counts as verified in the current
+     * browser session afterwards.
+     *
+     * @param mixed $token Token from the request.
      * @param array $allowed_customer_fields Customer fields an online booking may write.
      * @param callable $is_available Availability check of the booking flow: fn(array $appointment): bool.
      *
-     * @return array|null Returns ['result' => RESULT_CONFIRMED|RESULT_EMAIL_CHANGED, 'appointment_id' => int,
-     * 'customer_id' => int], ['result' => RESULT_EXPIRED], or null when the link is unknown, used, void or its
-     * Vormerkung is gone.
+     * @return array Returns ['page' => array] for Email_verification_pages::show(), or the confirmed appointment:
+     * ['appointment_id' => int, 'customer_id' => int, 'manage_mode' => bool, 'notify' => bool] with the arguments of
+     * the booking flow's follow-up (a confirmed email change is a reschedule whose mails went out already).
      *
      * @throws Throwable
      */
-    public function confirm(string $token, array $allowed_customer_fields, callable $is_available): ?array
+    public function confirm(mixed $token, array $allowed_customer_fields, callable $is_available): array
     {
-        if (!preg_match('/^[a-zA-Z0-9]{1,128}$/', $token)) {
-            return null;
+        if (!is_string($token) || !preg_match(self::TOKEN_PATTERN, $token)) {
+            return ['page' => $this->CI->email_verification_pages->invalid()];
         }
 
         $this->cleanup_expired();
 
         $rules = $this->CI->email_verification_rules;
 
-        $verification = $this->CI->appointment_verifications_model->find_by_token_hash($rules->token_hash($token));
+        $this->CI->db->trans_begin();
 
-        if ($verification && $verification['purpose'] === Email_verification_rules::PURPOSE_EMAIL_CHANGE) {
-            return $this->confirm_email_change($verification, $allowed_customer_fields);
+        try {
+            $verification = $this->CI->appointment_verifications_model->lock_by_token_hash($rules->token_hash($token));
+
+            $appointment = !empty($verification['id_appointments'])
+                ? $this->find_appointment((int) $verification['id_appointments'])
+                : null;
+
+            $action = $verification
+                ? $rules->confirm_action($verification, $appointment, new DateTimeImmutable('now'))
+                : Email_verification_rules::CONFIRM_INVALID;
+
+            $outcome = match ($action) {
+                Email_verification_rules::CONFIRM_HELD => $this->book(
+                    $verification,
+                    $appointment,
+                    $allowed_customer_fields
+                ),
+                Email_verification_rules::CONFIRM_RESTORE => $this->restore(
+                    $verification,
+                    $allowed_customer_fields,
+                    $is_available
+                ),
+                Email_verification_rules::CONFIRM_EMAIL_CHANGE => $this->take_email_change(
+                    $verification,
+                    $appointment,
+                    $allowed_customer_fields
+                ),
+                default => ['page' => $this->CI->email_verification_pages->invalid()]
+            };
+
+            $this->CI->db->trans_commit();
+        } catch (Throwable $e) {
+            $this->CI->db->trans_rollback();
+
+            throw $e;
         }
 
-        if (!$verification || $verification['purpose'] !== Email_verification_rules::PURPOSE_BOOKING) {
-            return null;
+        if (!isset($outcome['page'])) {
+            $this->CI->email_verification_session->remember_verified($verification['email']);
         }
 
-        $state = $rules->state($verification, new DateTimeImmutable('now'));
+        return $outcome;
+    }
 
-        if ($state === Email_verification_rules::STATE_VALID && !empty($verification['id_appointments'])) {
-            $appointment = $this->CI->appointments_model->get(['id' => $verification['id_appointments']])[0] ?? null;
+    /**
+     * Get the settings the mail templates of the booking flow use.
+     *
+     * @return array
+     */
+    public function mail_settings(): array
+    {
+        $company_color = setting('company_color');
 
-            if (!$appointment || !empty($appointment['id_users_customer'])) {
-                return null;
-            }
-        } elseif ($state === Email_verification_rules::STATE_RESTORABLE && empty($verification['id_appointments'])) {
-            $appointment = $this->restored_appointment($verification);
+        return [
+            'company_name' => setting('company_name'),
+            'company_link' => setting('company_link'),
+            'company_email' => setting('company_email'),
+            'company_color' =>
+                !empty($company_color) && $company_color != DEFAULT_COMPANY_COLOR ? $company_color : null,
+            'date_format' => setting('date_format'),
+            'time_format' => setting('time_format')
+        ];
+    }
 
-            if (!$is_available($appointment)) {
-                return ['result' => self::RESULT_EXPIRED];
-            }
-        } else {
-            return null;
-        }
+    /**
+     * Book a Vormerkung for the customer of its verified email (inside the transaction of confirm()).
+     *
+     * @param array $verification Locked verification record.
+     * @param array $appointment The held Vormerkung, or the appointment restored from the verification (no ID).
+     * @param array $allowed_customer_fields Customer fields an online booking may write.
+     *
+     * @return array Returns the outcome of confirm().
+     *
+     * @throws Throwable
+     */
+    protected function book(array $verification, array $appointment, array $allowed_customer_fields): array
+    {
+        $model = $this->CI->appointment_verifications_model;
 
-        $customer = $rules->customer_input($verification);
+        $customer = $this->CI->email_verification_rules->customer_input($verification);
 
         $this->CI->customers_model->only($customer, $allowed_customer_fields);
 
         $email_customer_id = $this->CI->customers_model->exists($customer)
             ? $this->CI->customers_model->find_record_id($customer)
             : 0;
+
+        // The check of the booking form runs here for a Vormerkung (spec 0018): the Vormerkung is dropped.
+        if ($email_customer_id && $this->customer_already_booked($email_customer_id, $appointment)) {
+            if (empty($appointment['id'])) {
+                $model->take((int) $verification['id']);
+            } else {
+                $model->delete_vormerkung((int) $appointment['id']);
+            }
+
+            return ['page' => $this->CI->email_verification_pages->not_booked()];
+        }
 
         $existing_customer = $email_customer_id ? $this->CI->customers_model->find($email_customer_id) : null;
 
@@ -538,84 +496,80 @@ class Email_verification
 
         $this->CI->customers_model->only($customer_record, $allowed_customer_fields);
 
-        $this->CI->db->trans_begin();
+        $model->take((int) $verification['id']);
 
-        try {
-            // Taking the verification first makes a concurrent second click find nothing.
-            if (!$this->CI->appointment_verifications_model->take((int) $verification['id'])) {
-                $this->CI->db->trans_rollback();
+        $is_restored = empty($appointment['id']);
 
-                return null;
-            }
+        $customer_id = $email_customer_id ?: $this->CI->customers_model->save($customer_record);
 
-            $customer_id = $email_customer_id ?: $this->CI->customers_model->save($customer_record);
+        $appointment['id_users_customer'] = $customer_id;
 
-            $appointment['id_users_customer'] = $customer_id;
+        $appointment_id = $this->CI->appointments_model->save($appointment);
 
-            $appointment_id = $this->CI->appointments_model->save($appointment);
-
-            if (empty($verification['id_appointments'])) {
-                $this->CI->appointment_contacts_model->save_for_appointment(
-                    $appointment_id,
-                    $this->CI->appointment_contact_rules->contact($customer)
-                );
-            }
-
-            if ($existing_customer) {
-                $this->CI->customers_model->save($customer_record);
-            }
-
-            $this->CI->db->trans_commit();
-        } catch (Throwable $e) {
-            $this->CI->db->trans_rollback();
-
-            throw $e;
+        if ($is_restored) {
+            $this->CI->appointment_contacts_model->save_for_appointment(
+                $appointment_id,
+                $this->CI->appointment_contact_rules->contact($customer)
+            );
         }
 
-        session([
-            self::SESSION_KEY => $rules->remember_verified(session(self::SESSION_KEY), $verification['email'])
-        ]);
+        if ($existing_customer) {
+            $this->CI->customers_model->save($customer_record);
+        }
 
         return [
-            'result' => self::RESULT_CONFIRMED,
             'appointment_id' => (int) $appointment_id,
-            'customer_id' => (int) $customer_id
+            'customer_id' => (int) $customer_id,
+            'manage_mode' => false,
+            'notify' => true
         ];
     }
 
     /**
-     * Take over the new email of a reschedule (ticket 0018/05).
+     * Book a Vormerkung released by the expiry cleanup again when its slot is still free (late click).
      *
-     * Only a valid link works; an expired one changes nothing (the appointment stays with the old email). The
-     * appointment contact gets the new email; the customer record only when no other customer has it (spec 0017).
+     * The availability check runs inside the transaction of confirm(); the restore data stays when the slot is taken.
      *
-     * @param array $verification Stored verification with purpose "email_change".
+     * @param array $verification Locked verification record.
      * @param array $allowed_customer_fields Customer fields an online booking may write.
+     * @param callable $is_available Availability check of the booking flow: fn(array $appointment): bool.
      *
-     * @return array|null Returns ['result' => RESULT_EMAIL_CHANGED, 'appointment_id' => int, 'customer_id' => int]
-     * or null when the link is expired or the appointment is gone.
+     * @return array Returns the outcome of confirm().
      *
      * @throws Throwable
      */
-    protected function confirm_email_change(array $verification, array $allowed_customer_fields): ?array
+    protected function restore(array $verification, array $allowed_customer_fields, callable $is_available): array
     {
-        $rules = $this->CI->email_verification_rules;
+        $appointment = $this->restored_appointment($verification);
+
+        if (!$is_available($appointment)) {
+            return ['page' => $this->CI->email_verification_pages->expired()];
+        }
+
+        return $this->book($verification, $appointment, $allowed_customer_fields);
+    }
+
+    /**
+     * Take over the new email of a reschedule (inside the transaction of confirm(), ticket 0018/05).
+     *
+     * The appointment contact gets the new email; the customer record only when no other customer has it (0017).
+     *
+     * @param array $verification Locked verification with purpose "email_change".
+     * @param array $appointment Appointment of the verification (with customer).
+     * @param array $allowed_customer_fields Customer fields an online booking may write.
+     *
+     * @return array Returns the outcome of confirm().
+     *
+     * @throws Throwable
+     */
+    protected function take_email_change(array $verification, array $appointment, array $allowed_customer_fields): array
+    {
         $contact_rules = $this->CI->appointment_contact_rules;
 
-        if (
-            empty($verification['id_appointments']) ||
-            $rules->state($verification, new DateTimeImmutable('now')) !== Email_verification_rules::STATE_VALID
-        ) {
-            return null;
-        }
-
-        $appointment = $this->CI->appointments_model->get(['id' => $verification['id_appointments']])[0] ?? null;
-
-        if (!$appointment || empty($appointment['id_users_customer'])) {
-            return null;
-        }
-
-        $email = trim((string) ($rules->customer_input($verification)['email'] ?? $verification['email']));
+        $email = trim(
+            (string) ($this->CI->email_verification_rules->customer_input($verification)['email'] ??
+                $verification['email'])
+        );
 
         $customer_id = (int) $appointment['id_users_customer'];
 
@@ -633,75 +587,99 @@ class Email_verification
 
         $contact = $contact_rules->contact(['email' => $email] + ($stored_contact ?? $existing_customer));
 
-        $this->CI->db->trans_begin();
+        $this->CI->appointment_verifications_model->take((int) $verification['id']);
 
-        try {
-            if (!$this->CI->appointment_verifications_model->take((int) $verification['id'])) {
-                $this->CI->db->trans_rollback();
+        $this->CI->appointment_contacts_model->save_for_appointment((int) $appointment['id'], $contact);
 
-                return null;
-            }
-
-            $this->CI->appointment_contacts_model->save_for_appointment((int) $appointment['id'], $contact);
-
-            $this->CI->customers_model->save($customer_record);
-
-            $this->CI->db->trans_commit();
-        } catch (Throwable $e) {
-            $this->CI->db->trans_rollback();
-
-            throw $e;
-        }
-
-        session([self::SESSION_KEY => $rules->remember_verified(session(self::SESSION_KEY), $email)]);
+        $this->CI->customers_model->save($customer_record);
 
         return [
-            'result' => self::RESULT_EMAIL_CHANGED,
             'appointment_id' => (int) $appointment['id'],
-            'customer_id' => $customer_id
+            'customer_id' => $customer_id,
+            'manage_mode' => true,
+            'notify' => false
         ];
     }
 
     /**
-     * Get the message page variables for an expired Vormerkung whose slot is taken ("Leider abgelaufen").
+     * Check whether a customer already has an appointment during the time of another one (the check of the
+     * booking form, Booking::register()).
      *
-     * @return array Returns message_title, message_text and message_icon for the booking_message page.
+     * @param int $customer_id Customer ID.
+     * @param array $appointment Appointment with start and end.
+     *
+     * @return bool
      */
-    public static function expired_page_vars(): array
+    protected function customer_already_booked(int $customer_id, array $appointment): bool
     {
-        return [
-            'message_title' => lang('email_verification_expired_title'),
-            'message_text' =>
-                '<p>' .
-                e(lang('email_verification_expired_text')) .
-                '</p><p><a href="' .
-                e(site_url()) .
-                '">' .
-                e(lang('go_to_booking_page')) .
-                '</a></p>',
-            'message_icon' => base_url('assets/img/error.png')
-        ];
+        return $this->CI->appointments_model->get([
+            'id_users_customer' => $customer_id,
+            'start_datetime <=' => $appointment['start_datetime'],
+            'end_datetime >=' => $appointment['end_datetime']
+        ]) !== [];
     }
 
     /**
-     * Get the message page variables for an unknown or used verification link (neutral wording).
+     * Check and record a verification mail against the send limit of its email in one step.
      *
-     * @return array Returns message_title, message_text and message_icon for the booking_message page.
+     * @param string $email Recipient.
+     * @param bool $resend Whether the mail is a resend for an existing Vormerkung (60 seconds pause).
+     * @param DateTimeImmutable $now Time of the mail.
+     *
+     * @return array Returns the decision ['decision' => SEND_*, 'wait_seconds' => int]; an allowed mail is counted.
      */
-    public static function invalid_page_vars(): array
+    protected function reserve_mail(string $email, bool $resend, DateTimeImmutable $now): array
     {
-        return [
-            'message_title' => lang('email_verification_invalid_title'),
-            'message_text' =>
-                '<p>' .
-                e(lang('email_verification_invalid_text')) .
-                '</p><p><a href="' .
-                e(site_url()) .
-                '">' .
-                e(lang('go_to_booking_page')) .
-                '</a></p>',
-            'message_icon' => base_url('assets/img/error.png')
-        ];
+        $rules = $this->CI->email_verification_rules;
+
+        return $this->CI->appointment_verifications_model->reserve_send($rules->normalize_email($email), function (
+            ?array $limit
+        ) use ($rules, $email, $resend, $now): array {
+            $decision = $rules->send_decision($limit, $now, $resend);
+
+            return [
+                'decision' => $decision,
+                'limit' =>
+                    $decision['decision'] === Email_verification_rules::SEND_ALLOWED
+                        ? $rules->limit_after_send($limit, $email, $now)
+                        : null
+            ];
+        });
+    }
+
+    /**
+     * Send a verification link mail.
+     *
+     * @param string $token Token of the link.
+     * @param array $appointment Appointment (service, provider, times).
+     * @param string $email Recipient.
+     * @param bool $email_change Whether the link confirms a changed email of a reschedule.
+     *
+     * @throws Exception
+     */
+    protected function send_link(string $token, array $appointment, string $email, bool $email_change): void
+    {
+        $this->CI->email_messages->send_email_verification_link(
+            site_url('booking/verify/' . $token),
+            $appointment,
+            $this->CI->services_model->find((int) $appointment['id_services']),
+            $this->CI->providers_model->find((int) $appointment['id_users_provider']),
+            $email,
+            $this->mail_settings(),
+            $email_change
+        );
+    }
+
+    /**
+     * Find a stored appointment.
+     *
+     * @param int $appointment_id Appointment ID.
+     *
+     * @return array|null Returns the appointment or null when it is gone.
+     */
+    protected function find_appointment(int $appointment_id): ?array
+    {
+        return $this->CI->appointments_model->get(['id' => $appointment_id])[0] ?? null;
     }
 
     /**
@@ -755,6 +733,16 @@ class Email_verification
     }
 
     /**
+     * Check whether the setting "require_email_verification" is on.
+     *
+     * @return bool
+     */
+    protected function enabled(): bool
+    {
+        return filter_var(setting('require_email_verification', '0'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
      * Create a random token for a verification link (256 bits, hex).
      *
      * @return string
@@ -764,25 +752,5 @@ class Email_verification
     protected function new_token(): string
     {
         return bin2hex(random_bytes(32));
-    }
-
-    /**
-     * Get the settings the mail templates use.
-     *
-     * @return array
-     */
-    protected function mail_settings(): array
-    {
-        $company_color = setting('company_color');
-
-        return [
-            'company_name' => setting('company_name'),
-            'company_link' => setting('company_link'),
-            'company_email' => setting('company_email'),
-            'company_color' =>
-                !empty($company_color) && $company_color != DEFAULT_COMPANY_COLOR ? $company_color : null,
-            'date_format' => setting('date_format'),
-            'time_format' => setting('time_format')
-        ];
     }
 }

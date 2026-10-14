@@ -144,7 +144,7 @@ class EmailVerificationRulesTest extends TestCase
         $this->assertSame([], $this->rules()->customer_input(['customer_data' => 'not json']));
     }
 
-    private const SENT = ['expires_datetime' => '2026-10-14 12:10:00'];
+    private const SENT = ['expires_datetime' => '2026-10-14 12:10:00', 'last_sent_datetime' => '2026-10-14 12:00:00'];
 
     public function testVormerkungIsValidUntilTenMinutesAfterTheMail(): void
     {
@@ -182,10 +182,10 @@ class EmailVerificationRulesTest extends TestCase
     {
         $cutoffs = $this->rules()->cleanup_cutoffs(new DateTimeImmutable('2026-10-15 12:00:00'));
 
-        // Rows with expires_datetime <= cutoff: expired at 12:00:00 on the 15th, void when the mail went out at
-        // 12:00:00 on the 14th (expiry 12:10:00), see the state tests above.
+        // Rows with expires_datetime <= 'expired' are expired at 12:00:00 on the 15th, rows with last_sent_datetime <=
+        // 'void' are void: the mail went out at 12:00:00 on the 14th, see the state tests above.
         $this->assertSame('2026-10-15 12:00:00', $cutoffs['expired']);
-        $this->assertSame('2026-10-14 12:10:00', $cutoffs['void']);
+        $this->assertSame('2026-10-14 12:00:00', $cutoffs['void']);
     }
 
     public function testCleanupCutoffForSendLimitsIsOneHourAfterTheLastMail(): void
@@ -371,6 +371,151 @@ class EmailVerificationRulesTest extends TestCase
                 'send_count' => 2
             ],
             $this->rules()->resent_verification($record, 'new-token', new DateTimeImmutable('2026-10-14 12:03:00'))
+        );
+    }
+
+    private const SUBMITTED = [
+        'create_datetime' => '2026-10-14 12:00:00',
+        'expires_datetime' => '2026-10-14 12:15:00',
+        'last_sent_datetime' => '2026-10-14 12:05:00',
+        'send_count' => 2
+    ];
+
+    public function testResendHoldsTheSlotTenMinutesFromTheResendUpToTwentyMinutesAfterTheSubmit(): void
+    {
+        $resent = $this->rules()->resent_verification(
+            self::SUBMITTED,
+            'token',
+            new DateTimeImmutable('2026-10-14 12:10:00')
+        );
+
+        $this->assertSame('2026-10-14 12:20:00', $resent['expires_datetime']);
+    }
+
+    public function testResendNeverHoldsTheSlotLongerThanTwentyMinutesAfterTheSubmit(): void
+    {
+        $rules = $this->rules();
+
+        $this->assertSame(
+            '2026-10-14 12:20:00',
+            $rules->resent_verification(self::SUBMITTED, 'token', new DateTimeImmutable('2026-10-14 12:10:01'))[
+                'expires_datetime'
+            ]
+        );
+        $this->assertSame(
+            '2026-10-14 12:20:00',
+            $rules->resent_verification(self::SUBMITTED, 'token', new DateTimeImmutable('2026-10-14 12:14:59'))[
+                'expires_datetime'
+            ]
+        );
+    }
+
+    public function testLinkOfALateResendStillBooksAfterTheHoldEndsUntilTwentyFourHoursAfterTheResend(): void
+    {
+        $rules = $this->rules();
+
+        $resent =
+            $rules->resent_verification(self::SUBMITTED, 'token', new DateTimeImmutable('2026-10-14 12:15:00')) +
+            self::SUBMITTED;
+
+        $this->assertSame(
+            \Email_verification_rules::STATE_VALID,
+            $rules->state($resent, new DateTimeImmutable('2026-10-14 12:19:59'))
+        );
+        $this->assertSame(
+            \Email_verification_rules::STATE_RESTORABLE,
+            $rules->state($resent, new DateTimeImmutable('2026-10-14 12:20:00'))
+        );
+        $this->assertSame(
+            \Email_verification_rules::STATE_RESTORABLE,
+            $rules->state($resent, new DateTimeImmutable('2026-10-15 12:14:59'))
+        );
+        $this->assertSame(
+            \Email_verification_rules::STATE_VOID,
+            $rules->state($resent, new DateTimeImmutable('2026-10-15 12:15:00'))
+        );
+    }
+
+    private const HELD = [
+        'purpose' => 'booking',
+        'id_appointments' => 7,
+        'restorable' => false,
+        'expires_datetime' => '2026-10-14 12:10:00',
+        'last_sent_datetime' => '2026-10-14 12:00:00'
+    ];
+
+    private const VORMERKUNG = ['id' => 7, 'id_users_customer' => null];
+
+    public function testValidLinkConfirmsItsHeldVormerkung(): void
+    {
+        $this->assertSame(
+            \Email_verification_rules::CONFIRM_HELD,
+            $this->rules()->confirm_action(self::HELD, self::VORMERKUNG, new DateTimeImmutable('2026-10-14 12:09:59'))
+        );
+    }
+
+    public function testValidLinkOfADeletedOrAlreadyConfirmedVormerkungIsInvalid(): void
+    {
+        $rules = $this->rules();
+        $now = new DateTimeImmutable('2026-10-14 12:05:00');
+
+        $this->assertSame(\Email_verification_rules::CONFIRM_INVALID, $rules->confirm_action(self::HELD, null, $now));
+        $this->assertSame(
+            \Email_verification_rules::CONFIRM_INVALID,
+            $rules->confirm_action(self::HELD, ['id' => 7, 'id_users_customer' => 12], $now)
+        );
+    }
+
+    public function testLateClickRestoresAVormerkungReleasedByTheExpiryCleanup(): void
+    {
+        $released = ['id_appointments' => null, 'restorable' => true] + self::HELD;
+
+        $this->assertSame(
+            \Email_verification_rules::CONFIRM_RESTORE,
+            $this->rules()->confirm_action($released, null, new DateTimeImmutable('2026-10-14 12:10:00'))
+        );
+    }
+
+    public function testLateClickOnAVormerkungDeletedOtherwiseIsInvalid(): void
+    {
+        // Deleted by staff, the API or a deleted provider: the foreign key cleared id_appointments, but the expiry
+        // cleanup never released it.
+        $deleted = ['id_appointments' => null] + self::HELD;
+
+        $this->assertSame(
+            \Email_verification_rules::CONFIRM_INVALID,
+            $this->rules()->confirm_action($deleted, null, new DateTimeImmutable('2026-10-14 12:30:00'))
+        );
+    }
+
+    public function testVoidLinkRestoresNothing(): void
+    {
+        $released = ['id_appointments' => null, 'restorable' => true] + self::HELD;
+
+        $this->assertSame(
+            \Email_verification_rules::CONFIRM_INVALID,
+            $this->rules()->confirm_action($released, null, new DateTimeImmutable('2026-10-15 12:00:00'))
+        );
+    }
+
+    public function testValidEmailChangeLinkTakesTheEmailOverOnlyForAConfirmedAppointment(): void
+    {
+        $rules = $this->rules();
+        $change = ['purpose' => 'email_change'] + self::HELD;
+        $now = new DateTimeImmutable('2026-10-14 12:05:00');
+
+        $this->assertSame(
+            \Email_verification_rules::CONFIRM_EMAIL_CHANGE,
+            $rules->confirm_action($change, ['id' => 7, 'id_users_customer' => 12], $now)
+        );
+        $this->assertSame(\Email_verification_rules::CONFIRM_INVALID, $rules->confirm_action($change, null, $now));
+        $this->assertSame(
+            \Email_verification_rules::CONFIRM_INVALID,
+            $rules->confirm_action(
+                $change,
+                ['id' => 7, 'id_users_customer' => 12],
+                new DateTimeImmutable('2026-10-14 12:10:00')
+            )
         );
     }
 

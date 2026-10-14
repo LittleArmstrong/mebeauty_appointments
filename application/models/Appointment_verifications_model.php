@@ -6,7 +6,14 @@
  * Stores the email verifications of appointments. A row with purpose "booking" marks its appointment as
  * "Vormerkung": the appointment holds its slot but has no customer until the link is clicked. Only the SHA-256 hash
  * of the token is stored. The restore data (service, provider, start, end, notes, customer form data) stays when the
- * appointment is deleted (foreign key ON DELETE SET NULL). The rules live in the Email_verification_rules library.
+ * appointment is deleted (foreign key ON DELETE SET NULL); only the expiry cleanup marks it "restorable", so a
+ * Vormerkung deleted any other way (staff, API, deleted provider) cannot come back by a late click. The rules live
+ * in the Email_verification_rules library.
+ *
+ * The model writes customer-less appointments of `appointments` directly (create_vormerkung(), delete_vormerkung(),
+ * delete_expired()): Appointments_model::save() requires a customer, and the deletes must only hit appointments
+ * that still have none (a concurrent click may have confirmed them), which Appointments_model::delete() cannot
+ * express.
  *
  * @package Models
  */
@@ -20,7 +27,8 @@ class Appointment_verifications_model extends EA_Model
         'id_appointments' => 'integer',
         'send_count' => 'integer',
         'id_services' => 'integer',
-        'id_users_provider' => 'integer'
+        'id_users_provider' => 'integer',
+        'restorable' => 'boolean'
     ];
 
     /**
@@ -93,8 +101,9 @@ class Appointment_verifications_model extends EA_Model
      */
     public function insert(array $verification): int
     {
-        $verification['create_datetime'] = date('Y-m-d H:i:s');
-        $verification['update_datetime'] = $verification['create_datetime'];
+        // A booking verification brings its submit time (the limit of its slot hold, spec 0018).
+        $verification['create_datetime'] ??= date('Y-m-d H:i:s');
+        $verification['update_datetime'] = date('Y-m-d H:i:s');
 
         if (!$this->db->insert('appointment_verifications', $verification)) {
             throw new RuntimeException('Could not insert the appointment verification.');
@@ -113,6 +122,36 @@ class Appointment_verifications_model extends EA_Model
     public function find_by_token_hash(string $token_hash): ?array
     {
         return $this->first($this->db->where('token_hash', $token_hash));
+    }
+
+    /**
+     * Find the verification with a token hash and lock it until the current transaction ends.
+     *
+     * A concurrent click, resend or expiry cleanup waits for the lock, so the state checked by the caller stays
+     * true until it commits.
+     *
+     * @param string $token_hash SHA-256 hash of the token.
+     *
+     * @return array|null Returns the verification or null.
+     */
+    public function lock_by_token_hash(string $token_hash): ?array
+    {
+        $verification = $this->db
+            ->query(
+                'SELECT * FROM `' .
+                    $this->db->dbprefix('appointment_verifications') .
+                    '` WHERE `token_hash` = ? FOR UPDATE',
+                [$token_hash]
+            )
+            ->row_array();
+
+        if (!$verification) {
+            return null;
+        }
+
+        $this->cast($verification);
+
+        return $verification;
     }
 
     /**
@@ -193,16 +232,6 @@ class Appointment_verifications_model extends EA_Model
     }
 
     /**
-     * Delete all verifications of an appointment (e.g. before staff deletes the appointment).
-     *
-     * @param int $appointment_id Appointment ID.
-     */
-    public function delete_by_appointment(int $appointment_id): void
-    {
-        $this->db->delete('appointment_verifications', ['id_appointments' => $appointment_id]);
-    }
-
-    /**
      * Delete a Vormerkung with its verification (only an appointment without customer).
      *
      * @param int $appointment_id Appointment ID.
@@ -217,42 +246,60 @@ class Appointment_verifications_model extends EA_Model
      * Delete expired Vormerkungen and void verifications (cleanup, spec 0018).
      *
      * An expired verification with a purpose in $purposes_freeing_slot loses its appointment (only one without
-     * customer); the verification itself stays as restore data (foreign key ON DELETE SET NULL). A void verification
-     * is deleted.
+     * customer) and becomes "restorable": it stays as restore data for a late click (foreign key ON DELETE SET
+     * NULL). The rows are locked first, so a concurrent click either confirms before or finds them released. A
+     * void verification is deleted.
      *
      * @param string $expired_cutoff Verifications with expires_datetime <= this are expired (Y-m-d H:i:s).
-     * @param string $void_cutoff Verifications with expires_datetime <= this are void (Y-m-d H:i:s).
+     * @param string $void_cutoff Verifications with last_sent_datetime <= this are void (Y-m-d H:i:s).
      * @param array $purposes_freeing_slot Purposes whose expiry deletes the appointment.
      *
      * @return array Returns ['appointments' => int, 'verifications' => int] with the numbers of deleted rows.
+     *
+     * @throws Throwable
      */
     public function delete_expired(string $expired_cutoff, string $void_cutoff, array $purposes_freeing_slot): array
     {
         $deleted = ['appointments' => 0, 'verifications' => 0];
 
         if ($purposes_freeing_slot !== []) {
-            $appointment_ids = array_column(
-                $this->db
-                    ->select('id_appointments')
-                    ->where('id_appointments IS NOT NULL')
-                    ->where('expires_datetime <=', $expired_cutoff)
-                    ->where_in('purpose', $purposes_freeing_slot)
-                    ->get('appointment_verifications')
-                    ->result_array(),
-                'id_appointments'
-            );
+            $this->db->trans_begin();
 
-            if ($appointment_ids !== []) {
-                $this->db
-                    ->where_in('id', array_map('intval', $appointment_ids))
-                    ->where('id_users_customer IS NULL')
-                    ->delete('appointments');
+            try {
+                $expired = $this->db
+                    ->query(
+                        'SELECT `v`.`id`, `v`.`id_appointments` FROM `' .
+                            $this->db->dbprefix('appointment_verifications') .
+                            '` `v` JOIN `' .
+                            $this->db->dbprefix('appointments') .
+                            '` `a` ON `a`.`id` = `v`.`id_appointments` AND `a`.`id_users_customer` IS NULL ' .
+                            'WHERE `v`.`expires_datetime` <= ? AND `v`.`purpose` IN ? FOR UPDATE',
+                        [$expired_cutoff, array_values($purposes_freeing_slot)]
+                    )
+                    ->result_array();
 
-                $deleted['appointments'] = $this->db->affected_rows();
+                if ($expired !== []) {
+                    $this->db
+                        ->where_in('id', array_map('intval', array_column($expired, 'id')))
+                        ->update('appointment_verifications', ['restorable' => 1]);
+
+                    $this->db
+                        ->where_in('id', array_map('intval', array_column($expired, 'id_appointments')))
+                        ->where('id_users_customer IS NULL')
+                        ->delete('appointments');
+
+                    $deleted['appointments'] = $this->db->affected_rows();
+                }
+
+                $this->db->trans_commit();
+            } catch (Throwable $e) {
+                $this->db->trans_rollback();
+
+                throw $e;
             }
         }
 
-        $this->db->where('expires_datetime <=', $void_cutoff)->delete('appointment_verifications');
+        $this->db->where('last_sent_datetime <=', $void_cutoff)->delete('appointment_verifications');
 
         $deleted['verifications'] = $this->db->affected_rows();
 
@@ -301,13 +348,38 @@ class Appointment_verifications_model extends EA_Model
     }
 
     /**
-     * Store the send limit of an email (one row per email).
+     * Check and record a verification mail against the send limit of an email in one step (spec 0018/03).
      *
-     * @param array $limit Send limit (see Email_verification_rules::limit_after_send()).
+     * A named database lock per email serializes concurrent requests, so two of them cannot both pass the check
+     * before either records its mail.
+     *
+     * @param string $email Normalized email.
+     * @param callable $decide fn(?array $limit): array returning ['decision' => array, 'limit' => ?array]: the
+     * decision for the caller and the limit to store (null stores nothing).
+     *
+     * @return array Returns the decision.
+     *
+     * @throws RuntimeException When the lock cannot be taken.
      */
-    public function save_limit(array $limit): void
+    public function reserve_send(string $email, callable $decide): array
     {
-        $this->db->replace('email_verification_limits', $limit);
+        $lock = 'ea_email_verification_' . sha1($email);
+
+        if ((int) $this->db->query('SELECT GET_LOCK(?, 10) AS `locked`', [$lock])->row()->locked !== 1) {
+            throw new RuntimeException('Could not lock the email verification send limit.');
+        }
+
+        try {
+            $result = $decide($this->find_limit($email));
+
+            if ($result['limit'] !== null) {
+                $this->db->replace('email_verification_limits', $result['limit']);
+            }
+
+            return $result['decision'];
+        } finally {
+            $this->db->query('SELECT RELEASE_LOCK(?)', [$lock]);
+        }
     }
 
     /**

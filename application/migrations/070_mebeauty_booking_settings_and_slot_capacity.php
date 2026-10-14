@@ -80,7 +80,8 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
 
         // Marks an appointment as Vormerkung (purpose "booking") or holds a changed email (purpose "email_change")
         // until the link is clicked. Only the token hash is stored. The restore data (service, provider, start, end,
-        // notes, customer form data) outlives the appointment of an expired Vormerkung, hence ON DELETE SET NULL.
+        // notes, customer form data) outlives the appointment of an expired Vormerkung, hence ON DELETE SET NULL;
+        // "restorable" is set only by the expiry cleanup, so a Vormerkung deleted any other way stays deleted.
         if (!$this->db->table_exists('appointment_verifications')) {
             $this->dbforge->add_field([
                 'id' => ['type' => 'INT', 'constraint' => 11, 'auto_increment' => true],
@@ -91,6 +92,7 @@ class Migration_Mebeauty_booking_settings_and_slot_capacity extends EA_Migration
                 'expires_datetime' => ['type' => 'DATETIME', 'null' => false],
                 'last_sent_datetime' => ['type' => 'DATETIME', 'null' => true],
                 'send_count' => ['type' => 'INT', 'constraint' => 11, 'default' => 0],
+                'restorable' => ['type' => 'TINYINT', 'constraint' => 1, 'null' => false, 'default' => 0],
                 'id_services' => ['type' => 'INT', 'constraint' => 11, 'null' => true],
                 'id_users_provider' => ['type' => 'INT', 'constraint' => 11, 'null' => true],
                 'start_datetime' => ['type' => 'DATETIME', 'null' => true],

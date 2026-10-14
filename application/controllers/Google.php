@@ -59,7 +59,7 @@ class Google extends EA_Controller
             $CI->load->model('customers_model');
             $CI->load->model('settings_model');
 
-            $CI->load->library('email_verification');
+            $CI->load->library('email_verification_calendar');
 
             $user_id = session('user_id');
 
@@ -100,7 +100,7 @@ class Google extends EA_Controller
             ];
 
             // Vormerkungen (spec 0018) reach the external calendar only after the customer's confirmation.
-            $appointments = $CI->email_verification->without_unconfirmed($CI->appointments_model->get($where));
+            $appointments = $CI->email_verification_calendar->without_unconfirmed($CI->appointments_model->get($where));
 
             $unavailabilities = $CI->unavailabilities_model->get($where);
 

@@ -69,11 +69,11 @@ Der Eintrag eines Kunden in der Kundenverwaltung; enthält den letzten bekannten
 _Avoid_: Kundenstamm, Kundenprofil, Kundenkonto
 
 **E-Mail-Bestätigung**:
-Nachweis per Link, dass die bei einer Online-Buchung eingegebene E-Mail-Adresse der buchenden Person gehört; per Einstellung erforderlich.
+Nachweis per Link (und Schaltfläche auf der Link-Seite), dass die bei einer Online-Buchung eingegebene E-Mail-Adresse der buchenden Person gehört; per Einstellung erforderlich.
 _Avoid_: Double-Opt-in, Verifizierungscode
 
 **Vormerkung**:
-Ein Online-Termin, der bei aktiver E-Mail-Bestätigung bis zum Klick auf den Bestätigungslink den Slot hält (10 Minuten); im Backend als „unbestätigt“ sichtbar, in Google erst nach der Bestätigung.
+Ein Online-Termin, der bei aktiver E-Mail-Bestätigung bis zur Bestätigung über den Link den Slot hält (10 Minuten, mit „erneut senden“ höchstens 20 Minuten); im Backend als „unbestätigt“ sichtbar, in Google erst nach der Bestätigung.
 _Avoid_: Reservierung, unbestätigte Buchung, Pending
 
 **Theme**:

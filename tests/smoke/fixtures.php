@@ -43,6 +43,13 @@
  *   APP_ENV=testing php tests/smoke/fixtures.php limit-backdate <email> <seconds>
  *       Moves the last verification mail to that email the given seconds into the past (to end the resend pause
  *       without waiting). Prints the send limit (JSON, or "null").
+ *   APP_ENV=testing php tests/smoke/fixtures.php limit-fill <email>
+ *       Records the hourly maximum of verification mails to that email (window starting now), spec 0018 review S1.
+ *   APP_ENV=testing php tests/smoke/fixtures.php service-attendants <service-id> [<number>]
+ *       Prints the attendants number of the service and, with <number>, sets it first (spec 0018 review S2).
+ *   APP_ENV=testing php tests/smoke/fixtures.php rate-limit-reset
+ *       Deletes the request counters of rate_limit() (a long smoke test sends more than 100 requests in two
+ *       minutes from one IP).
  *   APP_ENV=testing php tests/smoke/fixtures.php cleanup-verifications
  *       Runs the email verification part of `console cleanup` (Cleanup::cleanup_email_verifications()).
  *   APP_ENV=testing php tests/smoke/fixtures.php purge
@@ -316,6 +323,33 @@ switch ($command) {
         echo json_encode($CI->appointment_verifications_model->find_limit($arguments[0] ?? '')) . PHP_EOL;
         break;
 
+    case 'limit-fill':
+        $CI->load->library('email_verification_rules');
+
+        $CI->db->replace('email_verification_limits', [
+            'email' => $CI->email_verification_rules->normalize_email($arguments[0] ?? ''),
+            'window_start_datetime' => date('Y-m-d H:i:s'),
+            'window_count' => Email_verification_rules::MAILS_PER_WINDOW,
+            'last_sent_datetime' => date('Y-m-d H:i:s')
+        ]);
+
+        echo json_encode($CI->appointment_verifications_model->find_limit($arguments[0] ?? '')) . PHP_EOL;
+        break;
+
+    case 'service-attendants':
+        if (isset($arguments[1])) {
+            $CI->db->update('services', ['attendants_number' => (int) $arguments[1]], ['id' => (int) $arguments[0]]);
+        }
+
+        echo $CI->db->get_where('services', ['id' => (int) ($arguments[0] ?? 0)])->row()->attendants_number . PHP_EOL;
+        break;
+
+    case 'rate-limit-reset':
+        foreach (glob(config('cache_path') . 'rate_limit_*') ?: [] as $file) {
+            unlink($file);
+        }
+        break;
+
     case 'cleanup-verifications':
         $CI->load->library('cleanup');
         $CI->cleanup->cleanup_email_verifications();
@@ -367,7 +401,8 @@ switch ($command) {
         fwrite(
             STDERR,
             'Usage: fixtures.php setup|get|appointment-by-hash|get-by-customer|customer|contact|setting|lang|cleanup|' .
-                'verification-by-email|verification-token|limit|limit-backdate|cleanup-verifications|purge' .
+                'verification-by-email|verification-token|vormerkung|email-change-verification|limit|limit-backdate|' .
+                'limit-fill|service-attendants|rate-limit-reset|cleanup-verifications|purge' .
                 PHP_EOL
         );
         exit(2);

@@ -12,8 +12,10 @@
  *   already verified in this browser session. A reschedule via manage link applies right away; only a changed
  *   email waits for a link to the new address ("E-Mail-Änderung") and stays the old one until then.
  * - A verification link is valid for 10 minutes; the data to restore the booking is kept for 24 hours after the
- *   mail. An expired Vormerkung (purpose "booking") is deleted and frees its slot; a later click books it again when
- *   the slot is still free. An expired email change keeps its appointment.
+ *   last mail. A resend gives a new link for 10 minutes, but a Vormerkung holds its slot at most 20 minutes after
+ *   the submit. An expired Vormerkung (purpose "booking") is deleted by the expiry cleanup, which frees its slot and
+ *   marks the verification "restorable"; a later click books it again when the slot is still free. A Vormerkung
+ *   deleted any other way (staff, API) is not restorable. An expired email change keeps its appointment.
  * - Only the SHA-256 hash of the token is stored; the token itself only travels in the link.
  *
  * @package Libraries
@@ -36,6 +38,11 @@ class Email_verification_rules
     public const VALIDITY_MINUTES = 10;
 
     /**
+     * Minutes after the submit a Vormerkung holds its slot at most, resends included.
+     */
+    public const HOLD_MAX_MINUTES = 20;
+
+    /**
      * Hours the data to restore an expired Vormerkung is kept.
      */
     public const RESTORE_HOURS = 24;
@@ -54,6 +61,26 @@ class Email_verification_rules
      * State of a verification: the link is void and the restore data is deleted.
      */
     public const STATE_VOID = 'void';
+
+    /**
+     * Action of a clicked link: confirm the Vormerkung that holds its slot.
+     */
+    public const CONFIRM_HELD = 'held';
+
+    /**
+     * Action of a clicked link: book the Vormerkung released by the expiry cleanup again (late click).
+     */
+    public const CONFIRM_RESTORE = 'restore';
+
+    /**
+     * Action of a clicked link: take the new email of a reschedule over.
+     */
+    public const CONFIRM_EMAIL_CHANGE = 'email_change';
+
+    /**
+     * Action of a clicked link: nothing, the link is unknown, used, void or its appointment is gone.
+     */
+    public const CONFIRM_INVALID = 'invalid';
 
     /**
      * Seconds a customer must wait after the last mail before the verification mail can be sent again.
@@ -181,6 +208,7 @@ class Email_verification_rules
             'expires_datetime' => $now->modify('+' . self::VALIDITY_MINUTES . ' minutes')->format('Y-m-d H:i:s'),
             'last_sent_datetime' => $now->format('Y-m-d H:i:s'),
             'send_count' => 1,
+            'create_datetime' => $now->format('Y-m-d H:i:s'),
             'id_services' => (int) $appointment['id_services'],
             'id_users_provider' => (int) $appointment['id_users_provider'],
             'start_datetime' => $appointment['start_datetime'],
@@ -267,10 +295,10 @@ class Email_verification_rules
     /**
      * Get the state of a verification at a point in time.
      *
-     * Valid until its expiry (10 minutes after the last mail), restorable until 24 hours after the last mail, void
-     * afterwards.
+     * Valid until its expiry (10 minutes after the last mail, for a resend at most 20 minutes after the submit),
+     * restorable until 24 hours after the last mail, void afterwards.
      *
-     * @param array $verification Verification record with expires_datetime.
+     * @param array $verification Verification record with expires_datetime and last_sent_datetime.
      * @param DateTimeImmutable $now Point in time (database time zone).
      *
      * @return string Returns one of the STATE_* constants.
@@ -283,11 +311,49 @@ class Email_verification_rules
             return self::STATE_VALID;
         }
 
-        $void = $expires
-            ->modify('-' . self::VALIDITY_MINUTES . ' minutes')
-            ->modify('+' . self::RESTORE_HOURS . ' hours');
+        $void = (new DateTimeImmutable($verification['last_sent_datetime']))->modify(
+            '+' . self::RESTORE_HOURS . ' hours'
+        );
 
         return $now < $void ? self::STATE_RESTORABLE : self::STATE_VOID;
+    }
+
+    /**
+     * Decide what a click on a verification link does.
+     *
+     * A booking link confirms its Vormerkung while it holds the slot, and restores it after expiry only when the
+     * expiry cleanup released it ("restorable"); a Vormerkung deleted any other way stays deleted. An email change
+     * link takes the new email over only while it is valid and its appointment has a customer.
+     *
+     * @param array $verification Stored verification record (purpose, restorable, expires/last sent times).
+     * @param array|null $appointment Appointment of the verification (id_users_customer) or null when it is gone.
+     * @param DateTimeImmutable $now Time of the click (database time zone).
+     *
+     * @return string Returns one of the CONFIRM_* constants.
+     */
+    public function confirm_action(array $verification, ?array $appointment, DateTimeImmutable $now): string
+    {
+        $state = $this->state($verification, $now);
+
+        $has_customer = !empty($appointment['id_users_customer']);
+
+        if (($verification['purpose'] ?? null) === self::PURPOSE_EMAIL_CHANGE) {
+            return $state === self::STATE_VALID && $has_customer ? self::CONFIRM_EMAIL_CHANGE : self::CONFIRM_INVALID;
+        }
+
+        if (($verification['purpose'] ?? null) !== self::PURPOSE_BOOKING) {
+            return self::CONFIRM_INVALID;
+        }
+
+        if ($state === self::STATE_VALID) {
+            return $appointment && !$has_customer ? self::CONFIRM_HELD : self::CONFIRM_INVALID;
+        }
+
+        return $state === self::STATE_RESTORABLE &&
+            !empty($verification['restorable']) &&
+            empty($verification['id_appointments'])
+            ? self::CONFIRM_RESTORE
+            : self::CONFIRM_INVALID;
     }
 
     /**
@@ -296,17 +362,14 @@ class Email_verification_rules
      * @param DateTimeImmutable $now Point in time (database time zone).
      *
      * @return array Returns ['expired' => …, 'void' => …, 'limits' => …]: a verification with expires_datetime <=
-     * 'expired' is expired, one with expires_datetime <= 'void' is void, a send limit with last_sent_datetime <=
+     * 'expired' is expired, one with last_sent_datetime <= 'void' is void, a send limit with last_sent_datetime <=
      * 'limits' has ended: its window started before the last mail and its resend pause is over (Y-m-d H:i:s).
      */
     public function cleanup_cutoffs(DateTimeImmutable $now): array
     {
         return [
             'expired' => $now->format('Y-m-d H:i:s'),
-            'void' => $now
-                ->modify('+' . self::VALIDITY_MINUTES . ' minutes')
-                ->modify('-' . self::RESTORE_HOURS . ' hours')
-                ->format('Y-m-d H:i:s'),
+            'void' => $now->modify('-' . self::RESTORE_HOURS . ' hours')->format('Y-m-d H:i:s'),
             'limits' => $now->modify('-' . self::LIMIT_WINDOW_MINUTES . ' minutes')->format('Y-m-d H:i:s')
         ];
     }
@@ -450,10 +513,11 @@ class Email_verification_rules
     /**
      * Get the changed fields of a verification whose mail is sent again with a new link.
      *
-     * The new token replaces the old one (the old link becomes invalid), and the Vormerkung holds its slot for
-     * VALIDITY_MINUTES from the new mail.
+     * The new token replaces the old one (the old link becomes invalid). The Vormerkung holds its slot for
+     * VALIDITY_MINUTES from the new mail, but at most HOLD_MAX_MINUTES after the submit (create_datetime), so resends
+     * cannot block a slot for long; a later click still books while the slot is free (state "restorable").
      *
-     * @param array $verification Stored verification record.
+     * @param array $verification Stored verification record (create_datetime = submit, send_count).
      * @param string $token Token of the new link (only its hash is stored).
      * @param DateTimeImmutable $now Time of the mail (database time zone).
      *
@@ -461,9 +525,15 @@ class Email_verification_rules
      */
     public function resent_verification(array $verification, string $token, DateTimeImmutable $now): array
     {
+        $hold_end = (new DateTimeImmutable($verification['create_datetime']))->modify(
+            '+' . self::HOLD_MAX_MINUTES . ' minutes'
+        );
+
         return [
             'token_hash' => $this->token_hash($token),
-            'expires_datetime' => $now->modify('+' . self::VALIDITY_MINUTES . ' minutes')->format('Y-m-d H:i:s'),
+            'expires_datetime' => min($now->modify('+' . self::VALIDITY_MINUTES . ' minutes'), $hold_end)->format(
+                'Y-m-d H:i:s'
+            ),
             'last_sent_datetime' => $now->format('Y-m-d H:i:s'),
             'send_count' => (int) ($verification['send_count'] ?? 0) + 1
         ];

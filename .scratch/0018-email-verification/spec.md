@@ -70,27 +70,57 @@ Bei einer Umbuchung über den Manage-Link gelten neue Zeit und übrige Angaben s
   - Keine Kundenmail, keine Salon-Mail, kein Google-Sync, kein Webhook.
   - Ist die E-Mail in dieser Browser-Sitzung schon bestätigt, wird sofort gebucht wie ohne Einstellung.
 - **Bestätigungs-Endpunkt** (öffentlich, Token im Link):
-  - Prüft den Token und nimmt ihn auf.
+  - Das Öffnen des Links (`GET booking/verify/<token>`) ändert nichts, weil Mail-Scanner Links öffnen. Es zeigt eine
+    Seite „Termin bestätigen“ (bzw. „E-Mail-Adresse bestätigen“) mit einer Schaltfläche. Erst die Schaltfläche
+    (`POST booking/confirm_verification` mit CSRF-Token) bestätigt. Ein unbekannter oder verfallener Link zeigt gleich
+    „Link ungültig“.
+  - Prüft den Token und nimmt ihn auf. Die Markierung bleibt dabei gesperrt (`SELECT … FOR UPDATE`), so dass ein
+    gleichzeitiger Klick, „erneut senden“ oder das Aufräumen nicht dazwischenkommt; die Verfügbarkeitsprüfung beim
+    späten Klick läuft in derselben Transaktion.
+  - Hat der Kunde der E-Mail zu dieser Zeit schon einen Termin (Prüfung `customer_is_already_booked` des
+    Buchungsformulars), wird die Vormerkung verworfen und eine neutrale Seite „Termin nicht gebucht“ gezeigt. Bei
+    aktiver Bestätigung läuft diese Prüfung nur hier und nicht beim Absenden, damit die Antwort des Formulars nicht
+    verrät, ob eine Adresse einem Kunden gehört.
   - Ordnet den Kunden zu bzw. legt ihn an und aktualisiert den Datensatz nach 0017.
   - Entfernt die Markierung, startet Sync, Mails und Webhook wie bei einer normalen Buchung und leitet auf die bestehende Erfolgsseite weiter.
   - Merkt die Adresse für die Browser-Sitzung als bestätigt.
 - **Nach Ablauf (10 Minuten):**
-  - Der vorgemerkte Termin wird gelöscht und gibt den Slot frei. Die Wiederherstellungsdaten bleiben 24 Stunden erhalten.
+  - Der vorgemerkte Termin wird gelöscht und gibt den Slot frei. Die Wiederherstellungsdaten bleiben 24 Stunden nach
+    der letzten Mail erhalten. Nur dieses Aufräumen markiert sie als „wiederherstellbar“: Eine Vormerkung, die anders
+    gelöscht wird (Personal, REST-API, gelöschter Dienstleister), kommt durch einen späten Klick nicht zurück.
   - Ein späterer Klick prüft die Verfügbarkeit mit der vorhandenen Prüfung. Ist der Slot frei, wird der Termin neu angelegt und bestätigt, sonst erscheint eine Seite „abgelaufen“ mit Link zur Buchung.
   - Nach 24 Stunden ist der Link ungültig.
 - **Aufräumen:** „lazy“ vor Verfügbarkeitsabfragen, beim Absenden und beim Laden des Backend-Kalenders, zusätzlich in `console cleanup`.
 - **Limits:**
   - Der Token ist zufällig und lang, einmal verwendbar und 10 Minuten gültig.
   - „Erneut senden“ geht frühestens nach 60 Sekunden, höchstens 5 Mails pro E-Mail-Adresse und Stunde.
+  - Der neue Link gilt 10 Minuten ab dem erneuten Senden, die Vormerkung hält den Slot aber höchstens 20 Minuten nach
+    dem Absenden. Danach bucht ein Klick noch, solange der Slot frei ist (Regel für den späten Klick).
+  - Prüfen und Zählen des Stundenlimits geschehen in einem Schritt (benannte Datenbank-Sperre je Adresse). Ein
+    Sendeversuch zählt auch, wenn die Mail scheitert.
   - Die Fehlermeldungen verraten nicht, ob eine Adresse bekannt ist.
 - **Umbuchung mit geänderter E-Mail:**
   - Zeit und übrige Angaben gelten sofort (0017). Die neue E-Mail kommt erst nach dem Klick in Termin-Kontaktdaten und Datensatz, unter der Belegt-Regel aus 0017.
   - Bis dahin bleiben Termin-Kontaktdaten und Datensatz bei der alten Adresse, und die Umbuchungsmail geht an sie.
   - Zweck „E-Mail-Änderung“: Ablauf löscht hier keinen Termin.
+  - Hat die neue Adresse ihr Stundenlimit erreicht, gilt die Umbuchung trotzdem, die E-Mail bleibt die alte und es
+    geht kein Link hinaus.
+  - Abweichung (bewusst beibehalten): Eine in dieser Browser-Sitzung schon bestätigte Adresse braucht auch bei der
+    Umbuchung keinen weiteren Link, wie bei der zweiten Neubuchung.
 - **Backend:** Vorgemerkte Termine erscheinen im Kalender mit dem Zusatz „unbestätigt“. Bestätigen kann das Personal sie nicht, es kann sie aber wie jeden Termin löschen.
+  - Abweichung (bewusst beibehalten): Das Personal kann eine Vormerkung auch nicht bearbeiten oder verschieben, nur
+    löschen. Das Löschen verschickt keine Mail und löst keinen Webhook aus, weil der Termin nie bestätigt war.
+  - Abweichung (bewusst beibehalten): Auch der volle Google- und CalDAV-Abgleich aus dem Backend lässt Vormerkungen
+    aus, nicht nur der Sync nach einer Buchung.
 - **Mail:** neue Bestätigungsmail im Stil der vorhandenen Mails, Texte über die Übersetzungen (Deutsch und Englisch, andere Sprachen fallen auf Englisch zurück).
 - **Regel-Modul (Seam):** reine Funktionen für den Zustand einer Vormerkung zu einem Zeitpunkt (gültig, abgelaufen aber wiederherstellbar, verfallen) und die Entscheidung über das erneute Senden (Sperrfrist, Stundenlimit). Sie liegen im Regel-Modul aus 0017 oder in einer zweiten kleinen Fork-Library.
-- **Upstream-Diff:** Eingriffe nur im Buchungs-Controller, im Booking-Flow (Hinweis), in der Kalender-Anzeige, im Cleanup und in der Einstellungsseite. Logik und Speicherung liegen in Fork-Klassen.
+- **Upstream-Diff:** Eingriffe im Buchungs-Controller (Aufrufe, `verify`/`confirm_verification`, ausgelagertes
+  `after_appointment_saved()`), im Kalender-Controller (Aufräumen, Markierung, Sperre beim Speichern, keine Ankündigung
+  beim Löschen), in den Google- und CalDAV-Controllern (Sync-Filter), im Cleanup, in `Email_messages` (neue Mail), im
+  Booking-Flow (Hinweis, „erneut senden“), in der Kalender-Anzeige (JS), in der Einstellungsseite, in der
+  Einstellungsvalidierung und in den Übersetzungen. Jede Stelle ruft nur Fork-Code auf; Entscheidungen liegen in
+  Fork-Klassen (`Email_verification`, `_rules`, `_session`, `_pages`, `_calendar`, `Appointment_verifications_model`).
+  Die Mail-Methode liegt in `Email_messages`, weil der Mailer dort privat aufgebaut wird (ADR 0008).
 - ADR 0008 (aus 0017) bekommt den Abschnitt zur Bestätigung. Verworfen wurden ein Code im Wizard (Kunden finden den Link angenehmer) und eine eigene Tabelle für Vormerkungen (sie würde Eingriffe in die Verfügbarkeitsberechnung erfordern).
 
 ## Testing Decisions
@@ -119,3 +149,48 @@ Bei einer Umbuchung über den Manage-Link gelten neue Zeit und übrige Angaben s
 - Ohne funktionierenden Mailversand ist bei aktiver Einstellung keine Online-Buchung möglich. Das steht im Hilfetext der Einstellung und in `docs/deployment.md`.
 - Herkunft: Grilling am 2026-10-11 bis 2026-10-13, siehe 0017.
 - Bezug: 0006 (Slot-Kapazität), 0009 (Manage-Link), 0010 (Einstellungsregeln), 0017, ADR 0008, Glossar „Vormerkung“, „E-Mail-Bestätigung“.
+
+## Comments
+
+**2026-10-14 (Review-Befunde 0018 behoben):**
+
+- Entscheidungen des Nutzers umgesetzt: R1 (Link öffnet nur die Seite mit der Schaltfläche, `POST
+  booking/confirm_verification` mit CSRF bestätigt) und R2 (neuer Link 10 Minuten ab dem erneuten Senden, Slot höchstens
+  20 Minuten nach dem Absenden, danach Regel für den späten Klick). Beibehaltene Abweichungen (Sync-Filter
+  Google/CalDAV, Vormerkung im Backend nur löschbar, Sitzungs-Abkürzung bei der E-Mail-Änderung) oben und in ADR 0008
+  dokumentiert.
+- S1: Stundenlimit der neuen Adresse bei der Umbuchung lehnt nichts mehr ab (Umbuchung gilt, alte E-Mail, kein Link).
+  S2: `customer_is_already_booked` läuft bei aktiver Bestätigung erst bei der Bestätigung (neutrale Seite „Termin nicht
+  gebucht“, Vormerkung verworfen). S8: neue Spalte `appointment_verifications.restorable` (Migration 070), nur das
+  Aufräumen nach Ablauf setzt sie; `Email_verification_rules::confirm_action()` entscheidet über Bestätigen,
+  Wiederherstellen, E-Mail-Änderung oder ungültig. S10: `Appointment_verifications_model::reserve_send()` prüft und
+  zählt das Limit unter `GET_LOCK` je Adresse.
+- C1: `confirm()` sperrt die Markierung (`lock_by_token_hash()`, `SELECT … FOR UPDATE`) und prüft Zustand und
+  Verfügbarkeit in derselben Transaktion; das Aufräumen sperrt die abgelaufenen Zeilen ebenso. C2: `forget_appointment()`
+  entfällt (durch S8 unnötig), ein gescheitertes Löschen lässt die Markierung unberührt. C3: Booking und Calendar rufen
+  je Stelle nur noch eine Fork-Methode auf (`link_page`, `confirm`, `check_staff_editable`, `announces_deletion`,
+  `customer_of`, `hold_back_email_change`/`start_email_change` ohne Verzweigung); `after_appointment_saved()` mit
+  benannten Argumenten `manage_mode:`/`notify:` aus dem Ergebnis von `confirm()`. C4: Mail bleibt in `Email_messages`
+  (privater `get_php_mailer()`, keine öffentliche Methode für beliebiges HTML), Begründung in ADR 0008. C5:
+  `mail_settings()` einmal (Booking nutzt es), `reserve_mail()` für alle Limitprüfungen, `enabled()` +
+  Sitzungsklasse, `find_appointment()`, `pages->message()`, `customer_of()`. C6: `Email_verification` aufgeteilt in
+  `Email_verification_session` (Sitzung), `Email_verification_pages` (Link-Seiten) und `Email_verification_calendar`
+  (Backend/externe Kalender); dass das Model `appointments` direkt schreibt, ist im Model-Docblock begründet
+  (`Appointments_model::save()` verlangt einen Kunden, die Löschungen dürfen nur kundenlose Termine treffen).
+- Smoke: `email-verification-smoke.sh` jetzt 30 Checks (neu: Link öffnen ändert nichts, später Klick nach anderem
+  Löschen, bekannter gebuchter Kunde, Umbuchung über dem Stundenlimit), `confirm_link()` drückt die Schaltfläche;
+  Fixtures `limit-fill`, `service-attendants`, `rate-limit-reset` (der Smoke überschreitet sonst 100 Anfragen in zwei
+  Minuten). Backend-Smoke Check 5 prüft jetzt, dass ein gelöschter Vormerkungs-Link nichts wiederherstellt.
+- Rot vor Fix: `EmailVerificationRulesTest` – `testValidLinkConfirmsItsHeldVormerkung` u. a. (6 Tests) `Error: Undefined
+  constant Email_verification_rules::CONFIRM_HELD`; `testResendNeverHoldsTheSlotLongerThanTwentyMinutesAfterTheSubmit`
+  – `'2026-10-14 12:20:00'` erwartet, `'2026-10-14 12:20:01'` erhalten;
+  `testLinkOfALateResendStillBooksAfterTheHoldEndsUntilTwentyFourHoursAfterTheResend` – `'restorable'` erwartet,
+  `'valid'` erhalten; `testCleanupCutoffsMatchTheStateBoundaries` – `'2026-10-14 12:00:00'` erwartet, `'… 12:10:00'`.
+  Smoke gegen den alten Code: `FAIL opening the link (HTTP 307): appointment {… "id_users_customer":270 …},
+  verification null` (R1). Smoke mit simuliertem Altverhalten je Befund: `FAIL late click on a deleted Vormerkung: 303
+  …/booking_confirmation/of/…` (S8), `FAIL booking with the email of a booked customer (HTTP 500, {… "Dieser Kunde hat
+  bereits einen Termin während des angefragten Reservierungszeitraums."})` (S2), `FAIL reschedule with a limited new
+  email (HTTP 500, {… "An diese Adresse wurden zu viele Bestätigungsmails geschickt. …"})` (S1). Danach alle grün.
+- Nicht automatisch testbar: die Nebenläufigkeit von C1/S10 (Sperren per Review geprüft).
+- Offen für den Nutzer (manuell): Seite „Termin bestätigen“ / „E-Mail-Adresse bestätigen“ nach dem Öffnen des Links
+  (Deutsch/Englisch, Theme), Seite „Termin nicht gebucht“.

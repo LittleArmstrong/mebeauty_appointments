@@ -89,6 +89,7 @@ class Calendar extends EA_Controller
         $this->load->library('jitsi_client');
         $this->load->library('appointment_contact_rules');
         $this->load->library('email_verification');
+        $this->load->library('email_verification_calendar');
     }
 
     /**
@@ -159,7 +160,7 @@ class Calendar extends EA_Controller
                     $edit_appointment['customer'] ?? [],
                 );
 
-                $edit_appointment['is_unconfirmed'] = $this->email_verification->is_unconfirmed(
+                $edit_appointment['is_unconfirmed'] = $this->email_verification_calendar->is_unconfirmed(
                     (int) $edit_appointment['id'],
                 );
             }
@@ -299,9 +300,7 @@ class Calendar extends EA_Controller
                 : null;
 
             // A Vormerkung waits for the customer's link: staff can delete it, but neither edit nor confirm it.
-            if ($stored_appointment && $this->email_verification->is_unconfirmed((int) $stored_appointment['id'])) {
-                throw new RuntimeException(lang('appointment_unconfirmed_not_editable'));
-            }
+            $this->email_verification_calendar->check_staff_editable($stored_appointment);
 
             $contact = null;
 
@@ -497,15 +496,11 @@ class Calendar extends EA_Controller
             $this->check_event_permissions((int) $appointment['id_users_provider']);
 
             $provider = $this->providers_model->find($appointment['id_users_provider']);
-            $customer = $appointment['id_users_customer']
-                ? $this->customers_model->find($appointment['id_users_customer'])
-                : [];
+            $customer = $this->email_verification_calendar->customer_of($appointment);
             $service = $this->services_model->find($appointment['id_services']);
 
-            // A Vormerkung was never confirmed: no notification or webhook, and its link must not restore it.
-            $is_unconfirmed = $this->email_verification->is_unconfirmed((int) $appointment_id);
-
-            $this->email_verification->forget_appointment((int) $appointment_id);
+            // A Vormerkung was never confirmed: its deletion is not announced (spec 0018).
+            $announce_deletion = $this->email_verification_calendar->announces_deletion((int) $appointment_id);
 
             $company_color = setting('company_color');
 
@@ -522,7 +517,7 @@ class Calendar extends EA_Controller
             // Delete appointment record from the database.
             $this->appointments_model->delete($appointment_id);
 
-            if ($notify_users && !$is_unconfirmed) {
+            if ($notify_users && $announce_deletion) {
                 $this->notifications->notify_appointment_deleted(
                     $appointment,
                     $service,
@@ -535,7 +530,7 @@ class Calendar extends EA_Controller
 
             $this->synchronization->sync_appointment_deleted($appointment, $provider);
 
-            if (!$is_unconfirmed) {
+            if ($announce_deletion) {
                 $this->webhooks_client->trigger(WEBHOOK_APPOINTMENT_DELETE, $appointment);
             }
 
@@ -726,16 +721,14 @@ class Calendar extends EA_Controller
             foreach ($response['appointments'] as &$appointment) {
                 $appointment['provider'] = $this->providers_model->find($appointment['id_users_provider']);
                 $appointment['service'] = $this->services_model->find($appointment['id_services']);
-                $appointment['customer'] = $appointment['id_users_customer']
-                    ? $this->customers_model->find($appointment['id_users_customer'])
-                    : [];
+                $appointment['customer'] = $this->email_verification_calendar->customer_of($appointment);
             }
 
             unset($appointment);
 
             $this->appointment_contacts_model->apply_to_customers($response['appointments']);
 
-            $this->email_verification->mark_unconfirmed($response['appointments']);
+            $this->email_verification_calendar->mark_unconfirmed($response['appointments']);
 
             $user_id = session('user_id');
 
@@ -890,16 +883,14 @@ class Calendar extends EA_Controller
             foreach ($response['appointments'] as &$appointment) {
                 $appointment['provider'] = $this->providers_model->find($appointment['id_users_provider']);
                 $appointment['service'] = $this->services_model->find($appointment['id_services']);
-                $appointment['customer'] = $appointment['id_users_customer']
-                    ? $this->customers_model->find($appointment['id_users_customer'])
-                    : [];
+                $appointment['customer'] = $this->email_verification_calendar->customer_of($appointment);
             }
 
             unset($appointment);
 
             $this->appointment_contacts_model->apply_to_customers($response['appointments']);
 
-            $this->email_verification->mark_unconfirmed($response['appointments']);
+            $this->email_verification_calendar->mark_unconfirmed($response['appointments']);
 
             // Get unavailability periods (only for provider).
             $response['unavailabilities'] = [];

@@ -82,6 +82,7 @@ class Booking extends EA_Controller
         $this->load->library('booking_policy');
         $this->load->library('appointment_contact_rules');
         $this->load->library('email_verification');
+        $this->load->library('email_verification_pages');
         $this->load->library('webhooks_client');
         $this->load->library('jitsi_client');
     }
@@ -473,9 +474,11 @@ class Booking extends EA_Controller
 
             // With email verification a changed email of a reschedule keeps the old one until the new address is
             // verified (spec 0018/05).
-            $changed_email = $manage_mode
-                ? $this->email_verification->hold_back_email_change($original_appointment, $customer)
-                : null;
+            $changed_email = $this->email_verification->hold_back_email_change($original_appointment, $customer);
+
+            // With email verification a new booking is first stored as Vormerkung; the check below then runs when
+            // the link is confirmed, so this answer does not tell whether the email is known (spec 0018).
+            $vormerkung = $this->email_verification->required($manage_mode, $customer['email'] ?? null);
 
             // A reschedule stays with the customer of the original appointment, a new booking is matched by email
             // (spec 0017).
@@ -488,7 +491,7 @@ class Booking extends EA_Controller
                 $email_customer_id,
             );
 
-            if ($customer_id) {
+            if ($customer_id && !$vormerkung) {
                 $existing_appointments = $this->appointments_model->get([
                     'id !=' => $manage_mode ? $appointment['id'] : null,
                     'id_users_customer' => $customer_id,
@@ -562,8 +565,8 @@ class Booking extends EA_Controller
             $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
 
             // With email verification a new booking is first stored as Vormerkung (spec 0018).
-            if ($this->email_verification->required($manage_mode, $customer['email'] ?? null)) {
-                $this->email_verification->start_booking($appointment, $customer, $service, $provider);
+            if ($vormerkung) {
+                $this->email_verification->start_booking($appointment, $customer);
 
                 json_response(['verification_pending' => true]);
 
@@ -598,9 +601,7 @@ class Booking extends EA_Controller
 
             $appointment = $this->after_appointment_saved($appointment_id, $customer_id, $manage_mode);
 
-            if ($changed_email !== null) {
-                $this->email_verification->start_email_change($appointment, $changed_email);
-            }
+            $this->email_verification->start_email_change($appointment, $changed_email);
 
             $response = [
                 'appointment_id' => $appointment['id'],
@@ -614,10 +615,9 @@ class Booking extends EA_Controller
     }
 
     /**
-     * Confirm a Vormerkung with the link from the email verification mail (spec 0018).
+     * Show the page of a link from the email verification mail (spec 0018).
      *
-     * A valid link books the appointment like a regular online booking (or takes over the new email of a
-     * reschedule) and redirects to the success page; an unknown or used link shows a neutral message.
+     * Opening the link changes nothing (mail scanners open links): the page only offers the confirm button.
      *
      * @param string $token Token from the link.
      */
@@ -625,46 +625,38 @@ class Booking extends EA_Controller
     {
         method('get');
 
+        $this->email_verification_pages->show($this->email_verification->link_page($token));
+    }
+
+    /**
+     * Confirm a verification link with its button (spec 0018).
+     *
+     * A confirmed booking runs like a regular online booking (a confirmed email change of a reschedule updates Google
+     * and the webhook only) and redirects to the success page; otherwise a message page follows.
+     */
+    public function confirm_verification(): void
+    {
+        method('post');
+
+        $this->verify_csrf_token();
+
         $confirmed = $this->email_verification->confirm(
-            $token,
+            request('token'),
             $this->allowed_customer_fields,
             fn(array $appointment) => (bool) $this->check_datetime_availability($appointment),
         );
 
-        if (
-            !in_array(
-                $confirmed['result'] ?? null,
-                [Email_verification::RESULT_CONFIRMED, Email_verification::RESULT_EMAIL_CHANGED],
-                true,
-            )
-        ) {
-            html_vars([
-                'show_message' => true,
-                'page_title' => lang('page_title') . ' ' . e(setting('company_name')),
-                ...($confirmed
-                    ? Email_verification::expired_page_vars()
-                    : Email_verification::invalid_page_vars()),
-                'google_analytics_code' => setting('google_analytics_code'),
-                'matomo_analytics_url' => setting('matomo_analytics_url'),
-                'matomo_analytics_site_id' => setting('matomo_analytics_site_id'),
-                'display_login_button' => setting('display_login_button'),
-                'legal_notice_url' => setting('legal_notice_url'),
-                'imprint_url' => setting('imprint_url'),
-            ]);
-
-            $this->load->view('pages/booking_message');
+        if (isset($confirmed['page'])) {
+            $this->email_verification_pages->show($confirmed['page']);
 
             return;
         }
 
-        // A confirmed email change only updates Google and the webhook; the reschedule mails went out already.
-        $email_changed = $confirmed['result'] === Email_verification::RESULT_EMAIL_CHANGED;
-
         $appointment = $this->after_appointment_saved(
             $confirmed['appointment_id'],
             $confirmed['customer_id'],
-            $email_changed,
-            !$email_changed,
+            manage_mode: $confirmed['manage_mode'],
+            notify: $confirmed['notify'],
         );
 
         redirect('booking_confirmation/of/' . $appointment['hash']);
@@ -708,18 +700,7 @@ class Booking extends EA_Controller
         $appointment = $this->appointments_model->find($appointment_id);
         $service = $this->services_model->find($appointment['id_services']);
         $provider = $this->providers_model->find($appointment['id_users_provider']);
-
-        $company_color = setting('company_color');
-
-        $settings = [
-            'company_name' => setting('company_name'),
-            'company_link' => setting('company_link'),
-            'company_email' => setting('company_email'),
-            'company_color' =>
-                !empty($company_color) && $company_color != DEFAULT_COMPANY_COLOR ? $company_color : null,
-            'date_format' => setting('date_format'),
-            'time_format' => setting('time_format'),
-        ];
+        $settings = $this->email_verification->mail_settings();
 
         $this->synchronization->sync_appointment_saved($appointment, $service, $provider, $customer, $settings);
 

@@ -9,7 +9,8 @@
 #   its appointment contact; an appointment with a pending email change stays confirmed;
 # - the reschedule page of the Vormerkung opens with its contact;
 # - staff cannot save (confirm or move) a Vormerkung;
-# - deleting the Vormerkung also removes its verification (no later restore by the link).
+# - deleting the Vormerkung frees it for good: its verification is not restorable, a late click on its link shows
+#   the invalid page.
 # All test data is removed on exit.
 #
 # Requires the docker stack to be up (php-fpm, nginx, mysql), a provider with a service and the administrator
@@ -117,15 +118,24 @@ else
     fail "saving a Vormerkung: $(cat "$TMP/save")"
 fi
 
-# 5. Deleting the Vormerkung removes it with its verification.
+# 5. Deleting the Vormerkung frees it for good: a late click on its link (after the 10 minutes) books nothing.
 backend_post calendar/delete_appointment --data-urlencode "appointment_id=$VORMERKUNG" \
     --data-urlencode "notify_users=true" >"$TMP/delete"
-if grep -q '"success":true' "$TMP/delete" \
-    && [ "$(fixtures get "$VORMERKUNG")" = "null" ] \
-    && [ "$(fixtures verification-by-email "$EMAIL")" = "null" ]; then
-    ok "deleting a Vormerkung also deletes its verification"
+TOKEN="smokebackend$$$RANDOM"
+fixtures verification-token "$EMAIL" "$TOKEN" 11 >/dev/null
+fixtures cleanup-verifications >/dev/null
+LINK="$TMP/link"
+curl -s -o /dev/null -c "$LINK" -b "$LINK" "$BASE/index.php/booking/verify/$TOKEN"
+CSRF=$(awk '$6 == "csrf_cookie" { print $7 }' "$LINK")
+STATUS=$(curl -s -o "$TMP/confirm" -w '%{http_code}' -c "$LINK" -b "$LINK" --data-urlencode "csrf_token=$CSRF" \
+    --data-urlencode "token=$TOKEN" "$BASE/index.php/booking/confirm_verification")
+INVALID=$(fixtures lang email_verification_invalid_title | tail -1)
+if grep -q '"success":true' "$TMP/delete" && [ "$(fixtures get "$VORMERKUNG")" = "null" ] \
+    && [ "$STATUS" = "200" ] && grep -qF "$INVALID" "$TMP/confirm" \
+    && [ "$(fixtures verification-by-email "$EMAIL" | json "d is None or d['restorable'] is False")" = "True" ]; then
+    ok "a deleted Vormerkung cannot be restored by a late click on its link"
 else
-    fail "delete Vormerkung: $(cat "$TMP/delete"), verification $(fixtures verification-by-email "$EMAIL")"
+    fail "delete Vormerkung: $(cat "$TMP/delete"), link HTTP $STATUS, verification $(fixtures verification-by-email "$EMAIL")"
 fi
 
 exit $FAIL
