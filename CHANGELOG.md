@@ -3,6 +3,66 @@
 This file contains the code changes that were introduced into each release (starting from v1.1.0) so that is easy for 
 developers to maintain and readjust their custom modifications on the main project codebase.
 
+## MeBeauty Appointments
+
+MeBeauty Appointments is a fork of Easy!Appointments with its own product version (SemVer, independent of the
+upstream version, see `UPSTREAM.md` and `docs/adr/0005-fork-versioning-und-upstream-sync.md`). The numbers in
+brackets refer to the specs in `.scratch/`. Each release is checked manually with `docs/manuelle-tests.md`.
+
+## [0.1.0] - unreleased
+
+First MeBeauty release, based on Easy!Appointments 1.6.0 (`4bc7ecd5`).
+
+### Added
+
+- MeBeauty theme `mebeauty`: Bootstrap theme with central design tokens (gold, black, Karla, Dancing Script) and self-hosted fonts, selectable next to the upstream themes (0001, 0005)
+- Theme site chrome for the booking page: website navbar with mobile menu, intro section with hero image and "Buchung" title, website footer (contact, phone hours, treatments, social links, legal links) and a floating WhatsApp button; only themes that ship site chrome show it, all others keep the upstream booking layout (0001, 0014)
+- Site chrome texts are translatable (German and English) (0014)
+- Themes declare a default color; browser bar and emails use the company color, otherwise the theme color, otherwise the upstream green (0014)
+- Booking deadline mode: either the existing minutes lead time or a fixed time of day with a day offset (deadline for day D = day D−N at HH:MM in the provider's time zone); days past the deadline are greyed out in the date picker (0003)
+- Reschedule/cancel deadline ("manage deadline"): inherits the booking deadline by default or uses its own minutes or fixed-time setting; the lock page names the concrete deadline (0003, 0006)
+- Global buffer time after appointments, optionally also before the end of the provider's working day (0003, 0012)
+- Time zone display setting for the booking wizard (dropdown, confirmation step only, hidden) and the time zone source used when the dropdown is hidden (company or browser) (0003)
+- Per-service slot capacity: maximum number of parallel bookings of a service across all providers (0 = unlimited) (0006)
+- Setting to show or hide the company logo and name in the booking wizard card header (0005)
+- Setting to show or hide the language selector on the booking page (0014)
+- Setting to hide the booking page footer; an empty footer (no legal links, no language selector, no login button) is hidden automatically (0019)
+- Appointment contact details: every appointment keeps the first name, last name, email and phone it was booked with; calendar tile, appointment dialog, provider email and Google event show them, older appointments fall back to the customer record (0017)
+- Google Calendar events start with a contact block (name, tappable phone number, email); the block is stripped again when notes are synced back (0017)
+- Email verification for online bookings (setting, off by default): the appointment is held for 10 minutes (at most 20 with resend) and is only booked when the link in the verification email is confirmed; resend with 60-second cooldown and at most 5 emails per address and hour; a late click still books if the slot is free; held appointments appear as "unconfirmed" in the backend calendar and are not synced to Google or CalDAV (0018)
+- Email change on reschedule is confirmed via a link to the new address; until then emails keep going to the old address (0018)
+- Links opened in the same browser session that started the verification confirm directly, other devices show a confirm button (0018)
+
+### Changed
+
+- Titles, emails, error pages, backend header and email logo use the company name and logo settings instead of hard-coded branding; a fresh installation looks like Easy!Appointments 1.6.0 (0004, 0005)
+- Success page and wizard card colors follow the theme/company color (0004, 0005)
+- German label of the minutes lead time renamed to "Mindestvorlaufzeit" (0003)
+- Booking deadlines, buffer and slot capacity apply only on the customer side (booking page and API); staff can still book freely in the backend calendar (0003, 0006)
+- Rescheduling via the manage link keeps the appointment with its original customer; the customer record is only updated with non-empty values and after the appointment was saved, and a changed email is only taken over if no other customer uses it (0017)
+- Booking page hero image is compressed and has fixed dimensions to avoid layout shifts (0008)
+
+### Fixed
+
+- The end-of-day buffer now applies only before the provider's effective end of work (including working plan exceptions), not before breaks, appointments or unavailabilities (0012)
+
+### Security
+
+- Rescheduling is only possible with the appointment hash from the manage link; appointment and customer IDs are bound on the server, and the manage deadline is checked again on submit against the stored start (0009)
+- Availability requests only exclude the appointment of a valid manage hash, so free-slot queries no longer reveal other bookings (0009)
+- Fork settings and the company color are validated centrally for backend pages and the API; an invalid value saves nothing (0010)
+- Slot capacity accepts only integers ≥ 0, in the backend and the API (documented in `openapi.yml`) (0010)
+- The company name is escaped in titles, social preview, backend header and emails (0010)
+- Bookings with someone else's email address can neither confirm an appointment nor change a customer record without access to the mailbox; error messages do not reveal whether an address is known (0018)
+
+### Operations
+
+- All fork schema changes are in the single idempotent migration `070` (settings, `services.slot_capacity`, `appointment_contacts`, `appointment_verifications`); existing test databases are updated with `migrations.version = 69` and `console migrate` (0007, 0017)
+- Minimum PHP version 8.2 (production CLI), tested on PHP 8.3 (production web server and Docker) (0008)
+- Deployment via rsync over SSH from a clean build artifact (`docs/deployment.md`)
+- `console cleanup` also removes expired email verification holds (0018)
+- For MeBeauty set at deployment: theme `mebeauty`, `require_email_verification = 1`, `display_booking_footer = 0`, language selector off
+
 ## [1.6.0] - 2026-05-27
 
 ### Added
