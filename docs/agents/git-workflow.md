@@ -20,7 +20,7 @@ Before creating a commit:
 - Inspect `git diff --cached`.
 - Stage only files belonging to the current workflow step.
 - Do not include unrelated user changes.
-- Use a clear, conventional commit message.
+- Use a clear, conventional commit message, written in English.
 
 The agent MUST NOT:
 

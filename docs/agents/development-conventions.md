@@ -32,6 +32,13 @@ Do NOT:
 - Modify generated files unless required.
 - Change configuration or secrets without explicit approval.
 
+## Language
+
+Write in English wherever possible: docs, identifiers (classes, methods, variables, settings keys),
+code comments, test names and commit messages. User-facing texts still go through the language files
+as usual. Existing German content is not translated as a drive-by change; translate it only when that
+part is being reworked anyway.
+
 ## Formatting
 
 The repository has a Prettier configuration (`.prettierrc.json`, PHP plugin) and `.editorconfig`, but
