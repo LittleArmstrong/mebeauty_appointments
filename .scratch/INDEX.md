@@ -9,6 +9,7 @@
 | [0017](0017-appointment-contacts/spec.md) Termin-Kontaktdaten: Kontaktdaten pro Termin, Kundendatensatz geschützt | needs-verification | P1 | 2026-10-13 | 0009 | 2/5 |
 | [0018](0018-email-verification/spec.md) E-Mail-Bestätigung mit Vormerkung | needs-verification | P1 | 2026-10-13 | 0017 | 5/5 |
 | [0019](0019-booking-footer/spec.md) Booking-Footer ausblenden: leer automatisch, per Einstellung immer | needs-verification | P3 | 2026-10-13 | 0017 | 1/1 |
+| [0020](0020-notify-previous-customer/spec.md) Notify the previous customer when an appointment is reassigned | needs-triage | P3 | 2026-10-16 | – | 0/0 |
 
 ## Abgeschlossen
 
