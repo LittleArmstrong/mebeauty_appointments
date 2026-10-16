@@ -12,6 +12,12 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Every statement about current behaviour in a spec's problem section cites its evidence as `path:line` (e.g. `application/controllers/Booking.php:489`), checked against the code before the spec is published.
 - Cross-references: a spec is referenced by its number (`0009`), a ticket in another spec as `NNNN/NN` (e.g. `0009/02`), a ticket in the same spec by `NN`.
 
+## Ideas
+
+Undecided open points and ideas go into `.scratch/IDEAS.md`, one section each (problem with `path:line` evidence,
+proposal, open questions). They get no number and no tickets and are not listed in the index. A spec is only
+created once it is decided that the idea will be implemented; its entry in `IDEAS.md` is then removed.
+
 ## Spec header
 
 Every `spec.md` starts with the title followed directly by these lines (one `Key: value` per line, no blank lines in between):
