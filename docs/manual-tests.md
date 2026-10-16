@@ -202,3 +202,13 @@ Automated: hourly limit (5 mails/h), cooldown, hold time 20 min, neutral error m
 - [ ] **T-FO-03** Footer on with login button on: footer with login button visible.
 - [ ] **T-FO-04** "Footer anzeigen" off (login button on): no footer. The theme's website footer stays. The backend
   is reachable via <http://localhost/index.php/login>.
+
+## 10 Backend header — 0021/01
+
+- [ ] **T-BH-01** Backend with calendar view "Standard" (account settings → "Kalender"): clicking the logo, the
+  company name or the subtitle at the top left opens the calendar (<http://localhost/index.php/calendar>), the same
+  page as the "Kalender" menu item. The header looks unchanged: no underline, no colour change on hover.
+- [ ] **T-BH-02** Calendar view set to "Tabelle": clicking the logo opens the table view (`calendar?view=table`),
+  like the "Kalender" menu item.
+- [ ] **T-BH-03** Phone width (DevTools, 375 px): the logo link sits next to the collapsed menu button and opens the
+  calendar; the menu button still opens the menu.
