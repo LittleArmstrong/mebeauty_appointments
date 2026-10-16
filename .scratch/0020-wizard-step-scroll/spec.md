@@ -1,6 +1,6 @@
 # Keep the Wizard-Card in view when changing booking steps
 
-Status: ready-for-agent
+Status: needs-verification
 Created: 2026-10-16
 Closed: –
 Priority: P2

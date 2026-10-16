@@ -8,7 +8,7 @@ stays unchanged. Same behaviour in both themes and in the Manage-Link flow.
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** needs-verification
 
 - [x] Scroll rule as a small pure function without DOM access (Wizard-Card position and height, viewport height,
       current scroll position → target position or "no scroll"); it replaces the scroll-to-top of "next" and is also
@@ -54,3 +54,18 @@ height in brackets). Each "next"/"back" was clicked after scrolling its button i
 - Fully visible case: mebeauty 1280×1000, card at 60/929 before "next" → 60/929 after, no scroll.
 - During the fade, scrollY was sampled every 20 ms: it drifts by at most 3 px (e.g. 764→762) and then jumps once to
   the target; there is no collapse to the top.
+- Rot vor Fix: Playwright `wizard.js` against `staging` (old code), mebeauty 1280×800 – after "next" 1→2 the page
+  scrolls to y 0 and the Wizard-Card sits at top 408/bottom 1277 (cut off by 477 px), after "back" 4→3 the card stays
+  at top -380 (start of the step off-screen); with the change top is 16 in every case (table above).
+
+### 2026-10-16 — code-review refactor
+
+- The pure rule `getWizardScrollTarget` and `WIZARD_SCROLL_OFFSET` moved out of the upstream `booking.js` into the
+  fork-owned `assets/js/utils/wizard_scroll.js` (`App.Utils.WizardScroll`), loaded by
+  `application/views/pages/booking.php` (booking page and Manage-Link page); `booking.js` only calls it
+  (CODING_STANDARDS "Upstream files only call fork code").
+- The step-indicator update moved into `changeWizardStep()`; the frame is passed via `.closest('.wizard-frame')`
+  instead of `.parents().eq(1)` (all "next"/"back" buttons sit in `.command-buttons` directly inside `.wizard-frame`).
+- The doc of `changeWizardStep()` and both handlers state that a programmatic `.trigger('click')` intentionally does
+  not scroll.
+- Behaviour unchanged; rule re-checked with node (fully visible → no scroll, cut off → top at 16 px, clamped at 0).
