@@ -1,6 +1,6 @@
 # Backend header logo links to the calendar
 
-Status: ready-for-agent
+Status: needs-verification
 Created: 2026-10-16
 Closed: –
 Priority: P2

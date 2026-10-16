@@ -9,7 +9,7 @@
 | [0017](0017-appointment-contacts/spec.md) Termin-Kontaktdaten: Kontaktdaten pro Termin, Kundendatensatz geschützt | needs-verification | P1 | 2026-10-13 | 0009 | 2/5 |
 | [0018](0018-email-verification/spec.md) E-Mail-Bestätigung mit Vormerkung | needs-verification | P1 | 2026-10-13 | 0017 | 5/5 |
 | [0020](0020-wizard-step-scroll/spec.md) Keep the Wizard-Card in view when changing booking steps | ready-for-agent | P2 | 2026-10-16 | – | 1/1 |
-| [0021](0021-backend-logo-link/spec.md) Backend header logo links to the calendar | ready-for-agent | P2 | 2026-10-16 | – | 1/1 |
+| [0021](0021-backend-logo-link/spec.md) Backend header logo links to the calendar | needs-verification | P2 | 2026-10-16 | – | 1/1 |
 | [0019](0019-booking-footer/spec.md) Booking-Footer ausblenden: leer automatisch, per Einstellung immer | needs-verification | P3 | 2026-10-13 | 0017 | 1/1 |
 
 ## Abgeschlossen

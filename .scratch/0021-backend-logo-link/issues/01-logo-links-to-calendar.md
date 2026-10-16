@@ -6,7 +6,7 @@ the link has an accessible name, and it works at phone width next to the collaps
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** needs-verification
 
 - [x] The header brand is one link to the calendar; its target and the "Calendar" menu item's target come from one
       shared expression
@@ -23,4 +23,7 @@ the link has an accessible name, and it works at phone width next to the collaps
   an `<a class="navbar-brand">` instead of a `<div>` (Bootstrap's `.navbar-brand` removes the underline; the
   children keep their explicit `text-white` colours) with `aria-label` "<company name> - <Calendar>". No permission
   check. No automated test (single view link, per spec). Manual cases T-BH-01..03 added to `docs/manual-tests.md`
-  (section 10). `bash scripts/test.sh` exit 3 in the worktree (all checks green, smokes skipped).
+  (section 10, renumbered to 11 after 0020 took 10). `bash scripts/test.sh` exit 3 in the worktree (all checks
+  green, smokes skipped).
+- Rot vor Fix: entfällt – single link in an upstream view, spec waives an automated test; on staging `#header-logo`
+  is a `<div>` without `href` (backend_header.php:14), now an `<a>` to the calendar.
