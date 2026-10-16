@@ -65,6 +65,75 @@ App.Pages.Booking = (function () {
     }
 
     /**
+     * Distance between the top of the viewport and the top of the wizard card after scrolling (in px).
+     *
+     * @type {Number}
+     */
+    const WIZARD_SCROLL_OFFSET = 16;
+
+    /**
+     * Get the scroll position that keeps the wizard card in view after a step change.
+     *
+     * Pure function without DOM access: if the card is fully inside the viewport nothing scrolls, otherwise the top
+     * of the card is placed WIZARD_SCROLL_OFFSET px below the top of the viewport.
+     *
+     * @param {Number} cardTop Top edge of the wizard card relative to the viewport.
+     * @param {Number} cardHeight Height of the wizard card.
+     * @param {Number} viewportHeight Height of the viewport.
+     * @param {Number} scrollTop Current scroll position of the page.
+     *
+     * @returns {Number|null} The target scroll position or null if no scrolling is needed.
+     */
+    function getWizardScrollTarget(cardTop, cardHeight, viewportHeight, scrollTop) {
+        if (cardTop >= 0 && cardTop + cardHeight <= viewportHeight) {
+            return null;
+        }
+
+        const target = Math.max(0, Math.round(scrollTop + cardTop - WIZARD_SCROLL_OFFSET));
+
+        return target === Math.round(scrollTop) ? null : target;
+    }
+
+    /**
+     * Switch the wizard from the current step frame to another one.
+     *
+     * The wizard card keeps its height while the old frame fades out, so that the page does not collapse and jump
+     * in between. Once the new frame is displayed, the wizard card is scrolled into view (if requested).
+     *
+     * @param {jQuery} $currentFrame The wizard frame that is currently displayed.
+     * @param {Number} targetIndex The step index of the wizard frame to display.
+     * @param {Boolean} scrollIntoView Whether to keep the wizard card in view after the change.
+     */
+    function changeWizardStep($currentFrame, targetIndex, scrollIntoView) {
+        const $wizard = $('#book-appointment-wizard');
+
+        $wizard.css('min-height', $wizard.outerHeight() + 'px');
+
+        $currentFrame.fadeOut(() => {
+            $('#wizard-frame-' + targetIndex).fadeIn();
+
+            $wizard.css('min-height', '');
+
+            if (!scrollIntoView || !$wizard.length) {
+                return;
+            }
+
+            const scrollingElement = document.scrollingElement || document.documentElement;
+            const rect = $wizard[0].getBoundingClientRect();
+            const target = getWizardScrollTarget(
+                rect.top,
+                rect.height,
+                window.innerHeight,
+                scrollingElement.scrollTop,
+            );
+
+            if (target !== null) {
+                window.scrollTo({top: target, behavior: 'instant'});
+            }
+        });
+    }
+
+    /**
      * Initialize the module.
      */
     function initialize() {
@@ -477,18 +546,9 @@ App.Pages.Booking = (function () {
             $('.active-step').removeClass('active-step');
             $('#step-' + nextTabIndex).addClass('active-step');
 
-            $target
-                .parents()
-                .eq(1)
-                .fadeOut(() => {
-                    $('#wizard-frame-' + nextTabIndex).fadeIn();
-                });
-
-            // Scroll to the top of the page. On a small screen, especially on a mobile device, this is very useful.
-            const scrollingElement = document.scrollingElement || document.body;
-            if (window.innerHeight < scrollingElement.scrollHeight) {
-                scrollingElement.scrollTop = 0;
-            }
+            // Keep the wizard card in view, except for the automatic "next" on page load (triggered, no original
+            // event), which must leave the initial scroll position unchanged.
+            changeWizardStep($target.parents().eq(1), nextTabIndex, Boolean(event.originalEvent));
         });
 
         /**
@@ -504,12 +564,7 @@ App.Pages.Booking = (function () {
             $('.active-step').removeClass('active-step');
             $('#step-' + prevTabIndex).addClass('active-step');
 
-            $(event.currentTarget)
-                .parents()
-                .eq(1)
-                .fadeOut(() => {
-                    $('#wizard-frame-' + prevTabIndex).fadeIn();
-                });
+            changeWizardStep($(event.currentTarget).parents().eq(1), prevTabIndex, Boolean(event.originalEvent));
         });
 
         /**
