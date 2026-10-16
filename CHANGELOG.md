@@ -7,7 +7,7 @@ developers to maintain and readjust their custom modifications on the main proje
 
 MeBeauty Appointments is a fork of Easy!Appointments with its own product version (SemVer, independent of the
 upstream version, see `UPSTREAM.md` and `docs/adr/0005-fork-versioning-und-upstream-sync.md`). The numbers in
-brackets refer to the specs in `.scratch/`. Each release is checked manually with `docs/manuelle-tests.md`.
+brackets refer to the specs in `.scratch/`. Each release is checked manually with `docs/manual-tests.md`.
 
 ## [0.1.0] - unreleased
 

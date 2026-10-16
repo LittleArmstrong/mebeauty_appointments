@@ -40,7 +40,7 @@ After making changes:
 
 Do not claim a test passed unless it was actually executed.
 
-A spec with user-visible behaviour adds its manual test cases to `docs/manuelle-tests.md`
+A spec with user-visible behaviour adds its manual test cases to `docs/manual-tests.md`
 (one per observable acceptance criterion, with the ticket reference) and its entry to the
 top release section of `CHANGELOG.md`.
 
