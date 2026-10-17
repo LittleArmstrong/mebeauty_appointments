@@ -202,3 +202,26 @@ Automated: hourly limit (5 mails/h), cooldown, hold time 20 min, neutral error m
 - [ ] **T-FO-03** Footer on with login button on: footer with login button visible.
 - [ ] **T-FO-04** "Footer anzeigen" off (login button on): no footer. The theme's website footer stays. The backend
   is reachable via <http://localhost/index.php/login>.
+
+## 10 Wizard step scroll — 0020/01
+
+Run each test case with theme `mebeauty` and again with theme `default`, on desktop and at phone width (browser
+dev tools, e.g. 390×844).
+
+- [ ] **T-WS-01** Open the booking flow (<http://localhost>): the page opens at the top, navbar and hero image are
+  visible as before.
+- [ ] **T-WS-02** Select S60 and A, click "Weiter": the page does not show navbar and hero again; the top of the
+  Wizard-Card of step 2 sits just below the top of the screen and the card is visible without scrolling (as far as
+  it fits on the screen).
+- [ ] **T-WS-03** Scroll so that the whole Wizard-Card is visible (desktop, short step), then click "Weiter" or
+  "Zurück": if the new step is fully visible as well, the page does not move.
+- [ ] **T-WS-04** At phone width, scroll down to the "Weiter" button at the bottom of a step taller than the screen
+  (step 2 with the time list, or step 3 with the customer form): after the click, the top of the next step is
+  visible.
+- [ ] **T-WS-05** "Zurück" from the bottom of a tall step: the top of the previous step is visible, not its middle.
+- [ ] **T-WS-06** Step changes are instant (no scroll animation) and the page does not jump or flicker while the
+  steps fade.
+- [ ] **T-WS-07** Preselected link, e.g. <http://localhost/?service=ID&provider=ID> with the IDs of S60 and A from
+  the backend: the page opens at step 2 and at the top, navbar and hero visible as before.
+- [ ] **T-WS-08** Manage link of an existing appointment (from the customer mail): "Weiter" and "Zurück" behave as
+  in T-WS-02 to T-WS-05.

@@ -65,6 +65,53 @@ App.Pages.Booking = (function () {
     }
 
     /**
+     * Switch the wizard from the current step frame to another one.
+     *
+     * The step indicator is updated immediately. The wizard card keeps its height while the old frame fades out, so
+     * that the page does not collapse and jump in between. Once the new frame is displayed, the wizard card is
+     * scrolled into view (if requested, see App.Utils.WizardScroll).
+     *
+     * Callers pass Boolean(event.originalEvent) as scrollIntoView: a real user click scrolls, a programmatic
+     * .trigger('click') (the automatic "next" on page load for preselected links) intentionally does not, so the
+     * initial scroll position stays unchanged.
+     *
+     * @param {jQuery} $currentFrame The wizard frame that is currently displayed.
+     * @param {Number} targetIndex The step index of the wizard frame to display.
+     * @param {Boolean} scrollIntoView Whether to keep the wizard card in view after the change.
+     */
+    function changeWizardStep($currentFrame, targetIndex, scrollIntoView) {
+        const $wizard = $('#book-appointment-wizard');
+
+        $('.active-step').removeClass('active-step');
+        $('#step-' + targetIndex).addClass('active-step');
+
+        $wizard.css('min-height', $wizard.outerHeight() + 'px');
+
+        $currentFrame.fadeOut(() => {
+            $('#wizard-frame-' + targetIndex).fadeIn();
+
+            $wizard.css('min-height', '');
+
+            if (!scrollIntoView || !$wizard.length) {
+                return;
+            }
+
+            const scrollingElement = document.scrollingElement || document.documentElement;
+            const rect = $wizard[0].getBoundingClientRect();
+            const target = App.Utils.WizardScroll.getWizardScrollTarget(
+                rect.top,
+                rect.height,
+                window.innerHeight,
+                scrollingElement.scrollTop,
+            );
+
+            if (target !== null) {
+                window.scrollTo({top: target, behavior: 'instant'});
+            }
+        });
+    }
+
+    /**
      * Initialize the module.
      */
     function initialize() {
@@ -473,22 +520,9 @@ App.Pages.Booking = (function () {
             // Display the next step tab (uses jquery animation effect).
             const nextTabIndex = parseInt($target.attr('data-step_index')) + 1;
 
-            // Update step indicator immediately
-            $('.active-step').removeClass('active-step');
-            $('#step-' + nextTabIndex).addClass('active-step');
-
-            $target
-                .parents()
-                .eq(1)
-                .fadeOut(() => {
-                    $('#wizard-frame-' + nextTabIndex).fadeIn();
-                });
-
-            // Scroll to the top of the page. On a small screen, especially on a mobile device, this is very useful.
-            const scrollingElement = document.scrollingElement || document.body;
-            if (window.innerHeight < scrollingElement.scrollHeight) {
-                scrollingElement.scrollTop = 0;
-            }
+            // Keep the wizard card in view, except for the automatic "next" on page load (programmatic
+            // .trigger('click'), no original event), which intentionally does not scroll.
+            changeWizardStep($target.closest('.wizard-frame'), nextTabIndex, Boolean(event.originalEvent));
         });
 
         /**
@@ -500,16 +534,13 @@ App.Pages.Booking = (function () {
         $('.button-back').on('click', (event) => {
             const prevTabIndex = parseInt($(event.currentTarget).attr('data-step_index')) - 1;
 
-            // Update step indicator immediately
-            $('.active-step').removeClass('active-step');
-            $('#step-' + prevTabIndex).addClass('active-step');
-
-            $(event.currentTarget)
-                .parents()
-                .eq(1)
-                .fadeOut(() => {
-                    $('#wizard-frame-' + prevTabIndex).fadeIn();
-                });
+            // Keep the wizard card in view; a programmatic .trigger('click') (no original event) intentionally does
+            // not scroll.
+            changeWizardStep(
+                $(event.currentTarget).closest('.wizard-frame'),
+                prevTabIndex,
+                Boolean(event.originalEvent),
+            );
         });
 
         /**
