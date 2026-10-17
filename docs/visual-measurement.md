@@ -7,16 +7,59 @@ Zweck: Die Buchungsseite (Booking-Flow) soll das Layout der Website (https://meb
 - Docker (kein sudo, keine Host-Installation nötig)
 - Netzwerkzugriff auf `https://mebeauty-koeln.de` und die laufende App (`http://localhost`, via Docker-Compose-Stack)
 
-## Einmaliges Setup (in einem Temp-Verzeichnis, NICHT im Repo)
+## Setup (checked in)
+
+Playwright is an exact devDependency (`playwright@1.53.0`, `package.json`). The npm package downloads no browsers:
+the browsers come from the Docker image `mcr.microsoft.com/playwright:v1.53.0-noble`, whose version must match the
+package exactly. So nothing is installed in `/tmp` and nothing on the host besides `node_modules`:
 
 ```bash
-mkdir -p /tmp/opencode/pw && cd /tmp/opencode/pw
-npm init -y
-npm i playwright@1.53.0          # exakt gepinnt: muss zur Browser-Revision des Images passen
+npm ci                                               # once per checkout; a worktree may link the main node_modules
 docker pull mcr.microsoft.com/playwright:v1.53.0-noble
 ```
 
-> Hinweis: `/tmp` ist flüchtig — nach Reboot dieses Setup wiederholen. Die Scripts unten sind bewusst klein gehalten.
+CI and deploy run `npm ci` as before and only get the package; Playwright never runs there (it needs the stack).
+
+## Booking-Flow measurement
+
+```bash
+npm run measure:booking                              # both viewports, both themes
+npm run measure:booking -- --viewport=390x844 --theme=mebeauty
+npm run measure:booking -- --timezone=UTC --locale=en-US --json
+```
+
+`scripts/measure-booking-flow.sh` runs `tests/playwright/booking-flow.js` in the image with host networking against
+`BASE_URL` (default `http://localhost`, the main checkout's stack; it must be running). The script:
+
+- creates its own test customers and appointments with `tests/smoke/fixtures.php setup` (emails
+  `smoke-…@example.com`) and removes them on exit, also when the run fails; it never uses existing customers. A run
+  killed hard can leave them behind: `fixtures.php purge` removes every smoke customer;
+- loads `/index.php/booking?theme=<theme>`, picks the fixture's service, provider and date, and clicks "next"
+  1→2→3→4 and "back" 4→3→2→1 like a customer (button scrolled into view first, then clicked, then waiting until
+  the fade has ended). It fills only the required customer fields with the fixture customer and never submits, so
+  no booking and no mail is created;
+- then opens the preselected link `?service=<id>&provider=<id>` (automatic "next" to step 2);
+- runs the browser in `Europe/Berlin` / `de-DE` by default, like the salon's customers; the booking page takes the
+  browser timezone, so a UTC browser sees other hours.
+
+Options (repeat `--viewport`/`--theme` for several values): `--viewport=<w>x<h>` (default `1280x800` and
+`390x844`), `--theme=<name>` (default `mebeauty` and `default`), `--timezone=<tz>`, `--locale=<locale>`, `--json`.
+
+Reading the output: one row per theme and viewport. Each cell is the Wizard-Card `#book-appointment-wizard`
+`top/bottom` in px relative to the viewport after the change; `(no move)` means the scroll position did not change.
+"Load" adds the scroll position `y`, "Preselected link" the active step, `y` and the card top. With `--json` every
+change is one line with `top`, `bottom`, `scrollY`, `step`, `moved` and the values `before` the click. Bottoms depend
+on the content (free hours, customer name), tops on the scroll rule (spec 0020: 16 px, clamped at 0).
+
+Last run (2026-10-17, reproduces the table of ticket 0020/01; the step-4 bottom on the phone differs by the length
+of the customer data):
+
+| Theme / viewport | Load | 1→2 | 2→3 | 3→4 | 4→3 | 3→2 | 2→1 | Preselected link |
+|---|---|---|---|---|---|---|---|---|
+| mebeauty 1280×800 | 408/1277, y 0 | 16/885 | 16/910 (no move) | 16/885 | 16/910 (no move) | 16/885 | 16/885 (no move) | step 2, y 0, top 408 |
+| mebeauty 390×844 | 428/1263, y 0 | 16/1145 | 16/1211 | 16/867 | 16/1211 (no move) | 16/1145 | 16/851 | step 2, y 0, top 428 |
+| default 1280×800 | 16/891, y 0 | 16/891 (no move) | 16/936 (no move) | 16/891 | 16/936 (no move) | 16/891 | 16/891 (no move) | step 2, y 0, top 16 |
+| default 390×844 | 1/843, y 0 | 0/1142 (no move) | 0/1243 | 1/843 | 0/1243 (no move) | 0/1142 | 1/843 | step 2, y 0, top 0 |
 
 ## Mess-Scripts
 
@@ -67,16 +110,16 @@ function measure(sel) {
 })();
 ```
 
-Ausführen (Script liegt in `/tmp/opencode/pw/`):
+Ad-hoc scripts like this one go to the scratchpad (not the repo) and run in the image with the checkout mounted,
+so `require('playwright')` resolves from its `node_modules` (`<script-dir>` holds `measure.js`):
 
 ```bash
-docker run --rm --network host \
-  -v /tmp/opencode:/out \
-  -e PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-  mcr.microsoft.com/playwright:v1.53.0-noble node /out/pw/measure.js
+docker run --rm --init --network host -v "$PWD:$PWD:ro" -v <script-dir>:/scripts:ro -w "$PWD" \
+  -e NODE_PATH="$PWD/node_modules" mcr.microsoft.com/playwright:v1.53.0-noble node /scripts/measure.js
 ```
 
-`--network host` ist nötig, damit der Container `http://localhost` (App) erreicht. Browser liegen im Image unter `/ms-playwright` (Env gesetzt), das npm-Paket kommt aus dem gemounteten `/tmp/opencode/pw/node_modules`.
+`--network host` lets the container reach `http://localhost` (the app). The browsers live in the image. In a worktree
+whose `node_modules` is a link to the main checkout, mount the main checkout instead.
 
 ## Referenzwerte (letzte Messung, 2026-09-30)
 
