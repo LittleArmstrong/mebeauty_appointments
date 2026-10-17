@@ -15,7 +15,7 @@ in `AGENTS.md` and the docs go away. The database stays shared; smokes keep usin
 - [x] Manual check recorded: a smoke that only passes with the worktree's change passes in the worktree run
 - [x] Manual check recorded: no `smoke-…` customer left, the user's customers unchanged
 - [x] `Rot vor Fix:` line recorded (`entfällt – <reason>` is fine for pure tooling)
-- [ ] `bash scripts/test.sh` green in the worktree and in the main checkout
+- [x] `bash scripts/test.sh` green in the worktree and in the main checkout
 
 ## Comments
 
@@ -68,3 +68,6 @@ Rot vor Fix: entfällt – pure tooling; before the change `scripts/test.sh` ski
 
 Validation: `bash scripts/test.sh` in the worktree exit 0 (8 checks, 8 smokes OK). The main-checkout run follows
 after the merge (orchestrator).
+
+Main checkout after the fast-forward merge into `agent/0024-agent-loop-follow-ups` (23bafcd5): `bash scripts/test.sh`
+exit 0, all 8 checks and all 8 smokes OK (BASE_URL `http://localhost`).
