@@ -478,6 +478,28 @@ if [ "${RESULT%% *}" = "200" ] && grep -qF "$NOT_BOOKED" "$TMP/page" \
 else
     fail "confirmation for a booked customer: $RESULT, Vormerkung $(fixtures get "$KNOWN_APPOINTMENT"), verification $(fixtures verification-by-email "$OWNER_EMAIL")"
 fi
+
+# 12b. A Vormerkung that overlaps the customer's appointment only partly (spec 0023): the confirmation shows the
+#      neutral page as well and books nothing. Its start is the first free hour inside the customer's appointment.
+OWNER_END=$(appointment_field "$OWNER_APPOINTMENT" end_datetime)
+PARTIAL_HOUR=$(available_hours | json "next(h for h in d if '${OWNER_START:11:5}' < h < '${OWNER_END:11:5}')")
+PARTIAL="$DATE $PARTIAL_HOUR:00"
+STATUS=$(register "$TMP/partial" "$PARTIAL" "$OWNER_EMAIL")
+PARTIAL_APPOINTMENT=$(fixtures verification-by-email "$OWNER_EMAIL" | json "d and d['id_appointments']")
+[ -n "$PARTIAL_APPOINTMENT" ] && [ "$PARTIAL_APPOINTMENT" != "None" ] \
+    && CREATED_APPOINTMENTS="$CREATED_APPOINTMENTS,$PARTIAL_APPOINTMENT"
+PARTIAL_TOKEN="smokepartial$$$RANDOM"
+fixtures verification-token "$OWNER_EMAIL" "$PARTIAL_TOKEN" >/dev/null
+RESULT=$(confirm_link "$TMP/partial-phone" "$PARTIAL_TOKEN")
+if [ "$STATUS" = "200" ] && [ "${RESULT%% *}" = "200" ] && grep -qF "$NOT_BOOKED" "$TMP/page" \
+    && [ "$(fixtures get-by-customer "$OWNER" "$PARTIAL")" = "null" ] \
+    && [ "$(fixtures verification-by-email "$OWNER_EMAIL")" = "null" ]; then
+    ok "confirmation of a partly overlapping Vormerkung shows the neutral page and books nothing"
+else
+    fail "partly overlapping Vormerkung at $PARTIAL (HTTP $STATUS): $RESULT, booked $(fixtures get-by-customer "$OWNER" "$PARTIAL")"
+    # A wrongly booked appointment would block the slots of the following cases.
+    fixtures cleanup "$(fixtures get-by-customer "$OWNER" "$PARTIAL" | json "d and d['id'] or ''")" "" >/dev/null
+fi
 fixtures service-attendants "$SERVICE" "$ORIGINAL_ATTENDANTS" >/dev/null
 ORIGINAL_ATTENDANTS=""
 

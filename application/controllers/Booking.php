@@ -81,6 +81,7 @@ class Booking extends EA_Controller
         $this->load->library('availability');
         $this->load->library('booking_policy');
         $this->load->library('appointment_contact_rules');
+        $this->load->library('customer_overlap');
         $this->load->library('email_verification');
         $this->load->library('email_verification_pages');
         $this->load->library('webhooks_client');
@@ -491,17 +492,18 @@ class Booking extends EA_Controller
                 $email_customer_id,
             );
 
-            if ($customer_id && !$vormerkung) {
-                $existing_appointments = $this->appointments_model->get([
-                    'id !=' => $manage_mode ? $appointment['id'] : null,
-                    'id_users_customer' => $customer_id,
-                    'start_datetime <=' => $appointment['start_datetime'],
-                    'end_datetime >=' => $appointment['end_datetime'],
-                ]);
-
-                if (count($existing_appointments)) {
-                    throw new RuntimeException(lang('customer_is_already_booked'));
-                }
+            // Any overlap with another appointment of the customer is refused (spec 0023).
+            if (
+                $customer_id &&
+                !$vormerkung &&
+                $this->customer_overlap->exists(
+                    $customer_id,
+                    $appointment['start_datetime'],
+                    $this->appointments_model->calculate_end_datetime($appointment),
+                    $manage_mode ? $appointment['id'] : null,
+                )
+            ) {
+                throw new RuntimeException(lang('customer_is_already_booked'));
             }
 
             // Jitsi integration: if enabled, generate a Jitsi meeting link for the appointment

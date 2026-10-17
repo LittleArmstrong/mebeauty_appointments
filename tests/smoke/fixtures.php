@@ -9,6 +9,13 @@
  *   APP_ENV=testing php tests/smoke/fixtures.php setup
  *       Creates two customers with one future appointment each and prints JSON with the IDs, hashes,
  *       provider/service and free target slots.
+ *   APP_ENV=testing php tests/smoke/fixtures.php overlap-setup
+ *       Creates a second provider (copy of a provider with its working plan and services) and a customer with one
+ *       future appointment H at that second provider. The first provider is free at H - duration, H - offset, H,
+ *       H + offset, H + duration - offset and H + duration (offset: the slot grid, smaller than the duration).
+ *       Prints JSON with the IDs, the appointment hash and the times, spec 0023.
+ *   APP_ENV=testing php tests/smoke/fixtures.php appointment-times <appointment-id> <start> <end>
+ *       Moves an appointment to the given start and end (Y-m-d H:i:s, the shell splits each into two arguments).
  *   APP_ENV=testing php tests/smoke/fixtures.php get <appointment-id>
  *       Prints the stored appointment (JSON, or "null" when it does not exist).
  *   APP_ENV=testing php tests/smoke/fixtures.php appointment-by-hash <hash>
@@ -53,9 +60,9 @@
  *   APP_ENV=testing php tests/smoke/fixtures.php cleanup-verifications
  *       Runs the email verification part of `console cleanup` (Cleanup::cleanup_email_verifications()).
  *   APP_ENV=testing php tests/smoke/fixtures.php purge
- *       Deletes every smoke customer (email smoke-…@example.com) with their appointments, every email
- *       verification of a smoke email with its Vormerkung and the send limits of smoke emails, e.g. left over by
- *       an aborted run.
+ *       Deletes every smoke customer and smoke provider (email smoke-…@example.com) with their appointments, every
+ *       email verification of a smoke email with its Vormerkung and the send limits of smoke emails, e.g. left over
+ *       by an aborted run.
  */
 
 $_SERVER['argv'] = ['fixtures', 'test'];
@@ -152,7 +159,116 @@ function smoke_create_booking(array $provider, array $service, string $date, str
     ];
 }
 
+/**
+ * Find a provider/service pair, a date and an hour H with the free hours the overlap smoke test books around H.
+ *
+ * @return array [$provider, $service, $date, $hour, $offset_minutes]
+ */
+function smoke_find_overlap_hour(): array
+{
+    $CI = &get_instance();
+
+    foreach ($CI->providers_model->get() as $provider) {
+        foreach ($provider['services'] ?? [] as $service_id) {
+            $service = $CI->services_model->find((int) $service_id);
+            $duration = (int) $service['duration'];
+
+            for ($days = 10; $days <= 40; $days++) {
+                $date = date('Y-m-d', strtotime('+' . $days . ' days'));
+
+                $starts = array_map(
+                    fn(string $hour) => strtotime($date . ' ' . $hour),
+                    $CI->availability->get_available_hours($date, $service, $provider)
+                );
+
+                if (count($starts) < 2) {
+                    continue;
+                }
+
+                $offset = min(array_map(fn($a, $b) => $b - $a, array_slice($starts, 0, -1), array_slice($starts, 1)));
+
+                if ($offset <= 0 || $offset >= $duration * 60) {
+                    continue;
+                }
+
+                foreach ($starts as $start) {
+                    $needed = [
+                        $start - $duration * 60,
+                        $start - $offset,
+                        $start + $offset,
+                        $start + $duration * 60 - $offset,
+                        $start + $duration * 60
+                    ];
+
+                    if (array_diff($needed, $starts) === []) {
+                        return [$provider, $service, $date, date('H:i', $start), intdiv($offset, 60)];
+                    }
+                }
+            }
+        }
+    }
+
+    throw new RuntimeException('No provider/service with free hours around one hour in the next 40 days.');
+}
+
+/**
+ * Create a provider that copies another one (working plan, services) under a smoke email.
+ */
+function smoke_copy_provider(array $provider): array
+{
+    $CI = &get_instance();
+
+    $suffix = bin2hex(random_bytes(4));
+
+    $copy = $provider;
+    unset($copy['id'], $copy['create_datetime'], $copy['update_datetime']);
+    $copy['first_name'] = 'Smoke';
+    $copy['last_name'] = 'Provider';
+    $copy['email'] = 'smoke-provider-' . $suffix . '@example.com';
+    $copy['settings']['username'] = 'smoke-provider-' . $suffix;
+    $copy['settings']['password'] = bin2hex(random_bytes(8));
+    $copy['settings']['notifications'] = false;
+    $copy['settings']['google_sync'] = false;
+    $copy['settings']['caldav_sync'] = false;
+
+    return $CI->providers_model->find($CI->providers_model->save($copy));
+}
+
 switch ($command) {
+    case 'overlap-setup':
+        [$provider, $service, $date, $hour, $offset] = smoke_find_overlap_hour();
+
+        $other_provider = smoke_copy_provider($provider);
+
+        $booking = smoke_create_booking($other_provider, $service, $date, $hour, 'Overlap');
+
+        echo json_encode([
+            'provider_id' => (int) $provider['id'],
+            'other_provider_id' => (int) $other_provider['id'],
+            'service_id' => (int) $service['id'],
+            'duration' => (int) $service['duration'],
+            'offset' => $offset,
+            'customer_id' => $booking['customer_id'],
+            'email' => $CI->customers_model->find($booking['customer_id'])['email'],
+            'appointment_id' => $booking['id'],
+            'hash' => $booking['hash'],
+            'start' => $booking['start']
+        ]) . PHP_EOL;
+        break;
+
+    case 'appointment-times':
+        $CI->db->update(
+            'appointments',
+            [
+                'start_datetime' => ($arguments[1] ?? '') . ' ' . ($arguments[2] ?? ''),
+                'end_datetime' => ($arguments[3] ?? '') . ' ' . ($arguments[4] ?? '')
+            ],
+            ['id' => (int) ($arguments[0] ?? 0)]
+        );
+
+        echo json_encode($CI->appointments_model->find((int) ($arguments[0] ?? 0))) . PHP_EOL;
+        break;
+
     case 'setup':
         [$provider, $service, $date, $hours] = smoke_find_slots();
 
@@ -394,13 +510,26 @@ switch ($command) {
             $CI->db->delete('users', ['id' => (int) $customer['id']]);
         }
 
+        $smoke_providers = $CI->db
+            ->select('id')
+            ->like('email', 'smoke-provider-', 'after')
+            ->like('email', '@example.com', 'before')
+            ->where('id_roles', $CI->providers_model->get_provider_role_id())
+            ->get('users')
+            ->result_array();
+
+        foreach ($smoke_providers as $provider) {
+            $CI->db->delete('appointments', ['id_users_provider' => (int) $provider['id']]);
+            $CI->db->delete('users', ['id' => (int) $provider['id']]);
+        }
+
         echo count($smoke_customers) . PHP_EOL;
         break;
 
     default:
         fwrite(
             STDERR,
-            'Usage: fixtures.php setup|get|appointment-by-hash|get-by-customer|customer|contact|setting|lang|cleanup|' .
+            'Usage: fixtures.php setup|overlap-setup|appointment-times|get|appointment-by-hash|get-by-customer|customer|contact|setting|lang|cleanup|' .
                 'verification-by-email|verification-token|vormerkung|email-change-verification|limit|limit-backdate|' .
                 'limit-fill|service-attendants|rate-limit-reset|cleanup-verifications|purge' .
                 PHP_EOL

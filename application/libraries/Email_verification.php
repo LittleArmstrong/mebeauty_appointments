@@ -43,6 +43,7 @@ class Email_verification
         $this->CI->load->library('email_verification_session');
         $this->CI->load->library('email_verification_pages');
         $this->CI->load->library('appointment_contact_rules');
+        $this->CI->load->library('customer_overlap');
         $this->CI->load->library('email_messages');
     }
 
@@ -491,8 +492,17 @@ class Email_verification
             ? $this->CI->customers_model->find_record_id($customer)
             : 0;
 
-        // The check of the booking form runs here for a Vormerkung (spec 0018): the Vormerkung is dropped.
-        if ($email_customer_id && $this->customer_already_booked($email_customer_id, $appointment)) {
+        // The check of the booking form runs here for a Vormerkung (spec 0018, overlap rule spec 0023): the
+        // Vormerkung is dropped.
+        if (
+            $email_customer_id &&
+            $this->CI->customer_overlap->exists(
+                $email_customer_id,
+                $appointment['start_datetime'],
+                $appointment['end_datetime'],
+                empty($appointment['id']) ? null : (int) $appointment['id']
+            )
+        ) {
             if (empty($appointment['id'])) {
                 $model->take((int) $verification['id']);
             } else {
@@ -615,24 +625,6 @@ class Email_verification
             'manage_mode' => true,
             'notify' => false
         ];
-    }
-
-    /**
-     * Check whether a customer already has an appointment during the time of another one (the check of the
-     * booking form, Booking::register()).
-     *
-     * @param int $customer_id Customer ID.
-     * @param array $appointment Appointment with start and end.
-     *
-     * @return bool
-     */
-    protected function customer_already_booked(int $customer_id, array $appointment): bool
-    {
-        return $this->CI->appointments_model->get([
-            'id_users_customer' => $customer_id,
-            'start_datetime <=' => $appointment['start_datetime'],
-            'end_datetime >=' => $appointment['end_datetime']
-        ]) !== [];
     }
 
     /**
