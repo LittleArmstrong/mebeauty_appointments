@@ -9,7 +9,7 @@
  * and appointments through tests/smoke/fixtures.php, passes them in FIXTURE / FIXTURE_CUSTOMER, runs this script
  * in the Playwright image and removes the test data afterwards.
  *
- * Options (each may be given more than once, defaults in brackets):
+ * Options (`--name=value` or `--name value`; --viewport/--theme may be given more than once, defaults in brackets):
  *   --viewport=<w>x<h>   [1280x800 and 390x844]
  *   --theme=<name>       [mebeauty and default]
  *   --timezone=<tz>      browser timezone [Europe/Berlin]
@@ -26,8 +26,20 @@ const CUSTOMER = JSON.parse(process.env.FIXTURE_CUSTOMER || 'null');
 function parseOptions(argv) {
     const options = {viewport: [], theme: [], timezone: 'Europe/Berlin', locale: 'de-DE', json: false};
 
-    for (const argument of argv) {
-        const [, name, value] = argument.match(/^--([a-z]+)(?:=(.*))?$/) || [];
+    for (let index = 0; index < argv.length; index++) {
+        const argument = argv[index];
+        let [, name, value] = argument.match(/^--([a-z]+)(?:=(.*))?$/) || [];
+
+        // `--name value`: the next argument is the value unless it is an option itself (--json takes none).
+        if (
+            name &&
+            name !== 'json' &&
+            value === undefined &&
+            index + 1 < argv.length &&
+            !argv[index + 1].startsWith('--')
+        ) {
+            value = argv[++index];
+        }
 
         if (name === 'viewport' && /^\d+x\d+$/.test(value || '')) {
             const [width, height] = value.split('x').map(Number);

@@ -42,8 +42,9 @@ npm run measure:booking -- --timezone=UTC --locale=en-US --json
 - runs the browser in `Europe/Berlin` / `de-DE` by default, like the salon's customers; the booking page takes the
   browser timezone, so a UTC browser sees other hours.
 
-Options (repeat `--viewport`/`--theme` for several values): `--viewport=<w>x<h>` (default `1280x800` and
-`390x844`), `--theme=<name>` (default `mebeauty` and `default`), `--timezone=<tz>`, `--locale=<locale>`, `--json`.
+Options (`--name=value` or `--name value`; repeat `--viewport`/`--theme` for several values):
+`--viewport=<w>x<h>` (default `1280x800` and `390x844`), `--theme=<name>` (default `mebeauty` and `default`),
+`--timezone=<tz>`, `--locale=<locale>`, `--json`.
 
 Reading the output: one row per theme and viewport. Each cell is the Wizard-Card `#book-appointment-wizard`
 `top/bottom` in px relative to the viewport after the change; `(no move)` means the scroll position did not change.
