@@ -12,8 +12,8 @@ CodeIgniter documentation. For repository-specific implementation questions, use
 bash scripts/test.sh    # starts the stack, waits for MySQL + site, runs PHPUnit, all checks, all smokes
 ```
 
-Exit 3 in a worktree under `.claude/worktrees/`: everything but the smokes is green; they run in the
-main checkout after the merge.
+In a worktree under `.claude/worktrees/` it tests the worktree's code, smokes included (against
+`http://localhost/.claude/worktrees/<name>`, shared database). After the merge it runs once more in the main checkout.
 
 Syntax and format of staged files are checked by the pre-commit hook. Theme layout and
 texts are checked visually by the user, not by a smoke test.

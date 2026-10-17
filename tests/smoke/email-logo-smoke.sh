@@ -12,16 +12,14 @@
 
 set -uo pipefail
 
+. "$(dirname "$0")/lib.sh"
+trap smoke_cleanup EXIT
+
 RECIPIENT="${EMAIL_RECIPIENT:-smoke-test@example.com}"
 MAILPIT="${MAILPIT_URL:-http://localhost:8025}"
-FAIL=0
-
-fail() { echo "FAIL $1"; FAIL=1; }
-ok() { echo "OK   $1"; }
 
 # 1. Trigger the email through the real Email_messages library.
-docker compose exec -T -e "EMAIL_RECIPIENT=$RECIPIENT" php-fpm \
-    sh -c 'APP_ENV=testing php tests/smoke/email-logo-trigger.php' >/dev/null 2>&1 \
+smoke_php -e "EMAIL_RECIPIENT=$RECIPIENT" tests/smoke/email-logo-trigger.php >/dev/null 2>&1 \
     || { fail "trigger (email send)"; exit $FAIL; }
 
 # 2. Find the newest message sent to the recipient.
@@ -58,12 +56,10 @@ fi
 ok "inline logo part (ContentID logo.png, part $PART)"
 
 # 4. Download the decoded part and verify it is a valid PNG.
-TMP=$(mktemp)
-curl -fsS "$MAILPIT/api/v1/message/$ID/part/$PART" -o "$TMP" 2>/dev/null \
-    || { fail "download part"; rm -f "$TMP"; exit $FAIL; }
+curl -fsS "$MAILPIT/api/v1/message/$ID/part/$PART" -o "$TMP/logo.png" 2>/dev/null \
+    || { fail "download part"; exit $FAIL; }
 
-VALID=$(python3 -c 'import sys; print("yes" if sys.stdin.buffer.read(8) == b"\x89PNG\r\n\x1a\n" else "no")' < "$TMP")
-rm -f "$TMP"
+VALID=$(python3 -c 'import sys; print("yes" if sys.stdin.buffer.read(8) == b"\x89PNG\r\n\x1a\n" else "no")' < "$TMP/logo.png")
 
 if [ "$VALID" = "yes" ]; then
     ok "embedded logo is a valid PNG"

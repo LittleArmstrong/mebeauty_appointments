@@ -8,20 +8,17 @@
 
 set -uo pipefail
 
-BASE="${BASE_URL:-http://localhost}"
-FAIL=0
+. "$(dirname "$0")/lib.sh"
 
-fail() { echo "FAIL $1"; FAIL=1; }
 has_selector() { local body; body=$(curl -fsS "$BASE/index.php/booking") && grep -q 'id="select-language"' <<<"$body"; }
-ok() { echo "OK   $1"; }
 
 setting() {
-    docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/fixtures.php setting $*" | tail -1
+    fixtures setting "$@" | tail -1
 }
 
 ORIGINAL=$(setting display_language_selector)
 ORIGINAL_FOOTER=$(setting display_booking_footer)
-trap 'setting display_language_selector "'"'"'$ORIGINAL'"'"'" >/dev/null; setting display_booking_footer "'"'"'$ORIGINAL_FOOTER'"'"'" >/dev/null' EXIT
+trap 'setting display_language_selector "'"'"'$ORIGINAL'"'"'" >/dev/null; setting display_booking_footer "'"'"'$ORIGINAL_FOOTER'"'"'" >/dev/null; smoke_cleanup' EXIT
 
 setting display_booking_footer "'1'" >/dev/null
 

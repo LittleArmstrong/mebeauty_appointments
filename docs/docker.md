@@ -66,6 +66,11 @@ worktree it would change the main checkout's files. The repository's composer co
 worktree needs its own `vendor/` for the commands that load the autoloader; `bash scripts/test.sh` creates it on
 its first run there.
 
+nginx serves `/var/www/html`, so a worktree's code answers at `http://localhost/.claude/worktrees/<name>/`. In a
+worktree, `bash scripts/test.sh` runs the smokes there (`BASE_URL`) and sets the same URL as `BASE_URL` in the
+worktree's `config.php` copy. A single smoke run by hand (`bash tests/smoke/<name>-smoke.sh`) also defaults to the
+URL of its checkout and runs its fixtures in php-fpm in that checkout (`tests/smoke/lib.sh`).
+
 nginx writes its access and error log to the image's default paths (`docker/nginx/nginx.conf`), which the image
 sends to the container output: `docker compose logs nginx` shows every request line. Request bodies are not
 logged (personal data). nginx reads its config only at start; after a change to it (also through a checkout) run

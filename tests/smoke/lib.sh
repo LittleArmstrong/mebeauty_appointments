@@ -4,8 +4,13 @@
 #
 #   . "$(dirname "$0")/lib.sh"
 #
+# The smokes test the checkout they belong to, the main checkout or a linked worktree under .claude/worktrees/
+# (scripts/lib/stack.sh): BASE defaults to that checkout's URL below nginx, and PHP runs in php-fpm in that
+# checkout's directory. The database is shared, so smokes create and remove only their own smoke-… fixtures.
+#
 # Provides BASE (BASE_URL override), FAIL (exit status), TMP (temporary directory, removed by smoke_cleanup) and:
 #   ok <text> / fail <text>       print a result line; fail sets FAIL=1
+#   smoke_php [-e VAR=value ...] <script> [args]  run a PHP script with APP_ENV=testing in php-fpm in this checkout
 #   fixtures <command> [args]     run tests/smoke/fixtures.php in the php-fpm container
 #   json <python-expression>      evaluate an expression on JSON from stdin (the parsed value is `d`)
 #   backend_login                 log in as the seeded administrator; sets COOKIES and CSRF for backend requests
@@ -15,7 +20,11 @@
 #
 # This file is not a smoke test itself: scripts/test.sh and CI only run *-smoke.sh.
 
-BASE="${BASE_URL:-http://localhost}"
+pushd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null || exit 2
+. ../../scripts/lib/stack.sh
+popd >/dev/null || exit 2
+
+BASE="${BASE_URL:-http://localhost$STACK_URL_PATH}"
 FAIL=0
 TMP=$(mktemp -d)
 COOKIES="$TMP/cookies"
@@ -24,8 +33,17 @@ CSRF=""
 fail() { echo "FAIL $1"; FAIL=1; }
 ok() { echo "OK   $1"; }
 
+smoke_php() {
+    local env=()
+    while [ "${1:-}" = "-e" ]; do
+        env+=(-e "$2")
+        shift 2
+    done
+    stack_exec "${env[@]}" php-fpm sh -c "APP_ENV=testing php $*"
+}
+
 fixtures() {
-    docker compose exec -T php-fpm sh -c "APP_ENV=testing php tests/smoke/fixtures.php $*"
+    smoke_php tests/smoke/fixtures.php "$@"
 }
 
 json() { python3 -c "import sys, json; d = json.load(sys.stdin); print($1)"; }
