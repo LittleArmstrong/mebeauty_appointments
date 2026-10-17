@@ -42,3 +42,8 @@ that case (main checkout only; a worktree links the main checkout's `node_module
   `node_modules/.package-lock.json` (23:31:05), so the first `scripts/test.sh` run there after the merge runs
   `npm ci`.
 - `bash scripts/test.sh` in the worktree: exit 0 (see above).
+- Main checkout after the merge (fast-forward to 10ffbbf6): the post-merge hook printed `post-merge:
+  package-lock.json ist neuer als node_modules – npm ci fällig (scripts/test.sh installiert selbst)`. The first full
+  `bash scripts/test.sh` printed `== npm ci: package-lock.json ist neuer als node_modules`, ran `npm ci` (`added 671
+  packages`), all checks and smokes OK, exit 0. Afterwards `npm_lock_stale` reports fresh and the post-merge hook is
+  silent (exit 0).
