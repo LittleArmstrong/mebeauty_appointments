@@ -54,3 +54,16 @@ docs-only tickets keep their existing tests green instead and record `Rot vor Fi
 `check:scratch` enforces that the line exists (tickets from spec 0017 on, status `needs-verification`/`resolved`;
 from spec 0022 on also as soon as every implementation item of the checklist is ticked, see
 `docs/agents/issue-tracker.md`); the review judges whether the evidence is real.
+
+## Global scripts use only what every page loads
+
+Global scripts (`assets/js/app.js`, `assets/js/utils/message.js`) run on every page, including the installation
+page, which loads only jQuery, Popper, Bootstrap and a few utilities (`application/views/pages/installation.php`).
+They use only what that page also loads (no `App.Utils.String` there); dynamic text they insert arrives escaped from
+the server instead of being escaped in the script.
+
+## Test data cleanup works from the raw setup output
+
+A script that creates test data stores the raw setup output first, before parsing or anything else that can fail,
+and its cleanup (an exit trap or `finally`) works from that stored output. A failing parse or a setup that prints its
+data and then exits non-zero still removes the test data (pattern: `scripts/measure-booking-flow.sh`).

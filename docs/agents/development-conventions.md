@@ -19,6 +19,9 @@ files only call fork code"): PHP rules in a fork-owned library, JS rules in a fo
 `assets/js/utils/` that the upstream page script (`assets/js/pages/*.js`) only calls. A spec does not prescribe
 logic inside the upstream file.
 
+When a spec changes a server response (HTTP status, JSON fields, error shape), it states the new status code and the
+response fields, so that the contract change is decided in the spec and not discovered in review.
+
 Prefer:
 
 - Existing project conventions
