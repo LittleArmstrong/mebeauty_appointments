@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # Full local validation in one command: starts the Docker stack, waits until MySQL and the site respond,
-# rebuilds stale minified JS and the local spec index, then runs PHPUnit, all repository checks and all smoke tests. Keeps going after a
+# runs `npm ci` when package-lock.json is newer than node_modules (main checkout), rebuilds stale minified JS and the
+# local spec index, then runs PHPUnit, all repository checks and all smoke tests. Keeps going after a
 # failure and ends with a summary; exits 1 when at least one check failed, 2 when a prerequisite is missing.
 #
 # Usage (on the host, from anywhere):
@@ -23,6 +24,7 @@ cd "$(dirname "$0")/.."
 . scripts/lib/stack.sh
 . scripts/lib/js-build.sh
 . scripts/lib/scratch-index.sh
+. scripts/lib/npm-deps.sh
 
 abort() {
     echo "test.sh: $1" >&2
@@ -62,7 +64,18 @@ if [ "$STACK_IN_WORKTREE" = true ]; then
         cp -a "$STACK_MAIN_DIR/vendor" vendor
         stack_exec php-fpm composer dump-autoload --quiet || abort "composer dump-autoload im Worktree fehlgeschlagen"
     fi
+    # A node_modules directory without an install (e.g. only the .cache Prettier creates in the pre-commit hook)
+    # would hide the main checkout's packages: replace it with the link.
+    if [ -d node_modules ] && [ ! -L node_modules ] && [ ! -e node_modules/.package-lock.json ]; then
+        rm -rf node_modules
+    fi
     [ -e node_modules ] || ln -s "$(realpath --relative-to=. "$STACK_MAIN_DIR/node_modules")" node_modules
+fi
+
+# package-lock.json newer than the installed packages (scripts/lib/npm-deps.sh, main checkout only): install.
+if npm_lock_stale; then
+    echo "== npm ci: package-lock.json ist neuer als node_modules"
+    npm ci || abort "npm ci fehlgeschlagen"
 fi
 
 wait_for "$BASE_URL/ antwortet nicht nach 120 s (docker compose logs nginx php-fpm)" 60 \

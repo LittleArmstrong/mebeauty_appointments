@@ -22,6 +22,12 @@ The post-checkout hook and a post-merge hook (`scripts/git-hooks/post-merge`) al
 `.scratch/INDEX.md` (`scripts/lib/scratch-index.sh`, `docs/agents/issue-tracker.md`); `scripts/test.sh` does the
 same. The hooks do this silently and skip it when `php-fpm` is not running.
 
+Both hooks print one line when `package-lock.json` is newer than `node_modules/.package-lock.json` (or nothing is
+installed) and nothing otherwise; they never install (`scripts/lib/npm-deps.sh`). `scripts/test.sh` runs `npm ci`
+itself in that case. Both apply to the main checkout only: a worktree links the main checkout's `node_modules`
+(`scripts/test.sh` replaces a `node_modules` directory without an install, such as the Prettier cache the pre-commit
+hook creates, with that link).
+
 The git config is local and not committed. Run this setup step once per clone (worktrees share it):
 
 ```bash

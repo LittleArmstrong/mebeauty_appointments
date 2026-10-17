@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
-# Post-merge: regenerate the local spec index (scripts/lib/scratch-index.sh) after a merge or pull, so it lists the
-# specs of both sides. Silent, skipped when php-fpm is not running, and never fails: the merge has already happened.
+# Post-merge: after a merge or pull, regenerate the local spec index (scripts/lib/scratch-index.sh), so it lists the
+# specs of both sides, and report when package-lock.json is newer than the installed npm packages
+# (scripts/lib/npm-deps.sh). The index is regenerated silently and skipped when php-fpm is not running. Prints one
+# line when `npm ci` is due (it never installs; scripts/test.sh does), nothing otherwise. Never fails: the merge has
+# already happened.
 
 . "$(dirname "$0")/../lib/stack.sh"
 . "$(dirname "$0")/../lib/scratch-index.sh"
+. "$(dirname "$0")/../lib/npm-deps.sh"
 
 scratch_index_refresh
+npm_lock_notice post-merge
 
 exit 0

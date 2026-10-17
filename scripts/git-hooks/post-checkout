@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
-# Post-checkout: after a branch switch, regenerate the local spec index (scripts/lib/scratch-index.sh) and rebuild
-# the minified JavaScript when a source is newer than its .min.js (scripts/lib/js-build.sh), so the site
-# (DEBUG_MODE = false) serves the checked-out branch's scripts.
+# Post-checkout: after a branch switch, regenerate the local spec index (scripts/lib/scratch-index.sh), report when
+# package-lock.json is newer than the installed npm packages (scripts/lib/npm-deps.sh) and rebuild the minified
+# JavaScript when a source is newer than its .min.js (scripts/lib/js-build.sh), so the site (DEBUG_MODE = false)
+# serves the checked-out branch's scripts.
 #
 # Runs only on branch checkouts (third argument 1), not on file checkouts. The index is regenerated silently and
-# skipped when php-fpm is not running. Prints one line when it rebuilds JS and nothing otherwise; stays silent when
-# node_modules is missing (scripts/test.sh reports that). A failed build only warns: the checkout itself has
-# already happened and is never blocked.
+# skipped when php-fpm is not running. Prints one line when `npm ci` is due (it never installs; scripts/test.sh
+# does) and one when it rebuilds JS, nothing otherwise; skips the JS build when gulp is not installed. A failed
+# build only warns: the checkout itself has already happened and is never blocked.
 
 [ "${3:-0}" = 1 ] || exit 0
 
 . "$(dirname "$0")/../lib/stack.sh"
 . "$(dirname "$0")/../lib/scratch-index.sh"
 . "$(dirname "$0")/../lib/js-build.sh"
+. "$(dirname "$0")/../lib/npm-deps.sh"
 
 scratch_index_refresh
+npm_lock_notice post-checkout
 
 [ -d assets/js ] && [ -x node_modules/.bin/gulp ] || exit 0
 
