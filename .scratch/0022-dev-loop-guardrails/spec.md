@@ -1,6 +1,6 @@
 # Dev-loop guardrails: fresh JS, measurable Booking-Flow, conflict-free parallel specs
 
-Status: ready-for-agent
+Status: needs-verification
 Created: 2026-10-16
 Closed: –
 Priority: P2

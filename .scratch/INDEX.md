@@ -11,7 +11,7 @@
 | [0023](0023-customer-double-booking/spec.md) Customer double booking: catch every overlap, tell the customer clearly | ready-for-agent | P1 | 2026-10-16 | 0018 | 2/2 |
 | [0020](0020-wizard-step-scroll/spec.md) Keep the Wizard-Card in view when changing booking steps | needs-verification | P2 | 2026-10-16 | – | 1/1 |
 | [0021](0021-backend-logo-link/spec.md) Backend header logo links to the calendar | needs-verification | P2 | 2026-10-16 | – | 1/1 |
-| [0022](0022-dev-loop-guardrails/spec.md) Dev-loop guardrails: fresh JS, measurable Booking-Flow, conflict-free parallel specs | ready-for-agent | P2 | 2026-10-16 | – | 1/4 |
+| [0022](0022-dev-loop-guardrails/spec.md) Dev-loop guardrails: fresh JS, measurable Booking-Flow, conflict-free parallel specs | needs-verification | P2 | 2026-10-16 | – | 1/4 |
 | [0019](0019-booking-footer/spec.md) Booking-Footer ausblenden: leer automatisch, per Einstellung immer | needs-verification | P3 | 2026-10-13 | 0017 | 1/1 |
 
 ## Abgeschlossen

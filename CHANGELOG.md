@@ -41,6 +41,7 @@ First MeBeauty release, based on Easy!Appointments 1.6.0 (`4bc7ecd5`).
 - Booking deadlines, buffer and slot capacity apply only on the customer side (booking page and API); staff can still book freely in the backend calendar (0003, 0006)
 - Rescheduling via the manage link keeps the appointment with its original customer; the customer record is only updated with non-empty values and after the appointment was saved, and a changed email is only taken over if no other customer uses it (0017)
 - Booking page hero image is compressed and has fixed dimensions to avoid layout shifts (0008)
+- Asset URLs carry the modification time of the served file as cache-busting token, so browsers load changed scripts and styles after a deploy without a hard reload (0022)
 
 ### Fixed
 
