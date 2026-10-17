@@ -150,9 +150,9 @@ fixtures setting manage_deadline_minutes "'0'" >/dev/null
 set_setting booking_deadline_mode fixed_time
 set_setting booking_deadline_days 365
 STATUS=$(register "$TARGET" 1 "$OWNER_ID" "" "$OWNER_HASH" "smoke-owner-$$@example.com")
-if [ "$STATUS" != "200" ] && message_is requested_hour_is_unavailable \
+if [ "$STATUS" = "409" ] && message_is requested_hour_is_unavailable && booking_refused \
     && [ "$(appointment_field "$OWNER_ID" start_datetime)" != "$TARGET" ]; then
-    ok "target slot after booking deadline rejected"
+    ok "target slot after booking deadline rejected as expected booking refusal"
 else
     fail "target slot after booking deadline (HTTP $STATUS, $(cat "$TMP/body"))"
 fi

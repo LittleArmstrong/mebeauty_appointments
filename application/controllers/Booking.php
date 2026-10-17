@@ -82,6 +82,7 @@ class Booking extends EA_Controller
         $this->load->library('booking_policy');
         $this->load->library('appointment_contact_rules');
         $this->load->library('customer_overlap');
+        $this->load->library('booking_refusal');
         $this->load->library('email_verification');
         $this->load->library('email_verification_pages');
         $this->load->library('webhooks_client');
@@ -434,7 +435,9 @@ class Booking extends EA_Controller
             $appointment['id_users_provider'] = $this->check_datetime_availability($appointment);
 
             if (!$appointment['id_users_provider']) {
-                throw new RuntimeException(lang('requested_hour_is_unavailable'));
+                $this->booking_refusal->respond(lang('requested_hour_is_unavailable'));
+
+                return;
             }
 
             $provider = $this->providers_model->find($appointment['id_users_provider']);
@@ -503,7 +506,9 @@ class Booking extends EA_Controller
                     $manage_mode ? $appointment['id'] : null,
                 )
             ) {
-                throw new RuntimeException(lang('customer_is_already_booked'));
+                $this->booking_refusal->respond(lang('customer_is_already_booked'));
+
+                return;
             }
 
             // Jitsi integration: if enabled, generate a Jitsi meeting link for the appointment

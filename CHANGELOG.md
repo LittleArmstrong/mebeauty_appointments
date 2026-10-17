@@ -42,10 +42,13 @@ First MeBeauty release, based on Easy!Appointments 1.6.0 (`4bc7ecd5`).
 - Rescheduling via the manage link keeps the appointment with its original customer; the customer record is only updated with non-empty values and after the appointment was saved, and a changed email is only taken over if no other customer uses it (0017)
 - Booking page hero image is compressed and has fixed dimensions to avoid layout shifts (0008)
 - Asset URLs carry the modification time of the served file as cache-busting token, so browsers load changed scripts and styles after a deploy without a hard reload (0022)
+- Expected booking refusals (the customer already has an appointment at that time, the requested hour is no longer available) show a calm dialog "Termin nicht möglich" / "Appointment not possible" addressed to the customer instead of the error dialog; the entered data stays in the wizard (0023)
+- Dialogs for unexpected errors on the booking page and in the backend are titled with the company name instead of "Easy!Appointments" (0023)
 
 ### Fixed
 
 - The end-of-day buffer now applies only before the provider's effective end of work (including working plan exceptions), not before breaks, appointments or unavailabilities (0012)
+- Online booking, Manage-Link reschedule and Vormerkung confirmation refuse every overlap with another appointment of the same customer, also a partial one and with "any provider"; back-to-back appointments stay possible, the backend calendar and API v1 are unchanged (0023)
 
 ### Security
 

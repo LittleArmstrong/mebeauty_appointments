@@ -10,6 +10,8 @@
 #   json <python-expression>      evaluate an expression on JSON from stdin (the parsed value is `d`)
 #   backend_login                 log in as the seeded administrator; sets COOKIES and CSRF for backend requests
 #   backend_post <path> [curl-args]  POST to a backend endpoint with session and CSRF token, prints the body
+#   booking_refused               the body in $TMP/body is an expected booking refusal (spec 0023): marker set and
+#                                 title "appointment_not_possible"
 #
 # This file is not a smoke test itself: scripts/test.sh and CI only run *-smoke.sh.
 
@@ -42,6 +44,12 @@ backend_post() {
     local path=$1
     shift
     curl -s -c "$COOKIES" -b "$COOKIES" --data-urlencode "csrf_token=$CSRF" "$@" "$BASE/index.php/$path"
+}
+
+booking_refused() {
+    local title
+    title=$(fixtures lang appointment_not_possible | tail -1)
+    [ "$(json "d.get('booking_refused') is True and d.get('title')" <"$TMP/body" 2>/dev/null)" = "$title" ]
 }
 
 smoke_cleanup() { rm -rf "$TMP"; }

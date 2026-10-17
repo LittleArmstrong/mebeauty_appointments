@@ -8,7 +8,8 @@
 #   the request inside the appointment, the appointment inside the request), also at another provider and with
 #   "any provider";
 # - back-to-back before and after is booked;
-# - a Manage-Link reschedule may shift the own appointment by a few minutes, but not onto another own appointment.
+# - a Manage-Link reschedule may shift the own appointment by a few minutes, but not onto another own appointment;
+# - every refusal is marked as an expected booking refusal (HTTP 409, booking_refused, title).
 # Email verification is switched off for the run. All test data and changed settings are restored on exit.
 #
 # Requires the docker stack to be up (php-fpm, nginx, mysql) and a provider with a service.
@@ -67,8 +68,8 @@ appointment_field() { fixtures get "$1" | json "d and d['$2']"; }
 
 message() { python3 -c "import json; print(json.load(open('$TMP/body')).get('message', ''))" 2>/dev/null; }
 
-# The last request was refused with the customer overlap message.
-refused() { [ "$1" != "200" ] && [ "$(message)" = "$ALREADY_BOOKED" ]; }
+# The last request was refused with the customer overlap message, marked as an expected refusal (HTTP 409).
+refused() { [ "$1" = "409" ] && [ "$(message)" = "$ALREADY_BOOKED" ] && booking_refused; }
 
 # Remove a wrongly booked new appointment right away, so it does not block the provider for the next cases.
 drop_booked() { [ -z "$BOOKED" ] || fixtures cleanup "$BOOKED" "" >/dev/null; }

@@ -240,3 +240,29 @@ dev tools, e.g. 390×844).
   like the "Kalender" menu item.
 - [ ] **T-BH-03** Phone width (DevTools, 375 px): the logo link sits next to the collapsed menu button and opens the
   calendar; the menu button still opens the menu.
+
+## 0023 Customer double booking — 0023/01, 0023/02
+
+All bookings with the same customer email. The overlap rule itself (partial overlaps, back-to-back, "any provider",
+Manage-Link, Vormerkung) is automated (`tests/smoke/customer-overlap-smoke.sh`, case 12b of
+`tests/smoke/email-verification-smoke.sh`).
+
+- [ ] **T-DB-01** Book S60 with A tomorrow at 10:00. Book again S60 with B tomorrow at 10:30 (or "Jeder
+  Anbieter") and submit: dialog titled "Termin nicht möglich" with the text "Sie haben zu dieser Zeit bereits einen
+  Termin bei uns. Bitte wählen Sie eine andere Uhrzeit." No "Der Vorgang konnte nicht abgeschlossen werden." and no
+  grey box with a server message. (0023/02)
+- [ ] **T-DB-02** Close the dialog: the wizard still shows the confirmation step with all entered data. Go back,
+  choose 11:00 and submit: booked (back-to-back). (0023/01, 0023/02)
+- [ ] **T-DB-03** Switch the booking page to English and repeat T-DB-01: title "Appointment not possible", text "You
+  already have an appointment with us at this time. Please choose another time." (0023/02)
+- [ ] **T-DB-04** Slot taken in the meantime: open the booking flow in two windows (one private), choose the same
+  free slot with different emails up to the confirmation step, book in the first window, then submit in the second:
+  the same dialog "Termin nicht möglich" with the text "Der gewünschte Termin ist leider nicht verfügbar. …".
+  (0023/02)
+- [ ] **T-DB-05** Unexpected error on the booking page: in the DevTools console run
+  `$.post(App.Utils.Url.siteUrl('booking/register'), {csrf_token: vars('csrf_token')})`: dialog titled with the
+  company name (General settings → "Name der Firma"), not "Easy!Appointments", with the text "Der Vorgang konnte nicht
+  abgeschlossen werden." and the server message in a box below. (0023/02)
+- [ ] **T-DB-06** Unexpected error in the backend calendar: in the DevTools console run
+  `$.post(App.Utils.Url.siteUrl('calendar/save_appointment'), {csrf_token: vars('csrf_token')})`: dialog titled with
+  the company name as in T-DB-05. (0023/02)

@@ -29,8 +29,13 @@ window.App = (function () {
             return;
         }
 
+        // Expected booking refusals get their own dialog (spec 0023).
+        if (App.Utils.BookingRefusal?.isRefusal(response)) {
+            return;
+        }
+
         if (App.Utils.Message) {
-            App.Utils.Message.show('Easy!Appointments', lang('unexpected_issues_message'));
+            App.Utils.Message.show(App.Utils.String.escapeHtml(vars('company_name')), lang('unexpected_issues_message'));
 
             $('<div/>', {
                 'class': 'card',

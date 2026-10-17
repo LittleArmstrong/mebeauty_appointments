@@ -261,7 +261,9 @@ App.Http.Booking = (function () {
 
                 window.location.href = App.Utils.Url.siteUrl('booking_confirmation/of/' + response.appointment_hash);
             })
-            .fail(() => {
+            .fail((jqXHR) => {
+                App.Utils.BookingRefusal.show(jqXHR);
+
                 $captchaTitle.find('button').trigger('click');
             })
             .always(() => {
