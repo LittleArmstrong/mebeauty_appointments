@@ -43,6 +43,12 @@ const SCRATCH_RED_EVIDENCE_STATUSES = ['needs-verification', 'resolved'];
 const SCRATCH_RED_EVIDENCE_FROM_SPEC = 17;
 
 /**
+ * First spec whose tickets carry a "Rot vor Fix:" checklist item (0022/03): from here on a ticket whose
+ * implementation items are all ticked needs the red evidence whatever its status.
+ */
+const SCRATCH_CHECKLIST_EVIDENCE_FROM_SPEC = 22;
+
+/**
  * Check whether a header value means "none" (en dash or hyphen).
  *
  * @param string $value Header value.
@@ -143,6 +149,40 @@ function scratch_ticket_has_red_evidence(string $content): bool
 }
 
 /**
+ * Check whether all implementation items of a ticket checklist are ticked.
+ *
+ * Implementation items are the "- [ ]"/"- [x]" lines except the "Rot vor Fix:" item itself and the user's
+ * check (an item that names "by the user" or "durch den Nutzer"). A ticket without implementation items is
+ * never complete.
+ *
+ * @param string $content Ticket file content.
+ *
+ * @return bool
+ */
+function scratch_ticket_implementation_done(string $content): bool
+{
+    preg_match_all('/^\s*[-*]\s+\[([ xX])\]\s*(.*)$/m', $content, $matches, PREG_SET_ORDER);
+
+    $items = array_filter(
+        $matches,
+        fn(array $item) => !str_contains($item[2], 'Rot vor Fix:') &&
+            !preg_match('/\b(?:by the user|durch den Nutzer)\b/i', $item[2])
+    );
+
+    if ($items === []) {
+        return false;
+    }
+
+    foreach ($items as $item) {
+        if ($item[1] === ' ') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
  * Read all spec directories of a scratch directory.
  *
  * @param string $directory Path to the scratch directory.
@@ -175,11 +215,13 @@ function scratch_collect(string $directory): array
 
         $tickets = [];
         $red_evidence = [];
+        $implementation_done = [];
 
         foreach (glob($path . '/issues/*.md') ?: [] as $ticket_path) {
             $content = (string) file_get_contents($ticket_path);
             $tickets[basename($ticket_path)] = scratch_ticket_status($content);
             $red_evidence[basename($ticket_path)] = scratch_ticket_has_red_evidence($content);
+            $implementation_done[basename($ticket_path)] = scratch_ticket_implementation_done($content);
         }
 
         ksort($tickets);
@@ -191,7 +233,8 @@ function scratch_collect(string $directory): array
             'title' => $parsed['title'],
             'header' => $parsed['header'],
             'tickets' => $tickets,
-            'red_evidence' => $red_evidence
+            'red_evidence' => $red_evidence,
+            'implementation_done' => $implementation_done
         ];
     }
 
@@ -325,6 +368,19 @@ function scratch_validate(array $specs): array
             ) {
                 $errors[] = sprintf(
                     '%s/issues/%s: Beleg "Rot vor Fix:" fehlt (CODING_STANDARDS.md "Tests go red"; bei Refactor/Doku "Rot vor Fix: entfällt – <Grund>")',
+                    $spec['dir'],
+                    $ticket
+                );
+            }
+
+            if (
+                $spec['number'] >= SCRATCH_CHECKLIST_EVIDENCE_FROM_SPEC &&
+                !in_array($ticket_status, SCRATCH_RED_EVIDENCE_STATUSES, true) &&
+                ($spec['implementation_done'][$ticket] ?? false) &&
+                !($spec['red_evidence'][$ticket] ?? false)
+            ) {
+                $errors[] = sprintf(
+                    '%s/issues/%s: alle Umsetzungspunkte abgehakt, aber Beleg "Rot vor Fix:" fehlt (vor der Übergabe eintragen; bei Refactor/Doku "Rot vor Fix: entfällt – <Grund>")',
                     $spec['dir'],
                     $ticket
                 );

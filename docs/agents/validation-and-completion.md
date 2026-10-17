@@ -11,8 +11,16 @@ file fails one of these checks:
 - accidentally staged backup files (`.backup`, `.bak`, `.orig`)
 
 A check whose tool is missing (`npx`, running container) is skipped with a warning.
-The hook is activated via `git config core.hooksPath scripts/git-hooks` and must be
-re-enabled on a fresh clone (the config is local, not committed).
+The git config is local and not committed. Run this setup step once per clone (worktrees share it):
+
+```bash
+git config core.hooksPath scripts/git-hooks
+git config merge.scratch-index.driver true
+```
+
+The first line activates the hooks. The second registers the merge driver that `.gitattributes` assigns to
+`.scratch/INDEX.md`. A merge then keeps the current side of the index instead of producing conflict markers.
+Regenerate the index right after the merge (`docs/agents/issue-tracker.md`).
 
 After making changes:
 

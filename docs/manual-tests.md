@@ -10,12 +10,17 @@ UI labels are quoted as they appear in the German UI.
 acceptance criterion, with a ticket reference). Tick the boxes only in your local copy; the empty template is what
 gets committed.
 
+**Section headings:** A section is headed by the number of the spec that introduced it, then its title and the
+tickets it verifies, e.g. `## 0020 Wizard step scroll — 0020/01`. Sections are ordered by that number; a new spec
+appends its section at the end. No running numbers: two specs built in parallel never claim the same heading.
+Preparation and basic run keep their names without a number.
+
 **Feedback:** Report failures with the test case ID, e.g. "T-EB-03 fails: …". Passed sections verify the tickets
 named in their heading.
 
 Duration: about 1–2 hours for a complete run.
 
-## 0 Preparation
+## Preparation
 
 Local Docker stack (`docs/docker.md`). Test cases marked **[Test server]** need the Google sync and run on
 `booking-test.mebeauty-koeln.de` with the Google account connected there.
@@ -45,7 +50,7 @@ theme `mebeauty`, deadline mode "Minuten-Vorlaufzeit" with 0, buffer time 0, res
 Time-dependent tests: instead of waiting, set deadline times a few minutes into the future or reset the expiry time
 in the database (described in the respective test case).
 
-## 1 Basic run (upstream core functionality)
+## Basic run (upstream core functionality)
 
 - [ ] **T-B-01** Booking flow (<http://localhost>): book S60 with A. The success page appears, customer and salon
   mail in Mailpit, appointment in the backend calendar.
@@ -53,7 +58,7 @@ in the database (described in the respective test case).
   Each notification mail is written in its recipient's language (user profile setting): e.g. the seeded customer
   James has English and gets English mails, while admin and provider with German get German ones.
 
-## 2 Theme, branding, site chrome — 0001, 0004, 0005, 0014
+## 0001 Theme, branding, site chrome — 0001, 0004, 0005, 0014
 
 - [ ] **T-TH-01** Theme `mebeauty` (Settings → General settings): the booking flow shows a black page, navbar with
   logo and four links to the mebeauty site, intro "Buchung" with hero image, Wizard-Card, website footer, WhatsApp
@@ -75,7 +80,7 @@ in the database (described in the respective test case).
 - [ ] **T-TH-09** Error page (<http://localhost/index.php/gibtsnicht>) shows a brand title, no "Easy!Appointments".
 - [ ] **T-TH-10** Language set to English (`?language=english`): navbar and footer texts are English.
 
-## 3 Booking deadline, buffer, time zone — 0003, 0012
+## 0003 Booking deadline, buffer, time zone — 0003, 0012
 
 - [ ] **T-FR-01** Deadline mode "Feste Uhrzeit", deadline time = now + 5 min, day offset 1: tomorrow is bookable.
   After the 5 min have passed, reload the page: tomorrow is greyed out in the date picker.
@@ -97,7 +102,7 @@ in the database (described in the respective test case).
 
 Automated: deadline, buffer and end-of-working-day edge cases (PHPUnit `Booking_policy`, Availability).
 
-## 4 Slot capacity — 0006
+## 0006 Slot capacity — 0006
 
 - [ ] **T-KA-01** S60 slot capacity 1 (services): book S60 tomorrow 10:00 with A. Afterwards B offers nothing for S60
   at 10:00 (nor overlapping 09:30); neither does "Beliebiger Anbieter".
@@ -106,7 +111,7 @@ Automated: deadline, buffer and end-of-working-day edge cases (PHPUnit `Booking_
 - [ ] **T-KA-04** In the backend calendar a third S60 at 10:00 can be created despite full capacity.
 - [ ] **T-KA-05** Save capacity "abc", "1.5" or "-1": error message, nothing saved.
 
-## 5 Manage link: rescheduling and cancelling — 0006, 0009
+## 0006 Manage link: rescheduling and cancelling — 0006, 0009
 
 Manage link = the appointment link from an appointment's customer mail (Mailpit).
 
@@ -123,7 +128,7 @@ Manage link = the appointment link from an appointment's customer mail (Mailpit)
 
 Automated: hash/ID binding and requests without a hash (PHPUnit, 0009).
 
-## 6 Settings validation — 0010
+## 0010 Settings validation — 0010
 
 - [ ] **T-VA-01** Booking settings: save deadline time "25:00" → error message at the field, **none of the other**
   changed values are saved either (reload the page).
@@ -131,7 +136,7 @@ Automated: hash/ID binding and requests without a hash (PHPUnit, 0009).
 
 Automated: all rules and the API path (PHPUnit, 0010).
 
-## 7 Appointment contact — 0017/04, 0017/05
+## 0017 Appointment contact — 0017/04, 0017/05
 
 - [ ] **T-KO-01** Book online with `anna@example.com`, name "Anna Alt", phone 111. Then book again with the same
   email, name "Lena Neu", phone empty. In the calendar the first appointment shows "Anna Alt", the second
@@ -151,7 +156,7 @@ Automated: all rules and the API path (PHPUnit, 0010).
 - [ ] **T-KO-09** **[Test server]** Add a note below the block in the Google event, trigger a sync: the note appears
   in the app appointment, the contact block does not.
 
-## 8 Email verification and hold — 0018/01–05
+## 0018 Email verification and hold — 0018/01–05
 
 Setting "E-Mail-Bestätigung erforderlich" (booking settings) on.
 
@@ -194,7 +199,7 @@ Setting "E-Mail-Bestätigung erforderlich" (booking settings) on.
 Automated: hourly limit (5 mails/h), cooldown, hold time 20 min, neutral error messages (PHPUnit
 `Email_verification_rules`).
 
-## 9 Footer and language selector — 0014, 0019/01
+## 0019 Footer and language selector — 0014, 0019/01
 
 - [ ] **T-FO-01** "Sprachauswahl im Buchungsformular anzeigen" off: no language switcher in the booking flow.
 - [ ] **T-FO-02** Footer on, but no legal URL, language selector off, login button off: no footer and no divider
@@ -203,7 +208,7 @@ Automated: hourly limit (5 mails/h), cooldown, hold time 20 min, neutral error m
 - [ ] **T-FO-04** "Footer anzeigen" off (login button on): no footer. The theme's website footer stays. The backend
   is reachable via <http://localhost/index.php/login>.
 
-## 10 Wizard step scroll — 0020/01
+## 0020 Wizard step scroll — 0020/01
 
 Run each test case with theme `mebeauty` and again with theme `default`, on desktop and at phone width (browser
 dev tools, e.g. 390×844).
@@ -226,7 +231,7 @@ dev tools, e.g. 390×844).
 - [ ] **T-WS-08** Manage link of an existing appointment (from the customer mail): "Weiter" and "Zurück" behave as
   in T-WS-02 to T-WS-05.
 
-## 11 Backend header — 0021/01
+## 0021 Backend header — 0021/01
 
 - [ ] **T-BH-01** Backend with calendar view "Standard" (account settings → "Kalender"): clicking the logo, the
   company name or the subtitle at the top left opens the calendar (<http://localhost/index.php/calendar>), the same
