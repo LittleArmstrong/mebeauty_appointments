@@ -56,9 +56,12 @@ A spec may only be `resolved` when none of its tickets is open.
 `.scratch/INDEX.md` lists all specs (open and closed) with status, priority, dates, dependencies and ticket counts. It is **generated** — never edit it by hand:
 
 ```bash
-docker compose exec -T php-fpm composer scratch:index   # regenerate INDEX.md
-docker compose exec -T php-fpm composer check:scratch   # validate headers, numbering, INDEX (also runs in CI)
+bash scripts/composer.sh scratch:index   # regenerate INDEX.md
+bash scripts/composer.sh check:scratch   # validate headers, numbering, INDEX (also runs in CI)
 ```
+
+`scripts/composer.sh` runs composer in the current checkout, also in a worktree under `.claude/worktrees/`
+(`docs/docker.md`).
 
 Regenerate the index whenever a spec header or a ticket status changes.
 

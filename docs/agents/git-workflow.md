@@ -81,6 +81,21 @@ git checkout staging && git checkout -b agent/<short-task-name>
 - Release to prod: PR `staging → main` (in the browser), then tag on `main`.
 - If the repository already contains unrelated work, do not switch branches without confirming with the user.
 
+### Agent worktrees
+
+`/implement-spec` and subagents with worktree isolation create linked worktrees under `.claude/worktrees/`.
+Their branch starts from `origin/HEAD`, which must point to `staging`. When it points to `main`, the worktree
+starts from production and misses the work on `staging`. Check it, and fix it once per clone:
+
+```bash
+git symbolic-ref refs/remotes/origin/HEAD   # expected: refs/remotes/origin/staging
+git remote set-head origin staging
+```
+
+A worktree from the wrong base has an old fork point (`git merge-base HEAD staging` is not the tip of
+`staging`, or of the integration branch it should build on): reset the fresh worktree to the intended branch
+before working in it. In a worktree, composer commands go through `bash scripts/composer.sh` (`docs/docker.md`).
+
 ## Releases & Tags
 
 The release/versioning workflow (PR `staging → main`, release tags) lives in

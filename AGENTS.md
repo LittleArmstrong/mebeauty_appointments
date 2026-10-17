@@ -18,8 +18,9 @@ main checkout after the merge.
 Syntax and format of staged files are checked by the pre-commit hook. Theme layout and
 texts are checked visually by the user, not by a smoke test.
 
-Single checks run inside the `php-fpm` container (host `php` is a ddev shim):
-`docker compose exec -T php-fpm composer test` etc., full list in `docs/docker.md`.
+Single checks run inside the `php-fpm` container (host `php` is a ddev shim) via
+`bash scripts/composer.sh test` etc., in the current checkout, main or worktree; full list in `docs/docker.md`.
+A plain `docker compose exec -T php-fpm composer …` never runs in a worktree: it works in the main checkout.
 
 ## Before changing code
 

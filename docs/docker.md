@@ -51,11 +51,25 @@ All ports can be changed with environment variables: `NGINX_PORT`, `MYSQL_PORT`,
 docker compose exec php-fpm bash           # shell into the application container
 docker compose exec php-fpm npm start      # watch and compile JS/SCSS
 docker compose exec php-fpm npm run build  # production assets and easyappointments-0.0.0.zip
-docker compose exec php-fpm composer test  # run the PHPUnit test suite
+bash scripts/composer.sh test              # run the PHPUnit test suite (any composer command)
 bash scripts/test.sh                       # full validation: stack up, PHPUnit, all checks, all smokes
 docker compose logs -f                     # follow the container logs
+docker compose logs -f nginx               # requests (access log) and nginx errors
 docker compose down                        # stop the environment (DB data stays in ./docker/mysql)
 ```
+
+`scripts/composer.sh` runs `composer <args>` inside `php-fpm` in the checkout the script belongs to: the main
+checkout or a linked worktree under `.claude/worktrees/` (`scripts/lib/stack.sh`). A plain
+`docker compose exec php-fpm composer …` runs in the container's working directory, the main checkout, so from a
+worktree it would change the main checkout's files. The repository's composer commands (`test`,
+`check:migrations`, `check:assets`, `check:views`, `check:scratch`, `scratch:index`) go through the wrapper. A
+worktree needs its own `vendor/` for the commands that load the autoloader; `bash scripts/test.sh` creates it on
+its first run there.
+
+nginx writes its access and error log to the image's default paths (`docker/nginx/nginx.conf`), which the image
+sends to the container output: `docker compose logs nginx` shows every request line. Request bodies are not
+logged (personal data). nginx reads its config only at start; after a change to it (also through a checkout) run
+`docker compose up -d --force-recreate nginx`.
 
 The `php-fpm` container runs as `${HOST_UID:-1000}:${HOST_GID:-1000}`, not as root; see "Docker user (UID/GID)" in the [README](../README.md) for overriding the IDs and migrating root-owned files of older checkouts.
 

@@ -1,5 +1,5 @@
-# Docker Compose stack of the main checkout, sourced by scripts/test.sh, scripts/migration-test-db.sh and the
-# pre-commit hook.
+# Docker Compose stack of the main checkout, sourced by scripts/test.sh, scripts/composer.sh,
+# scripts/migration-test-db.sh and the pre-commit hook.
 #
 # A linked git worktree (/implement-spec puts them under .claude/worktrees/) has no stack of its own: its
 # docker-compose.yml would start a second project with clashing ports. The containers mount the main checkout at

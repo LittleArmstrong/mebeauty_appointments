@@ -141,7 +141,7 @@ All local service URLs, ports and credentials are listed in [docs/docker.md](doc
 docker compose exec php-fpm bash           # shell into the application container
 docker compose exec php-fpm npm start      # watch and compile JS/SCSS
 docker compose exec php-fpm npm run build  # production assets and easyappointments-0.0.0.zip
-docker compose exec php-fpm composer test  # run the PHPUnit test suite
+bash scripts/composer.sh test              # run the PHPUnit test suite (any composer command)
 docker compose logs -f                     # follow the container logs
 docker compose down                        # stop the environment (DB data stays in ./docker/mysql)
 ```

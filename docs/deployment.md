@@ -34,7 +34,7 @@ Zwei Branches, zwei Umgebungen:
 Vor dem Push lokal prüfen:
 
 ```bash
-docker compose exec -T php-fpm composer test    # PHPUnit
+bash scripts/composer.sh test                    # PHPUnit (auch im Worktree)
 docker compose exec -T php-fpm php -l <datei>   # PHP-Syntax (je geänderte Datei)
 node --check <datei>                             # JS-Syntax (je geänderte Datei)
 ```
