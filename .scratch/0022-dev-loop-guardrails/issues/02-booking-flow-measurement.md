@@ -54,3 +54,13 @@ and appointments through the smoke fixtures and removes them afterwards, and the
   (`--timezone=Invalid/Zone`, exit 1): 5 users, 5 appointments, 0 smoke customers. Mailpit total unchanged (61).
 - `--viewport=1280x1000 --theme=mebeauty --timezone=UTC --locale=en-US --json` prints one line per change;
   an unknown option exits 1 with a message.
+
+### 2026-10-17 — review fix
+
+- `scripts/measure-booking-flow.sh` stores the raw `fixtures setup` output before anything can fail; the EXIT trap
+  derives the IDs from it, so a setup that prints its JSON and then exits non-zero, or a failing parse, still
+  cleans up. Checked with the script's setup/cleanup block and a stubbed `fixtures` (Playwright is not installed in
+  the main checkout's `node_modules` yet): ok → cleanup `11,12 21,22`; JSON then exit 1 → cleanup `11,12 21,22`;
+  exit 1 without JSON → no cleanup call, exit 2.
+- `field()` reads a dotted path with `node -p` (no host python3, no interpolated code); `IMAGE` derives from
+  `VERSION` (package.json stays the pin); comment on why the stack check is inline; file mode 755.

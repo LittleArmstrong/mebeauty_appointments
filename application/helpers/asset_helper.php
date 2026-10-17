@@ -26,17 +26,13 @@ function asset_url(string $uri = '', ?string $protocol = null): string
 {
     $debug = config('debug');
 
-    if (str_contains(basename($uri), '.js') && !str_contains(basename($uri), '.min.js') && !$debug) {
-        $uri = str_replace('.js', '.min.js', $uri);
-    }
+    // Fork (spec 0022): served file and its cache-busting token come from Asset_cache_busting.
+    $CI = &get_instance();
+    $CI->load->library('asset_cache_busting');
 
-    if (str_contains(basename($uri), '.css') && !str_contains(basename($uri), '.min.css') && !$debug) {
-        $uri = str_replace('.css', '.min.css', $uri);
-    }
+    $uri = $CI->asset_cache_busting->served_uri($uri, (bool) $debug);
 
-    get_instance()->load->library('asset_cache_busting');
+    $cache_busting_token = '?' . $CI->asset_cache_busting->token(FCPATH, $uri, config('cache_busting_token'));
 
-    $cache_busting_token = get_instance()->asset_cache_busting->token(FCPATH, $uri, config('cache_busting_token'));
-
-    return base_url($uri . '?' . $cache_busting_token, $protocol);
+    return base_url($uri . $cache_busting_token, $protocol);
 }

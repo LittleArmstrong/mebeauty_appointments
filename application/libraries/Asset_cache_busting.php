@@ -3,10 +3,11 @@
 /**
  * Asset cache busting library (fork, spec 0022).
  *
- * Decides the cache-busting token of an asset URL. `asset_url()` (`application/helpers/asset_helper.php`) maps the
- * URI to the file actually served (`.min.js`/`.min.css` unless debug mode) and calls this rule with that URI.
+ * Decides the served file and the cache-busting token of an asset URL for `asset_url()`
+ * (`application/helpers/asset_helper.php`).
  *
  * Rules:
+ * - Outside debug mode the served file of `.js`/`.css` is `.min.js`/`.min.css` (upstream rule).
  * - The token is the modification time of the served file, so a rebuilt or redeployed file gets a new URL and the
  *   browser loads it on a normal reload.
  * - When the file cannot be read (missing, directory, URI with a query), the configured token is the fallback.
@@ -15,6 +16,28 @@
  */
 class Asset_cache_busting
 {
+    /**
+     * URI of the file actually served: outside debug mode `.js`/`.css` map to `.min.js`/`.min.css` (upstream rule
+     * of `asset_url()`, moved here unchanged so the token is taken from that file).
+     *
+     * @param string $uri Relative URI as passed to asset_url().
+     * @param bool $debug Debug mode ("debug" config).
+     *
+     * @return string Returns the URI of the served file.
+     */
+    public function served_uri(string $uri, bool $debug): string
+    {
+        if (str_contains(basename($uri), '.js') && !str_contains(basename($uri), '.min.js') && !$debug) {
+            $uri = str_replace('.js', '.min.js', $uri);
+        }
+
+        if (str_contains(basename($uri), '.css') && !str_contains(basename($uri), '.min.css') && !$debug) {
+            $uri = str_replace('.css', '.min.css', $uri);
+        }
+
+        return $uri;
+    }
+
     /**
      * Cache-busting token of an asset URL.
      *

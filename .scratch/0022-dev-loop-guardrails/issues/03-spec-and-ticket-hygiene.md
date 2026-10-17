@@ -44,3 +44,6 @@ documented setup step that also activates the hooks path.
   older ticket comments (0018, 0020/01, 0021/01) are historical records and stay unchanged.
 - `bash scripts/test.sh` in the worktree: exit 3 (PHPUnit 218 tests OK, all checks OK, smokes skipped in the
   worktree).
+- 2026-10-17 (agent, review fix): heuristic kept; `docs/agents/issue-tracker.md` now states that the user-check item
+  must carry the exact phrase "by the user" ("durch den Nutzer") on its first line. 0022/01's open item reworded
+  to "Manual check by the user: …".

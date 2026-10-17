@@ -15,7 +15,7 @@ fork-owned rule that the upstream asset helper calls.
       rebuild, warning only on failure
 - [x] Per-file cache-busting token in a fork-owned rule; upstream asset helper only calls it
 - [x] PHPUnit tests for the token rule (existing file, missing file, minified and non-minified path)
-- [ ] Manual check recorded: checkout `staging` ↔ branch with a JS change → rebuild line, new code on normal reload
+- [ ] Manual check by the user: checkout `staging` ↔ branch with a JS change → rebuild line, new code on normal reload
 - [x] `Rot vor Fix:` line recorded
 - [x] `bash scripts/test.sh` green
 
@@ -46,3 +46,9 @@ fork-owned rule that the upstream asset helper calls.
   - `bash scripts/test.sh` in the worktree: exit 3 (PHPUnit and all checks OK, smokes skipped).
 - Open for the user (after the merge into `staging`): in the main checkout, switch `staging` ↔ a branch with a JS
   change, see the rebuild line, and confirm the browser runs the new code on a normal reload (no hard reload).
+- 2026-10-17 (agent, review fix): the `.js`/`.css` → `.min` mapping moved unchanged from `asset_url()` into
+  `Asset_cache_busting::served_uri($uri, $debug)`; the upstream helper now calls `get_instance()` once and only fork
+  code. New tests `test_production_serves_the_minified_file_and_its_token`,
+  `test_debug_mode_serves_the_source_file_and_its_token`, `test_production_keeps_an_already_minified_uri` (red
+  first: "Call to undefined method Asset_cache_busting::served_uri()"). The user-check item now carries "by the
+  user", so `check:scratch` recognises it (0022/03 convention).

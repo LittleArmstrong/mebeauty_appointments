@@ -48,3 +48,5 @@ Manual checks:
   needs `docker compose up -d --force-recreate nginx` to pick up the config (documented in `docs/docker.md`).
 - `origin/HEAD`: `git symbolic-ref refs/remotes/origin/HEAD` → `refs/remotes/origin/staging`.
 - `bash scripts/test.sh` in the worktree: phpunit and all checks OK, smokes skipped (exit 3, run in the main checkout after the merge).
+- 2026-10-17 (agent, review fix): the pre-commit hint for an invalid `.scratch` names
+  `bash scripts/composer.sh scratch:index`.

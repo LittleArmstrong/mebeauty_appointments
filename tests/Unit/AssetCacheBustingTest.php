@@ -78,6 +78,36 @@ class AssetCacheBustingTest extends TestCase
         $this->assertSame('1760000000', $this->token('assets/js/app.js'));
     }
 
+    public function test_production_serves_the_minified_file_and_its_token(): void
+    {
+        $this->write('assets/js/app.js', 1760000000);
+        $this->write('assets/js/app.min.js', 1760000500);
+
+        $served = (new \Asset_cache_busting())->served_uri('assets/js/app.js', false);
+
+        $this->assertSame('assets/js/app.min.js', $served);
+        $this->assertSame('1760000500', $this->token($served));
+    }
+
+    public function test_debug_mode_serves_the_source_file_and_its_token(): void
+    {
+        $this->write('assets/js/app.js', 1760000000);
+        $this->write('assets/js/app.min.js', 1760000500);
+
+        $served = (new \Asset_cache_busting())->served_uri('assets/js/app.js', true);
+
+        $this->assertSame('assets/js/app.js', $served);
+        $this->assertSame('1760000000', $this->token($served));
+    }
+
+    public function test_production_keeps_an_already_minified_uri(): void
+    {
+        $this->assertSame(
+            'assets/css/app.min.css',
+            (new \Asset_cache_busting())->served_uri('assets/css/app.min.css', false)
+        );
+    }
+
     public function test_directory_gives_the_configured_token(): void
     {
         $this->assertSame('TSJ83', $this->token('assets/js'));

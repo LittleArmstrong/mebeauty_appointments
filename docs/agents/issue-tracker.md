@@ -17,7 +17,9 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 
   From spec 0022 on, `check:scratch` fails for a ticket whose implementation items are all ticked while the
   ticket has no `Rot vor Fix:` line. Implementation items are all checklist items except the `Rot vor Fix:` item
-  and the user's check; the user's check is recognised by the words "by the user" (or "durch den Nutzer").
+  and the user's check. The user's check item must contain the exact phrase "by the user" (German: "durch den
+  Nutzer") on the item's first line, e.g. `` - [ ] Manual check by the user: … ``; without it the item counts as an
+  implementation item.
 - Every statement about current behaviour in a spec's problem section cites its evidence as `path:line` (e.g. `application/controllers/Booking.php:489`), checked against the code before the spec is published.
 - Cross-references: a spec is referenced by its number (`0009`), a ticket in another spec as `NNNN/NN` (e.g. `0009/02`), a ticket in the same spec by `NN`.
 
