@@ -11,8 +11,23 @@ file fails one of these checks:
 - accidentally staged backup files (`.backup`, `.bak`, `.orig`)
 
 A check whose tool is missing (`npx`, running container) is skipped with a warning.
-The hook is activated via `git config core.hooksPath scripts/git-hooks` and must be
-re-enabled on a fresh clone (the config is local, not committed).
+
+A post-checkout hook (`scripts/git-hooks/post-checkout`) rebuilds the minified JavaScript
+after a branch switch when a source is newer than its `.min.js` (`scripts/lib/js-build.sh`,
+the same check `scripts/test.sh` uses). It prints one line when it rebuilds, nothing otherwise,
+and only warns when the build fails. Asset URLs carry the served file's modification time
+(`Asset_cache_busting`), so a normal reload picks up a rebuilt file.
+
+The git config is local and not committed. Run this setup step once per clone (worktrees share it):
+
+```bash
+git config core.hooksPath scripts/git-hooks
+git config merge.scratch-index.driver true
+```
+
+The first line activates both hooks. The second registers the merge driver that `.gitattributes` assigns to
+`.scratch/INDEX.md`. A merge then keeps the current side of the index instead of producing conflict markers.
+Regenerate the index right after the merge (`docs/agents/issue-tracker.md`).
 
 After making changes:
 

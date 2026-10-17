@@ -207,6 +207,58 @@ class ScratchIndexTest extends TestCase
         $this->assertStringNotContainsString('Rot vor Fix', implode("\n", \scratch_check($this->tmpDir)));
     }
 
+    public function testFullyTickedTicketWithoutRedEvidenceIsReportedFromSpec0022(): void
+    {
+        $this->writeSpec('0022-feature', $this->header('in-progress', '2026-10-16', '–', 'P2', '–'));
+        $this->writeChecklistTicket('0022-feature', '01-a.md', 'in-progress', [
+            '- [x] Rule module with unit tests',
+            '- [x] `bash scripts/test.sh` green'
+        ]);
+
+        $this->assertErrorContains(
+            '0022-feature/issues/01-a.md: alle Umsetzungspunkte abgehakt, aber Beleg "Rot vor Fix:" fehlt'
+        );
+    }
+
+    public function testUserCheckAndRedEvidenceItemsDoNotCountAsImplementationItems(): void
+    {
+        $this->writeSpec('0022-feature', $this->header('in-progress', '2026-10-16', '–', 'P2', '–'));
+        $this->writeChecklistTicket('0022-feature', '01-a.md', 'in-progress', [
+            '- [x] Rule module with unit tests',
+            '- [ ] `Rot vor Fix:` line recorded',
+            '- [ ] Visual check by the user (ends as `needs-verification`)',
+            '- [ ] Manuelle Sichtprüfung durch den Nutzer'
+        ]);
+
+        $this->assertErrorContains('0022-feature/issues/01-a.md: alle Umsetzungspunkte abgehakt');
+    }
+
+    public function testRedEvidenceLineOrOpenItemSatisfiesTheChecklistRule(): void
+    {
+        $this->writeSpec('0022-feature', $this->header('in-progress', '2026-10-16', '–', 'P2', '–'));
+        $this->writeChecklistTicket(
+            '0022-feature',
+            '01-a.md',
+            'in-progress',
+            ['- [x] Rule module with unit tests', '- [x] `Rot vor Fix:` line recorded'],
+            '- Rot vor Fix: `FooTest` – Failed asserting'
+        );
+        $this->writeChecklistTicket('0022-feature', '02-b.md', 'ready-for-agent', [
+            '- [x] Rule module with unit tests',
+            '- [ ] `bash scripts/test.sh` green'
+        ]);
+
+        $this->assertStringNotContainsString('Rot vor Fix', implode("\n", \scratch_check($this->tmpDir)));
+    }
+
+    public function testChecklistRuleIgnoresSpecsBefore0022(): void
+    {
+        $this->writeSpec('0021-old', $this->header('in-progress', '2026-10-15', '–', 'P2', '–'));
+        $this->writeChecklistTicket('0021-old', '01-a.md', 'in-progress', ['- [x] Rule module with unit tests']);
+
+        $this->assertStringNotContainsString('Rot vor Fix', implode("\n", \scratch_check($this->tmpDir)));
+    }
+
     private function header(string $status, string $created, string $closed, string $priority, string $depends): string
     {
         return "# Title\n\nStatus: $status\nCreated: $created\nClosed: $closed\nPriority: $priority\nDepends-on: $depends\n\n## Problem Statement\n";
@@ -224,6 +276,22 @@ class ScratchIndexTest extends TestCase
         file_put_contents(
             $this->tmpDir . '/' . $dir . '/issues/' . $file,
             "# Ticket\n\n**Status:** $status\n" . ($comments === '' ? '' : "\n## Comments\n\n$comments\n")
+        );
+    }
+
+    private function writeChecklistTicket(
+        string $dir,
+        string $file,
+        string $status,
+        array $checklist,
+        string $comments = ''
+    ): void {
+        file_put_contents(
+            $this->tmpDir . '/' . $dir . '/issues/' . $file,
+            "# Ticket\n\n**Status:** $status\n\n" .
+                implode("\n", $checklist) .
+                "\n" .
+                ($comments === '' ? '' : "\n## Comments\n\n$comments\n")
         );
     }
 

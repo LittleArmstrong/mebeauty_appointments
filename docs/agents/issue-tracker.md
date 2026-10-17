@@ -9,6 +9,15 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Implementation issues are one file per ticket at `.scratch/<NNNN>-<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01`, never a single combined tickets file
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
+- The checklist of every feat/fix ticket ends with these items, in this order:
+  - `` - [ ] `Rot vor Fix:` line recorded `` — the evidence itself goes into the comments
+    (`CODING_STANDARDS.md`, "Tests go red"; tooling and docs tickets record `Rot vor Fix: entfällt – <reason>`);
+  - `` - [ ] `bash scripts/test.sh` green ``;
+  - for visible behaviour, `` - [ ] Visual check by the user (ends as `needs-verification`) ``.
+
+  From spec 0022 on, `check:scratch` fails for a ticket whose implementation items are all ticked while the
+  ticket has no `Rot vor Fix:` line. Implementation items are all checklist items except the `Rot vor Fix:` item
+  and the user's check; the user's check is recognised by the words "by the user" (or "durch den Nutzer").
 - Every statement about current behaviour in a spec's problem section cites its evidence as `path:line` (e.g. `application/controllers/Booking.php:489`), checked against the code before the spec is published.
 - Cross-references: a spec is referenced by its number (`0009`), a ticket in another spec as `NNNN/NN` (e.g. `0009/02`), a ticket in the same spec by `NN`.
 
@@ -52,6 +61,11 @@ docker compose exec -T php-fpm composer check:scratch   # validate headers, numb
 ```
 
 Regenerate the index whenever a spec header or a ticket status changes.
+
+After a merge, regenerate it as well. With the merge driver registered (setup step in
+`docs/agents/validation-and-completion.md`), a merge keeps the current side of `INDEX.md` without conflict markers,
+so the index may be stale. Regenerate it and commit the result. `check:scratch` reports a stale index in CI and
+in the pre-commit hook of the next commit that stages `.scratch/` files.
 
 ## When a skill says "publish to the issue tracker"
 
