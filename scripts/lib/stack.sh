@@ -14,11 +14,15 @@
 #   STACK_IN_WORKTREE  true in a linked worktree
 #   STACK_WORKDIR      path of the current checkout inside php-fpm (empty: worktree outside the mount)
 #   STACK_URL_PATH     URL path of the current checkout below nginx's root ("" in the main checkout)
+#   STACK_URL          default URL of the current checkout (scripts/test.sh, tests/smoke/lib.sh)
+#   STACK_SMOKE_LOCK   lock file in the git common dir, shared by the main checkout and all worktrees
 #   stack ...          docker compose of the main checkout
 #   stack_exec ...     docker compose exec -T in the current checkout ([-e VAR=value ...] <service> <command>)
 #   stack_link_host_path  in a worktree: link the main checkout's host path to /var/www/html inside php-fpm
 
-STACK_MAIN_DIR=$(cd "$(git rev-parse --path-format=absolute --git-common-dir)/.." && pwd)
+STACK_GIT_COMMON_DIR=$(git rev-parse --path-format=absolute --git-common-dir)
+STACK_MAIN_DIR=$(cd "$STACK_GIT_COMMON_DIR/.." && pwd)
+STACK_SMOKE_LOCK="$STACK_GIT_COMMON_DIR/smoke.lock"
 STACK_TOPLEVEL=$(git rev-parse --show-toplevel)
 STACK_IN_WORKTREE=false
 STACK_WORKDIR=/var/www/html
@@ -34,6 +38,8 @@ if [ "$STACK_TOPLEVEL" != "$STACK_MAIN_DIR" ]; then
         *) STACK_WORKDIR="" ;;
     esac
 fi
+
+STACK_URL="http://localhost$STACK_URL_PATH"
 
 stack() {
     docker compose -f "$STACK_MAIN_DIR/docker-compose.yml" "$@"

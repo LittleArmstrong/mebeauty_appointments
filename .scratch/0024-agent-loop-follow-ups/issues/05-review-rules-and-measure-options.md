@@ -30,3 +30,12 @@ server response. The booking measurement accepts `--name value` as well as `--na
   exit 0 with the same row `| mebeauty 390×844 | 428/1263, y 0 | 16/1145 | 16/1211 | 16/867 | 16/1211 (no move) |
   16/1145 | 16/851 | step 2, y 0, top 428 |` (matches the last run in `docs/visual-measurement.md`).
 - `bash scripts/test.sh` in the worktree: exit 3 (phpunit, all checks OK; smokes skipped in the worktree).
+
+### 2026-10-18 – review fixes
+
+- `bash scripts/test.sh` green: exit 0 in the main checkout after the later merges of 02 and 04, which include 05
+  (tickets 02 and 04).
+- `tests/playwright/booking-flow.js` rejects an unknown option before it can take the next argument as its value
+  (`OPTION_NAMES`). Rot vor Fix: entfällt – the old code consumed the value but then threw the same `Unknown option`
+  error, so there is no observable red; checked with `parseOptions` loaded without Playwright: `--foo 1280x800`,
+  `--foo --json` → `Unknown option --foo`, `--viewport 1x2 --json` parsed as before (old and new code alike).

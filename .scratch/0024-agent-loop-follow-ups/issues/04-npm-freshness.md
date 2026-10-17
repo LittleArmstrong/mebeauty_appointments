@@ -47,3 +47,11 @@ that case (main checkout only; a worktree links the main checkout's `node_module
   `bash scripts/test.sh` printed `== npm ci: package-lock.json ist neuer als node_modules`, ran `npm ci` (`added 671
   packages`), all checks and smokes OK, exit 0. Afterwards `npm_lock_stale` reports fresh and the post-merge hook is
   silent (exit 0).
+
+### 2026-10-18 – review fixes
+
+- In a worktree whose `package-lock.json` differs in content from the main checkout's (`cmp`), `scripts/test.sh`
+  prints one line `test.sh: package-lock.json weicht vom Hauptcheckout ab – das verlinkte node_modules passt nicht
+  dazu (kein npm ci)` and installs nothing (`npm_worktree_lock_notice` in `scripts/lib/npm-deps.sh`, documented in
+  `docs/agents/validation-and-completion.md`). Same content: silent (review-fix worktree runs printed nothing);
+  with one byte appended to the worktree's lockfile the function printed that line (lockfile restored afterwards).

@@ -23,6 +23,8 @@ const BASE = (process.env.BASE_URL || 'http://localhost').replace(/\/$/, '');
 const FIXTURE = JSON.parse(process.env.FIXTURE || 'null');
 const CUSTOMER = JSON.parse(process.env.FIXTURE_CUSTOMER || 'null');
 
+const OPTION_NAMES = ['viewport', 'theme', 'timezone', 'locale', 'json'];
+
 function parseOptions(argv) {
     const options = {viewport: [], theme: [], timezone: 'Europe/Berlin', locale: 'de-DE', json: false};
 
@@ -30,9 +32,13 @@ function parseOptions(argv) {
         const argument = argv[index];
         let [, name, value] = argument.match(/^--([a-z]+)(?:=(.*))?$/) || [];
 
+        // Reject an unknown option before it can take the next argument as its value.
+        if (!OPTION_NAMES.includes(name)) {
+            throw new Error('Unknown option ' + argument + ' (see the header of tests/playwright/booking-flow.js)');
+        }
+
         // `--name value`: the next argument is the value unless it is an option itself (--json takes none).
         if (
-            name &&
             name !== 'json' &&
             value === undefined &&
             index + 1 < argv.length &&

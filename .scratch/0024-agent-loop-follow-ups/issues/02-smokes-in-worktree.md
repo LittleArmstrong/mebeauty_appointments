@@ -71,3 +71,25 @@ after the merge (orchestrator).
 
 Main checkout after the fast-forward merge into `agent/0024-agent-loop-follow-ups` (23bafcd5): `bash scripts/test.sh`
 exit 0, all 8 checks and all 8 smokes OK (BASE_URL `http://localhost`).
+
+### 2026-10-18 – review fixes
+
+- Smoke lock: parallel worktree runs share the database, `fixtures.php purge` removes every `smoke-…` record and
+  `language-selector-smoke.sh` changes global settings, so the claim "smokes touch only their own fixtures" was
+  wrong. `scripts/test.sh` now runs the smoke phase (purge and smokes) under `flock` on `STACK_SMOKE_LOCK`
+  (`.git/smoke.lock` in the git common dir, shared by the main checkout and all worktrees) and prints
+  `== Smoke-Phase: wartet auf einen anderen test.sh-Lauf (…)` while blocked. Docs corrected: header of
+  `scripts/test.sh`, `tests/smoke/lib.sh`, `docs/agents/validation-and-completion.md`, `AGENTS.md`.
+- In a worktree an inherited `BASE_URL` that is not the worktree URL is ignored with one line
+  (`test.sh: BASE_URL=… ignoriert – im Worktree gilt …`); the main checkout keeps the override.
+- The default URL is defined once as `STACK_URL` in `scripts/lib/stack.sh`, used by `scripts/test.sh` and
+  `tests/smoke/lib.sh`.
+- The URL written into the worktree's `config.php` is escaped for the `sed` replacement (`\`, `&`, `|`), and the
+  check uses `grep -F`. Rot vor Fix: with `BASE_URL='http://localhost/a&b|c\d'` the old `sed` failed (`unknown
+  option to `s'`) and left the old URL; the new one writes it literally.
+- Manual check of the lock: two `scripts/test.sh` runs of the review-fix worktree started 20 s apart, the second
+  with `BASE_URL=http://localhost` inherited. Run A ran its smokes 01:32:58–01:35:10. Run B printed
+  `test.sh: BASE_URL=http://localhost ignoriert – im Worktree gilt http://localhost/.claude/worktrees/agent-a49571d211c324466`,
+  reached the smoke phase at 01:33:18, printed `== Smoke-Phase: wartet auf einen anderen test.sh-Lauf
+  (/home/baris/www/mebeauty_appointments/.git/smoke.lock)` and started its first smoke at 01:35:10, when A finished.
+  Both exit 0 with all checks and smokes OK.

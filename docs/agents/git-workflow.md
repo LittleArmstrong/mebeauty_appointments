@@ -94,7 +94,8 @@ single task) in the main checkout before it starts implementers, and only then s
 Fallback: an implementer first checks its base with
 `git merge-base --is-ancestor <integration-branch> HEAD`. If that fails (old fork point, e.g. the setting was
 not loaded or the wrong branch was checked out), it resets the fresh worktree with
-`git reset --hard <integration-branch>` before working in it and mentions the reset in its report. In a worktree, composer commands go through `bash scripts/composer.sh` (`docs/docker.md`).
+`git reset --hard <integration-branch>` before working in it and mentions the reset in its report. In a worktree,
+composer commands go through `bash scripts/composer.sh` (`docs/docker.md`).
 
 ## Releases & Tags
 

@@ -26,7 +26,8 @@ Both hooks print one line when `package-lock.json` is newer than `node_modules/.
 installed) and nothing otherwise; they never install (`scripts/lib/npm-deps.sh`). `scripts/test.sh` runs `npm ci`
 itself in that case. Both apply to the main checkout only: a worktree links the main checkout's `node_modules`
 (`scripts/test.sh` replaces a `node_modules` directory without an install, such as the Prettier cache the pre-commit
-hook creates, with that link).
+hook creates, with that link). When a worktree's `package-lock.json` differs in content from the main checkout's,
+`scripts/test.sh` prints one line that the linked `node_modules` does not match it and installs nothing.
 
 The git config is local and not committed. Run this setup step once per clone (worktrees share it):
 
@@ -55,8 +56,10 @@ After making changes:
    - In a linked worktree under `.claude/worktrees/` it runs everything against the worktree
      through the main checkout's stack: PHPUnit and the checks in the worktree's directory, the
      smoke tests against `http://localhost/.claude/worktrees/<name>` (nginx serves the worktree
-     there; its `config.php` copy gets that `BASE_URL`). The database is shared: smokes create and
-     purge only their own `smoke-…` fixtures. After the merge the orchestrator runs it once more in
+     there; its `config.php` copy gets that `BASE_URL`, and an inherited `BASE_URL` is ignored). The
+     database is shared, and smokes change global settings and purge all `smoke-…` data: the smoke
+     phase runs under a lock shared by all checkouts (`.git/smoke.lock`), so a second `test.sh` run
+     waits for it. After the merge the orchestrator runs it once more in
      the main checkout. A worktree outside the repository directory is not visible to the
      containers and aborts.
 

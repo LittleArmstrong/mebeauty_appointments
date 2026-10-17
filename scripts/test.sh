@@ -13,10 +13,12 @@
 # smoke tests against the worktree's URL below nginx (http://localhost/.claude/worktrees/<name>). The worktree gets
 # copies of config.php (BASE_URL set to that URL, so CLI code builds links to the worktree) and vendor/ (autoload
 # rebuilt for its own tests/) and a node_modules link. The database is shared with the main checkout and other
-# worktrees; the smokes touch only their own smoke-… fixtures.
+# worktrees, and smokes change global settings and purge all smoke-… data: the smoke phase (purge and smokes) runs
+# under a lock shared by all checkouts (STACK_SMOKE_LOCK, scripts/lib/stack.sh); a second run waits for it.
 #
-# The stack stays up afterwards; stop it with `docker compose down`. BASE_URL overrides the URL of the checkout
-# under test, as in the smoke tests. Only `set -u`: a failing check is recorded and the run continues.
+# The stack stays up afterwards; stop it with `docker compose down`. In the main checkout BASE_URL overrides the URL
+# under test, as in the smoke tests; a worktree always uses its own URL. Only `set -u`: a failing check is recorded
+# and the run continues.
 
 set -u
 
@@ -51,15 +53,22 @@ wait_for "MySQL antwortet nicht nach 60 s (docker compose logs mysql)" 30 \
 wait_for "vendor/autoload.php fehlt nach 120 s – Composer-Installation im php-fpm-Container prüfen" 60 \
     stack exec -T php-fpm test -f vendor/autoload.php
 
-# URL of the checkout under test; the smokes (tests/smoke/lib.sh) default to the same value.
-export BASE_URL="${BASE_URL:-http://localhost$STACK_URL_PATH}"
+# URL of the checkout under test; the smokes (tests/smoke/lib.sh) default to the same value. A worktree ignores an
+# inherited BASE_URL: it would point the run at another checkout (usually the main one).
+if [ "$STACK_IN_WORKTREE" = true ] && [ "${BASE_URL:-$STACK_URL}" != "$STACK_URL" ]; then
+    echo "test.sh: BASE_URL=$BASE_URL ignoriert – im Worktree gilt $STACK_URL"
+    BASE_URL=$STACK_URL
+fi
+export BASE_URL="${BASE_URL:-$STACK_URL}"
 
 if [ "$STACK_IN_WORKTREE" = true ]; then
     stack_link_host_path || abort "Host-Pfad $STACK_MAIN_DIR im php-fpm-Container nicht verlinkbar"
     [ -f config.php ] || cp "$STACK_MAIN_DIR/config.php" config.php
     # Also corrects a copy made before the worktree URL was set (Config::BASE_URL is used on the CLI only).
-    sed -i "s|^\( *const BASE_URL = \)'[^']*';|\1'$BASE_URL';|" config.php
-    grep -q "const BASE_URL = '$BASE_URL';" config.php || abort "BASE_URL in config.php des Worktrees nicht setzbar"
+    # The URL is escaped for the sed replacement (\, & and the delimiter |).
+    url_replacement=$(printf '%s' "$BASE_URL" | sed 's/[\\&|]/\\&/g')
+    sed -i "s|^\( *const BASE_URL = \)'[^']*';|\1'$url_replacement';|" config.php
+    grep -qF "const BASE_URL = '$BASE_URL';" config.php || abort "BASE_URL in config.php des Worktrees nicht setzbar"
     if [ ! -d vendor ]; then
         cp -a "$STACK_MAIN_DIR/vendor" vendor
         stack_exec php-fpm composer dump-autoload --quiet || abort "composer dump-autoload im Worktree fehlgeschlagen"
@@ -77,6 +86,8 @@ if npm_lock_stale; then
     echo "== npm ci: package-lock.json ist neuer als node_modules"
     npm ci || abort "npm ci fehlgeschlagen"
 fi
+# In a worktree with its own lockfile content the linked packages may not match: say so, install nothing.
+npm_worktree_lock_notice test.sh
 
 wait_for "$BASE_URL/ antwortet nicht nach 120 s (docker compose logs nginx php-fpm)" 60 \
     curl -fsS -o /dev/null "$BASE_URL/"
@@ -121,6 +132,14 @@ run "migration drift" bash scripts/migration-test-db.sh drift easyappointments
 run "check:assets" composer_in_container check:assets
 run "check:scratch" composer_in_container check:scratch
 run "check:views" composer_in_container check:views
+
+# Smoke phase under the lock shared by all checkouts: the purge below removes every smoke-… record, and some smokes
+# change global settings. The lock is released when this script exits.
+exec 9>"$STACK_SMOKE_LOCK" || abort "Lock-Datei $STACK_SMOKE_LOCK nicht anlegbar"
+if ! flock -n 9; then
+    echo "== Smoke-Phase: wartet auf einen anderen test.sh-Lauf ($STACK_SMOKE_LOCK)"
+    flock 9 || abort "flock auf $STACK_SMOKE_LOCK fehlgeschlagen"
+fi
 
 # Smoke customers left over by an aborted earlier run (tests/smoke/fixtures.php purge).
 stack_exec php-fpm sh -c "APP_ENV=testing php tests/smoke/fixtures.php purge" >/dev/null

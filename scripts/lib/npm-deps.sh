@@ -9,6 +9,8 @@
 # Provides:
 #   npm_lock_stale   succeed in the main checkout when node_modules is older than package-lock.json or not installed
 #   npm_lock_notice  print one line naming the hook when npm_lock_stale holds, nothing otherwise ($1: hook name)
+#   npm_worktree_lock_notice  in a worktree: print one line when its package-lock.json differs in content from the
+#                    main checkout's, so the linked node_modules does not match it (nothing is installed)
 
 npm_lock_stale() {
     [ "$STACK_IN_WORKTREE" = false ] && [ -f package-lock.json ] || return 1
@@ -18,4 +20,10 @@ npm_lock_stale() {
 npm_lock_notice() {
     npm_lock_stale || return 0
     echo "$1: package-lock.json ist neuer als node_modules – npm ci fällig (scripts/test.sh installiert selbst)"
+}
+
+npm_worktree_lock_notice() {
+    [ "$STACK_IN_WORKTREE" = true ] && [ -f package-lock.json ] || return 0
+    cmp -s package-lock.json "$STACK_MAIN_DIR/package-lock.json" && return 0
+    echo "$1: package-lock.json weicht vom Hauptcheckout ab – das verlinkte node_modules passt nicht dazu (kein npm ci)"
 }

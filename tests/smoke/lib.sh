@@ -6,7 +6,8 @@
 #
 # The smokes test the checkout they belong to, the main checkout or a linked worktree under .claude/worktrees/
 # (scripts/lib/stack.sh): BASE defaults to that checkout's URL below nginx, and PHP runs in php-fpm in that
-# checkout's directory. The database is shared, so smokes create and remove only their own smoke-… fixtures.
+# checkout's directory. The database is shared, and smokes change global settings and purge all smoke-… data:
+# scripts/test.sh runs the smoke phase under a lock shared by all checkouts (STACK_SMOKE_LOCK in stack.sh).
 #
 # Provides BASE (BASE_URL override), FAIL (exit status), TMP (temporary directory, removed by smoke_cleanup) and:
 #   ok <text> / fail <text>       print a result line; fail sets FAIL=1
@@ -24,7 +25,7 @@ pushd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null || exit 2
 . ../../scripts/lib/stack.sh
 popd >/dev/null || exit 2
 
-BASE="${BASE_URL:-http://localhost$STACK_URL_PATH}"
+BASE="${BASE_URL:-$STACK_URL}"
 FAIL=0
 TMP=$(mktemp -d)
 COOKIES="$TMP/cookies"

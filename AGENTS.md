@@ -13,7 +13,8 @@ bash scripts/test.sh    # starts the stack, waits for MySQL + site, runs PHPUnit
 ```
 
 In a worktree under `.claude/worktrees/` it tests the worktree's code, smokes included (against
-`http://localhost/.claude/worktrees/<name>`, shared database). After the merge it runs once more in the main checkout.
+`http://localhost/.claude/worktrees/<name>`, shared database; the smoke phase waits for a lock shared by all
+checkouts). After the merge it runs once more in the main checkout.
 
 Syntax and format of staged files are checked by the pre-commit hook. Theme layout and
 texts are checked visually by the user, not by a smoke test.
