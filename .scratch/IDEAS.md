@@ -24,19 +24,32 @@ booking confirmation instead of "details changed".
   an appointment over to someone else? This decides whether the cancellation mail helps or confuses.
 - Does the same apply to customer changes made through API v1?
 
-## Own browser URL per worktree
+## Own stack per worktree
 
-Added: 2026-10-17, from the retro of the 0020/0021 run.
+Added: 2026-10-17, from the retro of the 0020/0021 run; updated 2026-10-18 (spec 0024).
 
-**Problem:** nginx serves only the main checkout (`docker/nginx/nginx.conf:4-10`). Implementers in a worktree
-cannot run the smoke tests (`scripts/test.sh` exits 3) or Playwright, and seeing a branch in the browser means
-checking it out in the main checkout. Since 2026-10-17 validated branches are merged into `staging` and verified
-there (`docs/agents/git-workflow.md`), which removes the branch switching for the user's visual check.
+**Problem:** Since 0024 the smokes of a worktree run against the shared stack and database
+(`docker/nginx/nginx.conf:13` serves worktrees below `/var/www/html`). Parallel smoke runs share data; so far
+harmless, because every smoke uses its own `smoke-…` fixtures.
 
-**Proposal:** If several specs regularly run in parallel, give each worktree its own Docker Compose project
-(`docker compose -p <worktree>`) with its own port and database, so that parallel smokes do not share data.
+**Proposal:** If parallel runs start to interfere, give each worktree its own Docker Compose project
+(`docker compose -p <worktree>`) with its own port and database.
 
 **Open questions:**
 
-- How often do specs actually run in parallel?
 - Is the extra MySQL/Mailpit per worktree acceptable on the development machine?
+
+## CI as the gate for agent branches
+
+Added: 2026-10-18, from the retro of the 0023 run.
+
+**Problem:** CI runs the full smoke suite in a clean stack on every push (`.github/workflows/ci.yml:3`,
+`.github/workflows/ci.yml:76-151`); only a push to `staging` deploys (`.github/workflows/deploy.yml:11`). Agents never
+push (`AGENTS.md`), so CI only sees branches the user pushes.
+
+**Proposal:** Allow agents to push `agent/*` branches (never `staging`/`main`), so CI checks each branch before the
+staging merge.
+
+**Open questions:**
+
+- Do the monthly GitHub Actions minutes cover one CI run per agent branch?
