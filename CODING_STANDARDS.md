@@ -7,9 +7,11 @@ guardrail cannot enforce.
 ## Upstream files only call fork code
 
 The logic of a fork feature lives in fork-owned libraries and models (pattern: `Booking_policy`,
-`Appointment_contact_rules` as pure rule modules with unit tests). Upstream controllers, libraries and views
-only gain calls into them and display adjustments; a decision (if-cascade, merge, branch choice) written
-inline in an upstream file belongs in the rule module (ADR 0005, keeps the upstream diff and sync conflicts small).
+`Appointment_contact_rules` as pure rule modules with unit tests). Upstream controllers, libraries, views and
+page scripts (`assets/js/pages/*.js`) only gain calls into them and display adjustments; a decision (if-cascade,
+merge, branch choice) written inline in an upstream file belongs in the rule module (ADR 0005, keeps the upstream
+diff and sync conflicts small). Fork JS logic lives in a fork-owned utility module under `assets/js/utils/`
+(pattern: `wizard_scroll.js`) that the page script calls.
 
 ## Brand values come from settings
 
@@ -49,5 +51,6 @@ edge case the test name claims (a test about breaks has a break in its working p
 The ticket comment records the evidence: `Rot vor Fix: <test(s)> – <failure message>`,
 from running the test against the old code or a simulated old behaviour. Refactors and
 docs-only tickets keep their existing tests green instead and record `Rot vor Fix: entfällt – <reason>`.
-`check:scratch` enforces that the line exists (tickets from spec 0017 on, status `needs-verification`/`resolved`);
-the review judges whether the evidence is real.
+`check:scratch` enforces that the line exists (tickets from spec 0017 on, status `needs-verification`/`resolved`;
+from spec 0022 on also as soon as every implementation item of the checklist is ticked, see
+`docs/agents/issue-tracker.md`); the review judges whether the evidence is real.

@@ -14,6 +14,11 @@ Before implementing a change:
 7. Before changing image/logo/favicon assets, read `docs/assets.md` to verify asset roles and usages.
 8. Explain the planned approach before making substantial changes.
 
+When writing a spec, place fork logic in fork-owned modules from the start (`CODING_STANDARDS.md`, "Upstream
+files only call fork code"): PHP rules in a fork-owned library, JS rules in a fork-owned utility module under
+`assets/js/utils/` that the upstream page script (`assets/js/pages/*.js`) only calls. A spec does not prescribe
+logic inside the upstream file.
+
 Prefer:
 
 - Existing project conventions
