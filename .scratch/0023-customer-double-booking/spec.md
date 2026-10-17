@@ -1,6 +1,6 @@
 # Customer double booking: catch every overlap, tell the customer clearly
 
-Status: ready-for-agent
+Status: needs-verification
 Created: 2026-10-16
 Closed: –
 Priority: P1
