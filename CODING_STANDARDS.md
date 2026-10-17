@@ -67,3 +67,10 @@ the server instead of being escaped in the script.
 A script that creates test data stores the raw setup output first, before parsing or anything else that can fail,
 and its cleanup (an exit trap or `finally`) works from that stored output. A failing parse or a setup that prints its
 data and then exits non-zero still removes the test data (pattern: `scripts/measure-booking-flow.sh`).
+
+## Tooling survives parallel runs
+
+Agents run in parallel worktrees on one stack and one database. A test or tooling script that changes shared state
+(database rows, global settings, files in the main checkout) is safe when two runs overlap: it serializes the shared
+part with a lock (pattern: the smoke phase of `scripts/test.sh` under `.git/smoke.lock`) or keeps to data named for
+its own run. A cleanup that deletes by a shared prefix counts as shared state.

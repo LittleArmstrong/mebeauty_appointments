@@ -60,7 +60,8 @@ After making changes:
      database is shared, and smokes change global settings and purge all `smoke-…` data: the smoke
      phase runs under a lock shared by all checkouts (`.git/smoke.lock`), so a second `test.sh` run
      waits for it. After the merge the orchestrator runs it once more in
-     the main checkout. A worktree outside the repository directory is not visible to the
+     the main checkout; a green run there ticks "`bash scripts/test.sh` green" in every ticket merged
+     so far, with a comment naming the merge commit. A worktree outside the repository directory is not visible to the
      containers and aborts.
 
 3. Check for accidental modifications.

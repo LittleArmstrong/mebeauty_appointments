@@ -29,11 +29,16 @@ booking confirmation instead of "details changed".
 Added: 2026-10-17, from the retro of the 0020/0021 run; updated 2026-10-18 (spec 0024).
 
 **Problem:** Since 0024 the smokes of a worktree run against the shared stack and database
-(`docker/nginx/nginx.conf:13` serves worktrees below `/var/www/html`). Parallel smoke runs share data; so far
-harmless, because every smoke uses its own `smoke-…` fixtures.
+(`docker/nginx/nginx.conf:13` serves worktrees below `/var/www/html`). The purge deletes every `smoke-…` record and
+`language-selector-smoke.sh` flips global settings, so `scripts/test.sh` serializes the smoke phase of all checkouts
+with `.git/smoke.lock`. Parallel implementers wait for each other's smokes.
 
-**Proposal:** If parallel runs start to interfere, give each worktree its own Docker Compose project
-(`docker compose -p <worktree>`) with its own port and database.
+**Proposal:** If the waiting starts to slow runs down, either
+
+- give each worktree its own Docker Compose project (`docker compose -p <worktree>`) with its own port and database,
+  or
+- name fixtures per run (`smoke-<run>-…`), let the purge delete only leftovers older than e.g. 30 minutes, and keep
+  the lock only for the smokes that change global settings.
 
 **Open questions:**
 
@@ -53,3 +58,40 @@ staging merge.
 **Open questions:**
 
 - Do the monthly GitHub Actions minutes cover one CI run per agent branch?
+
+## Merge script for the orchestrator, with recorded green runs
+
+Added: 2026-10-18, from the retro of the 0024 run.
+
+**Problem:** In `/implement-spec` every ticket merge into the integration branch ran as its own merger subagent
+(30–46k tokens each) for the same fixed steps: clean-tree check, fast-forward or `--no-ff` with trailer,
+`bash scripts/test.sh`, ticking the ticket. Two merges must not run at once in the main checkout, so the orchestrator
+serialized them by hand. Whether a ticket's "`bash scripts/test.sh` green" box is true is only stated in prose
+(0024/01 and 0024/05 kept a stale "exit 3" until the spec review).
+
+**Proposal:** `scripts/merge-ticket.sh <branch> <integration-branch>` does the fixed steps in one Bash call under a
+lock and prints the exit code; `docs/agents/git-workflow.md` points to it. Optionally `scripts/test.sh` records the
+commit SHA of its last green run in `.git/`, and `check:scratch` refuses `resolved`/`needs-verification` for a spec
+whose integration commit has no recorded green run.
+
+**Open questions:**
+
+- Does a script replace the merger subagent in the `/implement-spec` skill text, or does the orchestrator call it
+  itself?
+- Is a SHA file in `.git/` enough, or does CI need the same evidence?
+
+## Manual checks that need a fresh session
+
+Added: 2026-10-18, from the retro of the 0024 run.
+
+**Problem:** 0024/01 asked the implementer to check that a new agent worktree starts from the local `HEAD`. That needs
+a new Claude Code session, which an implementer cannot start; the box stayed open until later tickets' worktrees
+provided the evidence.
+
+**Proposal:** `docs/agents/issue-tracker.md` (checklist rules): a manual check that needs a new session, a restart or
+an action outside the implementer's worktree is written as a check "by the user" or assigned to the orchestrator in
+the ticket text.
+
+**Open questions:**
+
+- Is one sentence in the tracker doc enough, or should the spec template carry an "who verifies" column?

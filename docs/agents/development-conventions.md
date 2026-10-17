@@ -22,6 +22,9 @@ logic inside the upstream file.
 When a spec changes a server response (HTTP status, JSON fields, error shape), it states the new status code and the
 response fields, so that the contract change is decided in the spec and not discovered in review.
 
+When a spec adds or changes tooling that agents run (`scripts/`, smokes, hooks), it states what happens when two runs
+overlap (`CODING_STANDARDS.md`, "Tooling survives parallel runs").
+
 Prefer:
 
 - Existing project conventions
