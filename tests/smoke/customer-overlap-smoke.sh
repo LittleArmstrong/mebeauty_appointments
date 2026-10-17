@@ -21,9 +21,12 @@ set -uo pipefail
 CREATED_APPOINTMENTS=""
 CREATED_CUSTOMERS=""
 ORIGINAL_SETTING=""
+SETTING_CHANGED=0
 
 cleanup() {
-    [ -z "$ORIGINAL_SETTING" ] || fixtures setting require_email_verification "'$ORIGINAL_SETTING'" >/dev/null
+    # A flag decides whether to restore, not the value: '' means the setting has no value, which the app treats as
+    # off; '' itself is no valid value, so it is restored as '0' (as in email-verification-smoke.sh).
+    [ "$SETTING_CHANGED" = 0 ] || fixtures setting require_email_verification "'${ORIGINAL_SETTING:-0}'" >/dev/null
     fixtures cleanup "${CREATED_APPOINTMENTS#,}" "${CREATED_CUSTOMERS#,}" >/dev/null
     smoke_cleanup
 }
@@ -94,6 +97,7 @@ CREATED_APPOINTMENTS=",$OWN"
 CREATED_CUSTOMERS=",$CUSTOMER,$OTHER_PROVIDER"
 
 ORIGINAL_SETTING=$(fixtures setting require_email_verification "'0'" | tail -1)
+SETTING_CHANGED=1
 ALREADY_BOOKED=$(fixtures lang customer_is_already_booked | tail -1)
 fixtures rate-limit-reset
 

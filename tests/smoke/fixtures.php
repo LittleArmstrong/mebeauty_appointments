@@ -13,7 +13,8 @@
  *       Creates a second provider (copy of a provider with its working plan and services) and a customer with one
  *       future appointment H at that second provider. The first provider is free at H - duration, H - offset, H,
  *       H + offset, H + duration - offset and H + duration (offset: the slot grid, smaller than the duration).
- *       Prints JSON with the IDs, the appointment hash and the times, spec 0023.
+ *       Prints JSON with the IDs, the appointment hash and the times, spec 0023. If the booking fails, the second
+ *       provider is removed again and nothing is printed.
  *   APP_ENV=testing php tests/smoke/fixtures.php appointment-times <appointment-id> <start> <end>
  *       Moves an appointment to the given start and end (Y-m-d H:i:s, the shell splits each into two arguments).
  *   APP_ENV=testing php tests/smoke/fixtures.php get <appointment-id>
@@ -240,7 +241,15 @@ switch ($command) {
 
         $other_provider = smoke_copy_provider($provider);
 
-        $booking = smoke_create_booking($other_provider, $service, $date, $hour, 'Overlap');
+        try {
+            $booking = smoke_create_booking($other_provider, $service, $date, $hour, 'Overlap');
+        } catch (Throwable $e) {
+            // Without the JSON output the smoke test cannot remove the provider, so it goes here.
+            $CI->db->delete('appointments', ['id_users_provider' => (int) $other_provider['id']]);
+            $CI->db->delete('users', ['id' => (int) $other_provider['id']]);
+
+            throw $e;
+        }
 
         echo json_encode([
             'provider_id' => (int) $provider['id'],

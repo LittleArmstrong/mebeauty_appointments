@@ -35,7 +35,7 @@ window.App = (function () {
         }
 
         if (App.Utils.Message) {
-            App.Utils.Message.show(App.Utils.String.escapeHtml(vars('company_name')), lang('unexpected_issues_message'));
+            App.Utils.Message.show(vars('error_dialog_title'), lang('unexpected_issues_message'));
 
             $('<div/>', {
                 'class': 'card',

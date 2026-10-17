@@ -59,6 +59,7 @@
  * @property Cleanup $cleanup
  * @property Availability $availability
  * @property Email_messages $email_messages
+ * @property Error_dialog $error_dialog
  * @property Google_Sync $google_sync
  * @property Caldav_Sync $caldav_sync
  * @property Ics_file $ics_file
@@ -80,6 +81,7 @@ class EA_Controller extends CI_Controller
         parent::__construct();
 
         $this->load->library('accounts');
+        $this->load->library('error_dialog');
 
         $this->check_storage_writable();
         $this->ensure_user_exists();
@@ -162,10 +164,8 @@ class EA_Controller extends CI_Controller
             'csrf_token' => $this->security->get_csrf_hash(),
             'language' => config('language'),
             'language_code' => config('language_code'),
-            // Title of the dialog for unexpected errors (spec 0023).
-            'company_name' => $this->db->table_exists('settings')
-                ? setting('company_name', DEFAULT_COMPANY_NAME)
-                : DEFAULT_COMPANY_NAME,
+            // Title of the dialog for unexpected errors, HTML-escaped (spec 0023).
+            'error_dialog_title' => $this->error_dialog->title(),
         ]);
     }
 

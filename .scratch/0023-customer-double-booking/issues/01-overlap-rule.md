@@ -49,3 +49,22 @@ and the fixtures ran in the worktree's directory inside php-fpm (wrapper redefin
 `-f <main>/docker-compose.yml -w /var/www/html/.claude/worktrees/<name>`). `bash scripts/test.sh` in the worktree:
 exit 3 (PHPUnit and all checks OK, smokes skipped); the full run with smokes follows in the main checkout after the
 merge.
+
+**2026-10-18, review fix (worktree `.claude/worktrees/agent-aae2d64d96e2171b5`):**
+
+`Booking::register()` computes the end from the service duration once, before the overlap check, and reuses it for
+the stored appointment (was computed twice). `fixtures.php overlap-setup` removes the smoke provider again when the
+booking after creating it fails (no JSON output, so the smoke test could not clean it up).
+`customer-overlap-smoke.sh` restores `require_email_verification` by a flag instead of skipping an empty original
+value ('' is no valid value and is restored as '0', as in `email-verification-smoke.sh`). The spec's Further Notes
+state that the check compares stored provider-local times and assumes one timezone for all providers.
+
+Not added: a smoke case "provider unavailability does not count as customer conflict". An unavailability at the
+requested provider makes the slot unavailable (requested-hour refusal, the overlap check is never reached), and an
+unavailability at another provider has no customer, so the case cannot go red through the booking endpoint.
+
+Rot vor Fix: entfällt – refactor and test-tooling fixes, existing smokes stay green.
+
+Validation: `bash scripts/test.sh` exit 3 (PHPUnit and all checks OK, smokes skipped in the worktree);
+`customer-overlap-smoke.sh` (also with `require_email_verification` = '1' before the run: restored),
+`manage-link-smoke.sh`, `email-verification-smoke.sh`, `appointment-contacts-smoke.sh` exit 0 against the worktree.

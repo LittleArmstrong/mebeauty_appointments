@@ -495,6 +495,8 @@ class Booking extends EA_Controller
                 $email_customer_id,
             );
 
+            $appointment['end_datetime'] = $this->appointments_model->calculate_end_datetime($appointment);
+
             // Any overlap with another appointment of the customer is refused (spec 0023).
             if (
                 $customer_id &&
@@ -502,7 +504,7 @@ class Booking extends EA_Controller
                 $this->customer_overlap->exists(
                     $customer_id,
                     $appointment['start_datetime'],
-                    $this->appointments_model->calculate_end_datetime($appointment),
+                    $appointment['end_datetime'],
                     $manage_mode ? $appointment['id'] : null,
                 )
             ) {
@@ -567,7 +569,6 @@ class Booking extends EA_Controller
             $appointment_status_options_json = setting('appointment_status_options', '[]');
             $appointment_status_options = json_decode($appointment_status_options_json, true) ?? [];
             $appointment['status'] = $appointment_status_options[0] ?? null;
-            $appointment['end_datetime'] = $this->appointments_model->calculate_end_datetime($appointment);
 
             $this->appointments_model->only($appointment, $this->allowed_appointment_fields);
 

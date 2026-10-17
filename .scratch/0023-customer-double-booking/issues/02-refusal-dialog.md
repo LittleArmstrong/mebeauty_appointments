@@ -52,3 +52,21 @@ Validation: `bash scripts/test.sh` in the worktree exit 3 (PHPUnit and all check
 `appointment-contacts-smoke.sh` exit 0 against the worktree (nginx path + fixtures in the worktree directory, as in 01).
 
 Open: the visual check of the dialogs by the user (`docs/manual-tests.md`, section 0023, T-DB-01 to T-DB-06).
+
+**2026-10-18, review fix (worktree `.claude/worktrees/agent-aae2d64d96e2171b5`):**
+
+The installation page loads `app.js` without `utils/string.js`, so `App.Utils.String.escapeHtml()` in the global
+error handler threw and no error dialog appeared there. The title now comes HTML-escaped from the server: new
+fork library `Error_dialog` (`title()`, pure `title_for()`, unit test `ErrorDialogTest`) decides company name vs.
+`DEFAULT_COMPANY_NAME` (also for an empty name, and before the installation via `is_app_installed()` instead of a
+second `table_exists('settings')` guard). `EA_Controller` only exposes it as script var `error_dialog_title`,
+`app.js` only passes `vars('error_dialog_title')` to the dialog (no escaping call left). The previous script var
+`company_name` is gone.
+
+Expected booking refusals are answered with HTTP 409 (previously 500 via `RuntimeException`); the CHANGELOG entry
+now says so.
+
+Rot vor Fix: `ErrorDialogTest` – `Failed opening required '…/application/libraries/Error_dialog.php'` before the
+library existed. The installation-page TypeError itself is visual (`docs/manual-tests.md`), not covered by a smoke.
+
+Validation: see ticket 01, same review-fix run.

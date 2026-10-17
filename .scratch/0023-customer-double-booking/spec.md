@@ -125,3 +125,5 @@ the company name instead of "Easy!Appointments".
 - Origin: manual test on 2026-10-16. The refusal was triggered by a timezone shift: provider and company in UTC
   locally, display in Europe/Berlin. The partial-overlap gap was found while analysing it.
 - Glossary: Booking-Flow, Manage-Link, Umbuchung, Vormerkung, E-Mail-Bestätigung.
+- The overlap check compares the stored provider-local times of the appointments and assumes that all providers share
+  one timezone; with providers in different timezones an overlap across providers would be misjudged.
