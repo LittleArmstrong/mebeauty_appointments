@@ -12,8 +12,8 @@ checkpoints:
    validation and code review.
 
 After checkpoint 2 the agent merges the task or integration branch into `staging`
-(fast-forward when possible, otherwise a merge commit; regenerate `.scratch/INDEX.md`
-on a conflict there). The user verifies on `staging`, and the push stays with the user.
+(fast-forward when possible, otherwise a merge commit; `.scratch/INDEX.md` is local and
+never conflicts). The user verifies on `staging`, and the push stays with the user.
 
 For any other commit, ask the user for approval first.
 

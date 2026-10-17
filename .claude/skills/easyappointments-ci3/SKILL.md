@@ -17,7 +17,7 @@ Before changing code, read what applies:
 - `CODING_STANDARDS.md` — review rules: fork logic outside upstream files, brand values from settings, asset roles, `e()` in views, tests go red.
 - `GLOSSARY.md` — domain vocabulary (Buchungsfrist, Umbuchungs-/Stornierungsfrist, Pufferzeit, Arbeitsende, Manage-Link, Theme, Site-Chrome …).
 - `docs/adr/` — fork decisions, notably 0002/0003 (deadlines, buffer, slot capacity), 0005 (upstream sync, migration numbering), 0006 (site chrome per theme), 0007 (PHP versions).
-- `.scratch/INDEX.md` — specs and tickets (schema in `docs/agents/issue-tracker.md`).
+- `.scratch/INDEX.md` — specs and tickets; local generated file, not in git (schema in `docs/agents/issue-tracker.md`).
 
 All PHP and Composer commands run inside the `php-fpm` container (`docker compose exec -T php-fpm …`); the host `php` is a shim.
 

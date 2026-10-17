@@ -55,22 +55,22 @@ A spec may only be `resolved` when none of its tickets is open.
 
 ## Index
 
-`.scratch/INDEX.md` lists all specs (open and closed) with status, priority, dates, dependencies and ticket counts. It is **generated** — never edit it by hand:
+`.scratch/INDEX.md` lists all specs (open and closed) with status, priority, dates, dependencies and ticket counts.
+It is a **local, generated file**: ignored by git, never committed and never edited by hand, so parallel branches
+never conflict on it. Each checkout keeps its own copy current: the post-checkout hook (branch switch, new
+worktree), the post-merge hook (merge, pull) and `bash scripts/test.sh` regenerate it. The hooks do so silently and
+skip it when `php-fpm` is not running. To regenerate or read it on demand:
 
 ```bash
-bash scripts/composer.sh scratch:index   # regenerate INDEX.md
-bash scripts/composer.sh check:scratch   # validate headers, numbering, INDEX (also runs in CI)
+bash scripts/composer.sh scratch:index   # regenerate INDEX.md, then read .scratch/INDEX.md
+bash scripts/composer.sh check:scratch   # validate folder names, headers, numbering, ticket rules (also runs in CI)
 ```
 
 `scripts/composer.sh` runs composer in the current checkout, also in a worktree under `.claude/worktrees/`
 (`docs/docker.md`).
 
-Regenerate the index whenever a spec header or a ticket status changes.
-
-After a merge, regenerate it as well. With the merge driver registered (setup step in
-`docs/agents/validation-and-completion.md`), a merge keeps the current side of `INDEX.md` without conflict markers,
-so the index may be stale. Regenerate it and commit the result. `check:scratch` reports a stale index in CI and
-in the pre-commit hook of the next commit that stages `.scratch/` files.
+Regenerate the index after changing a spec header or a ticket status when you want to read it right away.
+`check:scratch` does not look at `INDEX.md`.
 
 ## When a skill says "publish to the issue tracker"
 

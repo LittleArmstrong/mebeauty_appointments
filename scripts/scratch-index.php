@@ -6,10 +6,11 @@
  * Every spec lives in .scratch/NNNN-<slug>/ with a spec.md (or map.md for wayfinding efforts)
  * whose header lines carry Status, Created, Closed, Priority and Depends-on. Tickets live in
  * issues/NN-<slug>.md with a Status line. See docs/agents/issue-tracker.md for the schema.
+ * INDEX.md is generated locally (git hooks, scripts/test.sh) and ignored by git, so merges never conflict on it.
  *
  * Run directly:
- *     php scripts/scratch-index.php generate [path-to-scratch]   # (re)write INDEX.md
- *     php scripts/scratch-index.php check [path-to-scratch]      # validate, exit 1 on errors
+ *     php scripts/scratch-index.php generate [path-to-scratch]   # (re)write the local INDEX.md
+ *     php scripts/scratch-index.php check [path-to-scratch]      # validate headers and tickets, exit 1 on errors
  * When included (e.g. from PHPUnit), only the functions are defined and nothing is executed.
  */
 
@@ -444,7 +445,7 @@ function scratch_render_index(array $specs): string
     $lines = [
         '# Spec-Index',
         '',
-        '> Generiert von `composer scratch:index` — nicht von Hand bearbeiten. Schema: `docs/agents/issue-tracker.md`.',
+        '> Lokal generiert (Git-Hooks, `composer scratch:index`), nicht in Git — nicht von Hand bearbeiten. Schema: `docs/agents/issue-tracker.md`.',
         '',
         '## Offen',
         ''
@@ -495,7 +496,9 @@ function scratch_render_index(array $specs): string
 }
 
 /**
- * Validate a scratch directory including the freshness of its INDEX.md.
+ * Validate a scratch directory: folder names, spec headers, numbering and ticket rules.
+ *
+ * INDEX.md is a local generated file that git ignores, so it is not compared.
  *
  * @param string $directory Path to the scratch directory.
  *
@@ -505,19 +508,7 @@ function scratch_check(string $directory): array
 {
     $collected = scratch_collect($directory);
 
-    $errors = array_merge($collected['errors'], scratch_validate($collected['specs']));
-
-    $index_path = rtrim($directory, '/') . '/' . SCRATCH_INDEX_FILE;
-
-    $expected = scratch_render_index($collected['specs']);
-
-    if (!is_file($index_path)) {
-        $errors[] = SCRATCH_INDEX_FILE . ' fehlt — mit `composer scratch:index` erzeugen';
-    } elseif ((string) file_get_contents($index_path) !== $expected) {
-        $errors[] = SCRATCH_INDEX_FILE . ' ist veraltet — mit `composer scratch:index` neu erzeugen';
-    }
-
-    return $errors;
+    return array_merge($collected['errors'], scratch_validate($collected['specs']));
 }
 
 // Only run the CLI entry point when invoked directly, not when included by a test.

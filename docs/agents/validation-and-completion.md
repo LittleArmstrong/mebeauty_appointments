@@ -18,16 +18,17 @@ the same check `scripts/test.sh` uses). It prints one line when it rebuilds, not
 and only warns when the build fails. Asset URLs carry the served file's modification time
 (`Asset_cache_busting`), so a normal reload picks up a rebuilt file.
 
+The post-checkout hook and a post-merge hook (`scripts/git-hooks/post-merge`) also regenerate the local spec index
+`.scratch/INDEX.md` (`scripts/lib/scratch-index.sh`, `docs/agents/issue-tracker.md`); `scripts/test.sh` does the
+same. The hooks do this silently and skip it when `php-fpm` is not running.
+
 The git config is local and not committed. Run this setup step once per clone (worktrees share it):
 
 ```bash
 git config core.hooksPath scripts/git-hooks
-git config merge.scratch-index.driver true
 ```
 
-The first line activates both hooks. The second registers the merge driver that `.gitattributes` assigns to
-`.scratch/INDEX.md`. A merge then keeps the current side of the index instead of producing conflict markers.
-Regenerate the index right after the merge (`docs/agents/issue-tracker.md`).
+It activates all hooks.
 
 After making changes:
 

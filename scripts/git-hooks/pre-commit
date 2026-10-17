@@ -68,11 +68,11 @@ if staged_matches '\.(php|js|scss)$'; then
     fi
 fi
 
-# Spec tracker: headers, numbering and generated INDEX.md (docs/agents/issue-tracker.md).
+# Spec tracker: folder names, headers, numbering and ticket rules (docs/agents/issue-tracker.md).
 if staged_matches '^\.scratch/'; then
     if stack_php_running; then
         if ! stack_exec php-fpm php scripts/scratch-index.php check; then
-            echo "pre-commit: .scratch ungültig – bash scripts/composer.sh scratch:index ausführen bzw. Kopfzeilen korrigieren" >&2
+            echo "pre-commit: .scratch ungültig – Kopfzeilen bzw. Tickets korrigieren" >&2
             fail=1
         fi
     else

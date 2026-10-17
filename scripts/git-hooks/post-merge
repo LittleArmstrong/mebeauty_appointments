@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Post-merge: regenerate the local spec index (scripts/lib/scratch-index.sh) after a merge or pull, so it lists the
+# specs of both sides. Silent, skipped when php-fpm is not running, and never fails: the merge has already happened.
+
+. "$(dirname "$0")/../lib/stack.sh"
+. "$(dirname "$0")/../lib/scratch-index.sh"
+
+scratch_index_refresh
+
+exit 0

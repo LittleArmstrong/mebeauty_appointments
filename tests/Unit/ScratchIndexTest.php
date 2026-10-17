@@ -29,14 +29,12 @@ class ScratchIndexTest extends TestCase
         parent::tearDown();
     }
 
-    public function testValidScratchWithFreshIndexPasses(): void
+    public function testValidScratchPasses(): void
     {
         $this->writeSpec('0001-first', $this->header('resolved', '2026-09-30', '2026-10-01', '–', '–'));
         $this->writeTicket('0001-first', '01-a.md', 'resolved');
         $this->writeSpec('0002-second', $this->header('ready-for-agent', '2026-10-02', '–', 'P1', '0001'));
         $this->writeTicket('0002-second', '01-b.md', 'ready-for-agent');
-
-        $this->generateIndex();
 
         $this->assertSame([], \scratch_check($this->tmpDir));
     }
@@ -136,15 +134,35 @@ class ScratchIndexTest extends TestCase
         $this->assertErrorContains('legacy-spec: ungültiger Ordnername');
     }
 
-    public function testOutdatedIndexIsReported(): void
+    public function testMissingIndexPassesTheCheck(): void
+    {
+        $this->writeSpec('0001-first', $this->header('ready-for-agent', '2026-10-01', '–', 'P2', '–'));
+
+        $this->assertSame([], \scratch_check($this->tmpDir));
+    }
+
+    public function testStaleIndexPassesTheCheck(): void
     {
         $this->writeSpec('0001-first', $this->header('ready-for-agent', '2026-10-01', '–', 'P2', '–'));
 
         $this->generateIndex();
 
         $this->writeTicket('0001-first', '01-a.md', 'ready-for-agent');
+        file_put_contents($this->tmpDir . '/INDEX.md', "stale\n", FILE_APPEND);
 
-        $this->assertErrorContains('INDEX.md ist veraltet');
+        $this->assertSame([], \scratch_check($this->tmpDir));
+    }
+
+    public function testHeaderErrorsStillFailWithoutAnIndex(): void
+    {
+        $this->writeSpec('0001-first', $this->header('done', '2026-10-01', '–', 'P2', '–'));
+        $this->writeSpec('0003-third', $this->header('ready-for-agent', '2026-10-01', '–', 'P2', '–'));
+
+        $errors = implode("\n", \scratch_check($this->tmpDir));
+
+        $this->assertStringContainsString('unbekannter Status "done"', $errors);
+        $this->assertStringContainsString('fehlende Nummer 0002', $errors);
+        $this->assertStringNotContainsString('INDEX.md', $errors);
     }
 
     public function testIndexListsOpenSpecsByPriorityAndCountsTickets(): void

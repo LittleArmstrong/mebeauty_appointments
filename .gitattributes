@@ -1,5 +1,1 @@
 * text=auto
-
-# Generated spec index: keep the current side on merge, then regenerate it (docs/agents/issue-tracker.md).
-# The driver is registered by the setup step in docs/agents/validation-and-completion.md.
-.scratch/INDEX.md merge=scratch-index

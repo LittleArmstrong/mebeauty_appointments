@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Full local validation in one command: starts the Docker stack, waits until MySQL and the site respond,
-# rebuilds stale minified JS, then runs PHPUnit, all repository checks and all smoke tests. Keeps going after a
+# rebuilds stale minified JS and the local spec index, then runs PHPUnit, all repository checks and all smoke tests. Keeps going after a
 # failure and ends with a summary; exits 1 when at least one check failed, 2 when a prerequisite is missing.
 #
 # Usage (on the host, from anywhere):
@@ -22,6 +22,7 @@ set -u
 cd "$(dirname "$0")/.."
 . scripts/lib/stack.sh
 . scripts/lib/js-build.sh
+. scripts/lib/scratch-index.sh
 
 abort() {
     echo "test.sh: $1" >&2
@@ -75,6 +76,9 @@ if [ -n "$(js_stale_scripts)" ]; then
     npx gulp scripts || abort "npx gulp scripts fehlgeschlagen"
     [ -z "$(js_stale_scripts)" ] || abort "nach npx gulp scripts noch veraltet: $(js_stale_scripts | tr '\n' ' ')"
 fi
+
+# The spec index is a local generated file (docs/agents/issue-tracker.md): keep this checkout's copy current.
+scratch_index_refresh
 
 results=()
 failed=0
