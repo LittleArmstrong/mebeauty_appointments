@@ -36,6 +36,16 @@ and in one case they made the user's visual check report a false bug.
 - **Agent worktrees start from `main`.** Agent worktrees branched from `origin/HEAD`, which pointed to
   `origin/main`. This has been fixed locally (`git remote set-head origin staging`), but it is not documented
   anywhere.
+- **Reproductions touch real local data.** To reproduce a refusal, the agent booked with the user's own email. That
+  created an appointment, sent three mails and overwrote name and phone of the user's customer record, which had to
+  be restored by hand. The smoke fixtures already create and remove their own test customers
+  (`tests/smoke/fixtures.php`), but nothing points measurement or reproduction scripts to them.
+- **Browser timezone differs from the user's.** The Playwright container runs in UTC, and the booking page takes the
+  browser's timezone (`assets/js/pages/booking.js:221-224`). The first reproduction succeeded where the user's
+  booking failed, because the hours were shifted by two hours.
+- **nginx requests missing from `docker compose logs`.** The access log is written to a custom file
+  (`docker/nginx/nginx.conf:8`) instead of the image's default path, which the image sends to the container output.
+  `docker compose logs nginx` therefore shows no requests.
 
 ## Solution
 
@@ -80,6 +90,12 @@ and in one case they made the user's visual check report a false bug.
     change the main checkout by accident.
 16. As an agent, I want the docs to explain that agent worktrees branch from `origin/HEAD`, so that I can
     recognise and fix a wrong base.
+17. As the salon owner, I want measurement and reproduction runs to leave my local customers, appointments and
+    mails untouched, so that my own test data stays valid.
+18. As an agent, I want the measurement to run in the salon's timezone and locale by default, so that I see the
+    same hours as the user.
+19. As an agent, I want `docker compose logs nginx` to show the requests, so that I can see what the browser sent
+    without extra knowledge.
 
 ## Implementation Decisions
 
@@ -103,6 +119,9 @@ and in one case they made the user's visual check report a false bug.
   - `docs/visual-measurement.md` moves its setup from `/tmp` to the checked-in script and documents the new
     command.
   - Playwright does not run in CI (it needs the stack).
+  - The measurement creates its own test customer and appointments through the smoke fixtures and removes them
+    afterwards, also when a run fails. It never uses existing customers.
+  - Browser timezone `Europe/Berlin` and locale `de-DE` by default, both overridable by parameter.
 - **Coding standards.** The upstream rule also names page scripts. Fork JS rules live in fork-owned utility
   modules that the page script calls. The development conventions mention this where specs are written.
 - **Red evidence.**
@@ -123,6 +142,8 @@ and in one case they made the user's visual check report a false bug.
   - Docs that show `docker compose exec -T php-fpm composer …` for repository commands point to the wrapper.
 - **Worktree base.** The git-workflow doc states that agent worktrees branch from `origin/HEAD` and that it must
   point to `staging` (`git remote set-head origin staging`).
+- **nginx logs.** The access and error logs use the image's default paths, so they appear in
+  `docker compose logs nginx`. Request bodies are not logged (personal data).
 
 ## Testing Decisions
 
@@ -138,7 +159,9 @@ and in one case they made the user's visual check report a false bug.
   result in the ticket comments:
   - checkout between `staging` and a branch with a JS change → rebuild line and new code served;
   - the wrapper in a worktree changes only the worktree;
-  - the measurement command reproduces the 0020 table;
+  - the measurement command reproduces the 0020 table, and afterwards no test customer, appointment or customer
+    change is left in the database;
+  - a booking request shows up in `docker compose logs nginx`;
   - merging two branches that both touch the index leaves no conflict markers.
 - `bash scripts/test.sh` stays the single validation entry point.
 

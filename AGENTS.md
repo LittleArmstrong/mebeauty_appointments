@@ -36,7 +36,8 @@ comment, an ADR or `docs/` before the session ends.
 
 Two authorized commit checkpoints: (1) after a spec + ticket is created in `.scratch/`
 and is triage-ready, (2) after `/implement` or `/implement-spec` passes validation.
-Otherwise ask first. Never push or merge. See `docs/agents/git-workflow.md`.
+After (2), merge the branch into `staging`; the user verifies there. Otherwise ask first.
+Never push. See `docs/agents/git-workflow.md`.
 
 ## Load when relevant
 

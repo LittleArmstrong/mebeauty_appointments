@@ -11,6 +11,10 @@ checkpoints:
 2. After completing `/implement` or `/implement-spec`, including the required
    validation and code review.
 
+After checkpoint 2 the agent merges the task or integration branch into `staging`
+(fast-forward when possible, otherwise a merge commit; regenerate `.scratch/INDEX.md`
+on a conflict there). The user verifies on `staging`, and the push stays with the user.
+
 For any other commit, ask the user for approval first.
 
 Before creating a commit:
@@ -25,7 +29,7 @@ Before creating a commit:
 The agent MUST NOT:
 
 - Push to any remote unless the user explicitly asks for a push.
-- Merge branches unless explicitly requested.
+- Merge branches other than the `staging` merge after checkpoint 2, unless explicitly requested.
 - Force-push.
 - Amend, reset, rebase, cherry-pick, or otherwise rewrite git history unless explicitly requested.
 - Commit unrelated or pre-existing user changes.
@@ -72,8 +76,8 @@ asks for that specific path.
 git checkout staging && git checkout -b agent/<short-task-name>
 ```
 
-- Merge finished task branches back into `staging` (ff-merge or PR), then push
-  `staging` to trigger the test deploy.
+- Finished task branches are merged into `staging` after checkpoint 2 (see above);
+  the user pushes `staging` to trigger the test deploy.
 - Release to prod: PR `staging → main` (in the browser), then tag on `main`.
 - If the repository already contains unrelated work, do not switch branches without confirming with the user.
 

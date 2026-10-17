@@ -23,3 +23,20 @@ booking confirmation instead of "details changed".
 - Is reassigning used to correct a wrongly selected customer (who may never have read the first mail), or to hand
   an appointment over to someone else? This decides whether the cancellation mail helps or confuses.
 - Does the same apply to customer changes made through API v1?
+
+## Own browser URL per worktree
+
+Added: 2026-10-17, from the retro of the 0020/0021 run.
+
+**Problem:** nginx serves only the main checkout (`docker/nginx/nginx.conf:4-10`). Implementers in a worktree
+cannot run the smoke tests (`scripts/test.sh` exits 3) or Playwright, and seeing a branch in the browser means
+checking it out in the main checkout. Since 2026-10-17 validated branches are merged into `staging` and verified
+there (`docs/agents/git-workflow.md`), which removes the branch switching for the user's visual check.
+
+**Proposal:** If several specs regularly run in parallel, give each worktree its own Docker Compose project
+(`docker compose -p <worktree>`) with its own port and database, so that parallel smokes do not share data.
+
+**Open questions:**
+
+- How often do specs actually run in parallel?
+- Is the extra MySQL/Mailpit per worktree acceptable on the development machine?
