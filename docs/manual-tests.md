@@ -225,3 +225,13 @@ dev tools, e.g. 390×844).
   the backend: the page opens at step 2 and at the top, navbar and hero visible as before.
 - [ ] **T-WS-08** Manage link of an existing appointment (from the customer mail): "Weiter" and "Zurück" behave as
   in T-WS-02 to T-WS-05.
+
+## 11 Backend header — 0021/01
+
+- [ ] **T-BH-01** Backend with calendar view "Standard" (account settings → "Kalender"): clicking the logo, the
+  company name or the subtitle at the top left opens the calendar (<http://localhost/index.php/calendar>), the same
+  page as the "Kalender" menu item. The header looks unchanged: no underline, no colour change on hover.
+- [ ] **T-BH-02** Calendar view set to "Tabelle": clicking the logo opens the table view (`calendar?view=table`),
+  like the "Kalender" menu item.
+- [ ] **T-BH-03** Phone width (DevTools, 375 px): the logo link sits next to the collapsed menu button and opens the
+  calendar; the menu button still opens the menu.

@@ -8,14 +8,16 @@
 
 $company_logo = setting('company_logo') ?: base_url('assets/img/logo.png');
 $company_name = setting('company_name', DEFAULT_COMPANY_NAME);
+$calendar_url = site_url('calendar' . (vars('calendar_view') === CALENDAR_VIEW_TABLE ? '?view=table' : ''));
 ?>
 
 <nav id="header" class="navbar navbar-expand-md navbar-dark bg-primary p-0">
-    <div id="header-logo" class="navbar-brand p-1 lh-1">
+    <a id="header-logo" class="navbar-brand p-1 lh-1" href="<?= $calendar_url ?>"
+       aria-label="<?= e($company_name) ?> - <?= lang('calendar') ?>">
         <img src="<?= $company_logo ?>" alt="logo" class="float-start me-2" style="width: 45px; height: 45px;">
         <h6 class="mb-1 mt-1 fw-bold text-white" style="font-size: 15px;"><?= e($company_name) ?></h6>
         <small class="d-block text-white-50" style="font-size: 12px;">Online Appointment Scheduler</small>
-    </div>
+    </a>
 
     <button type="button" class="navbar-toggler me-1" data-bs-toggle="collapse" data-bs-target="#header-menu">
         <span class="navbar-toggler-icon"></span>
@@ -26,9 +28,7 @@ $company_name = setting('company_name', DEFAULT_COMPANY_NAME);
             <?php $hidden = can('view', PRIV_APPOINTMENTS) ? '' : 'd-none'; ?>
             <?php $active = $active_menu == PRIV_APPOINTMENTS ? 'active' : ''; ?>
             <li class="nav-item text-center <?= $active . $hidden ?>" style="min-width: 100px;">
-                <a href="<?= site_url(
-                    'calendar' . (vars('calendar_view') === CALENDAR_VIEW_TABLE ? '?view=table' : ''),
-                ) ?>"
+                <a href="<?= $calendar_url ?>"
                    class="nav-link text-white fw-light py-3 px-3"
                    data-tippy-content="<?= lang('manage_appointment_record_hint') ?>">
                     <i class="fas fa-calendar-alt me-2"></i>
