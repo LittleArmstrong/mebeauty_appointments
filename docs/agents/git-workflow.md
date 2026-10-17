@@ -84,17 +84,17 @@ git checkout staging && git checkout -b agent/<short-task-name>
 ### Agent worktrees
 
 `/implement-spec` and subagents with worktree isolation create linked worktrees under `.claude/worktrees/`.
-Their branch starts from `origin/HEAD`, which must point to `staging`. When it points to `main`, the worktree
-starts from production and misses the work on `staging`. Check it, and fix it once per clone:
+The checked-in `.claude/settings.json` sets `"worktree": {"baseRef": "head"}`, so their branch starts from the
+branch checked out in the main checkout (its local `HEAD`), not from `origin/HEAD`. Claude Code's default
+(`fresh`) would branch from `origin/staging`, which lags local `staging` because the user pushes rarely.
 
-```bash
-git symbolic-ref refs/remotes/origin/HEAD   # expected: refs/remotes/origin/staging
-git remote set-head origin staging
-```
+The orchestrator therefore checks out the integration branch (`agent/<NNNN>-<feature>`, or `staging` for a
+single task) in the main checkout before it starts implementers, and only then starts them.
 
-A worktree from the wrong base has an old fork point (`git merge-base HEAD staging` is not the tip of
-`staging`, or of the integration branch it should build on): reset the fresh worktree to the intended branch
-before working in it. In a worktree, composer commands go through `bash scripts/composer.sh` (`docs/docker.md`).
+Fallback: an implementer first checks its base with
+`git merge-base --is-ancestor <integration-branch> HEAD`. If that fails (old fork point, e.g. the setting was
+not loaded or the wrong branch was checked out), it resets the fresh worktree with
+`git reset --hard <integration-branch>` before working in it and mentions the reset in its report. In a worktree, composer commands go through `bash scripts/composer.sh` (`docs/docker.md`).
 
 ## Releases & Tags
 
