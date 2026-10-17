@@ -11,7 +11,14 @@ file fails one of these checks:
 - accidentally staged backup files (`.backup`, `.bak`, `.orig`)
 
 A check whose tool is missing (`npx`, running container) is skipped with a warning.
-The hook is activated via `git config core.hooksPath scripts/git-hooks` and must be
+
+A post-checkout hook (`scripts/git-hooks/post-checkout`) rebuilds the minified JavaScript
+after a branch switch when a source is newer than its `.min.js` (`scripts/lib/js-build.sh`,
+the same check `scripts/test.sh` uses). It prints one line when it rebuilds, nothing otherwise,
+and only warns when the build fails. Asset URLs carry the served file's modification time
+(`Asset_cache_busting`), so a normal reload picks up a rebuilt file.
+
+Both hooks are activated via `git config core.hooksPath scripts/git-hooks` and must be
 re-enabled on a fresh clone (the config is local, not committed).
 
 After making changes:

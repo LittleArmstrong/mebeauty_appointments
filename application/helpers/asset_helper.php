@@ -26,8 +26,6 @@ function asset_url(string $uri = '', ?string $protocol = null): string
 {
     $debug = config('debug');
 
-    $cache_busting_token = '?' . config('cache_busting_token');
-
     if (str_contains(basename($uri), '.js') && !str_contains(basename($uri), '.min.js') && !$debug) {
         $uri = str_replace('.js', '.min.js', $uri);
     }
@@ -36,5 +34,9 @@ function asset_url(string $uri = '', ?string $protocol = null): string
         $uri = str_replace('.css', '.min.css', $uri);
     }
 
-    return base_url($uri . $cache_busting_token, $protocol);
+    get_instance()->load->library('asset_cache_busting');
+
+    $cache_busting_token = get_instance()->asset_cache_busting->token(FCPATH, $uri, config('cache_busting_token'));
+
+    return base_url($uri . '?' . $cache_busting_token, $protocol);
 }

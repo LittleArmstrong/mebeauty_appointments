@@ -20,6 +20,7 @@ set -u
 
 cd "$(dirname "$0")/.."
 . scripts/lib/stack.sh
+. scripts/lib/js-build.sh
 
 abort() {
     echo "test.sh: $1" >&2
@@ -58,21 +59,13 @@ if [ "$STACK_IN_WORKTREE" = true ]; then
     [ -e node_modules ] || ln -s "$(realpath --relative-to=. "$STACK_MAIN_DIR/node_modules")" node_modules
 fi
 
-# With DEBUG_MODE = false the site loads the gitignored assets/js/**/*.min.js. The smokes do not run JS, but
-# the stack they leave behind is what the user checks by eye: rebuild when a source is newer than its .min.js
-# and abort when the build fails or leaves one stale. gulp gives the .min.js the source's mtime truncated to
-# milliseconds, so whole seconds are compared.
-stale_scripts() {
-    find assets/js -name '*.js' ! -name '*.min.js' -print0 | while IFS= read -r -d '' src; do
-        local min="${src%.js}.min.js"
-        [ -f "$min" ] && [ "$(stat -c %Y "$src")" -le "$(stat -c %Y "$min")" ] || echo "$src"
-    done
-}
-if [ -n "$(stale_scripts)" ]; then
+# The smokes do not run JS, but the stack they leave behind is what the user checks by eye: rebuild stale
+# minified scripts (scripts/lib/js-build.sh) and abort when the build fails or leaves one stale.
+if [ -n "$(js_stale_scripts)" ]; then
     [ -x node_modules/.bin/gulp ] || abort "veraltetes .min.js, aber node_modules fehlt – npm ci"
-    echo "== JS-Build (npx gulp scripts): $(stale_scripts | wc -l) Quelle(n) neuer als ihr .min.js"
+    echo "== JS-Build (npx gulp scripts): $(js_stale_scripts | wc -l) Quelle(n) neuer als ihr .min.js"
     npx gulp scripts || abort "npx gulp scripts fehlgeschlagen"
-    [ -z "$(stale_scripts)" ] || abort "nach npx gulp scripts noch veraltet: $(stale_scripts | tr '\n' ' ')"
+    [ -z "$(js_stale_scripts)" ] || abort "nach npx gulp scripts noch veraltet: $(js_stale_scripts | tr '\n' ' ')"
 fi
 
 results=()
