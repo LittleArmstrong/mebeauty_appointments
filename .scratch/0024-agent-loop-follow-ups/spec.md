@@ -1,8 +1,8 @@
 # Agent-loop follow-ups: current worktree base, smokes in the worktree, local index
 
-Status: ready-for-agent
+Status: resolved
 Created: 2026-10-18
-Closed: –
+Closed: 2026-10-18
 Priority: P2
 Depends-on: 0022
 

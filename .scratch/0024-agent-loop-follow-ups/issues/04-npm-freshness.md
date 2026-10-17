@@ -6,7 +6,7 @@ that case (main checkout only; a worktree links the main checkout's `node_module
 
 **Blocked by:** 03 (both edit the hooks and `scripts/test.sh`)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] Hooks print the npm line only when the lockfile is newer
 - [x] `scripts/test.sh` runs `npm ci` when the lockfile is newer (main checkout)

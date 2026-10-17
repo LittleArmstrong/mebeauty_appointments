@@ -7,7 +7,7 @@ implementers, and the reset check stays as a fallback.
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] `.claude/settings.json` with `worktree.baseRef: "head"`
 - [x] `docs/agents/git-workflow.md` updated (base rule, orchestrator checkout, reset fallback)

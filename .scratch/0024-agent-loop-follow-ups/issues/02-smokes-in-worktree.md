@@ -7,7 +7,7 @@ in `AGENTS.md` and the docs go away. The database stays shared; smokes keep usin
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] Fixtures run in the checkout being tested (built on `scripts/lib/stack.sh`)
 - [x] `scripts/test.sh` runs the smokes in a worktree with the worktree's `BASE_URL`; green run exits 0

@@ -8,7 +8,7 @@ server response. The booking measurement accepts `--name value` as well as `--na
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] Two rules in `CODING_STANDARDS.md`
 - [x] Spec-writing note in `docs/agents/development-conventions.md`
