@@ -7,7 +7,7 @@ cannot be worded right; English fixed only where functionally wrong.
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] Wizard steps and booking messages reworded (German)
 - [ ] Person step with question wording, "Egal bei wem"

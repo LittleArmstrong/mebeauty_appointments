@@ -6,7 +6,7 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] Role terms unified (provider, secretary, service)
 - [ ] Leftover and half-translated strings fixed

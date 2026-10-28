@@ -1,6 +1,6 @@
 # German translation revision: natural, function-based wording
 
-Status: ready-for-agent
+Status: in-progress
 Created: 2026-10-28
 Closed: –
 Priority: P2

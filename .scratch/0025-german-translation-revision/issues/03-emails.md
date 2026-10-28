@@ -6,7 +6,7 @@ verification) reworded per the style guide; email templates declare the renderin
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] Customer email texts reworded (German)
 - [ ] Staff email texts reworded (German)

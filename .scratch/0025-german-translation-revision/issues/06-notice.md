@@ -5,7 +5,7 @@
 
 **Blocked by:** –
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] `NOTICE` at the repository root
 - [ ] README links to it

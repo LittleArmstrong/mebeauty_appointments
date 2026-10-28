@@ -7,7 +7,7 @@ naturally. English hint and button fixed to match each other.
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] Cancellation banner: hint and own button key match (German and English)
 - [ ] Cancellation reason prompt reworded

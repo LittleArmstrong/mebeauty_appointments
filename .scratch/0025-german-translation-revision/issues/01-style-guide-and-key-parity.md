@@ -7,7 +7,7 @@ the same keys.
 
 **Blocked by:** –
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] Style guide in `docs/` with term table matching `GLOSSARY.md`
 - [ ] Linked from `docs/manage-translations.md`
