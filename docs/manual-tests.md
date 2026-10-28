@@ -105,7 +105,7 @@ Automated: deadline, buffer and end-of-working-day edge cases (PHPUnit `Booking_
 ## 0006 Slot capacity — 0006
 
 - [ ] **T-KA-01** S60 slot capacity 1 (services): book S60 tomorrow 10:00 with A. Afterwards B offers nothing for S60
-  at 10:00 (nor overlapping 09:30); neither does "Beliebiger Anbieter".
+  at 10:00 (nor overlapping 09:30); neither does "Egal bei wem".
 - [ ] **T-KA-02** Capacity 2: B still offers 10:00; after the second booking it no longer does.
 - [ ] **T-KA-03** Capacity 0: unlimited, as upstream.
 - [ ] **T-KA-04** In the backend calendar a third S60 at 10:00 can be created despite full capacity.
@@ -247,8 +247,8 @@ All bookings with the same customer email. The overlap rule itself (partial over
 Manage-Link, Vormerkung) is automated (`tests/smoke/customer-overlap-smoke.sh`, case 12b of
 `tests/smoke/email-verification-smoke.sh`).
 
-- [ ] **T-DB-01** Book S60 with A tomorrow at 10:00. Book again S60 with B tomorrow at 10:30 (or "Jeder
-  Anbieter") and submit: dialog titled "Termin nicht möglich" with the text "Sie haben zu dieser Zeit bereits einen
+- [ ] **T-DB-01** Book S60 with A tomorrow at 10:00. Book again S60 with B tomorrow at 10:30 (or "Egal
+  bei wem") and submit: dialog titled "Termin nicht möglich" with the text "Sie haben zu dieser Zeit bereits einen
   Termin bei uns. Bitte wählen Sie eine andere Uhrzeit." No "Der Vorgang konnte nicht abgeschlossen werden." and no
   grey box with a server message. (0023/02)
 - [ ] **T-DB-02** Close the dialog: the wizard still shows the confirmation step with all entered data. Go back,
@@ -257,7 +257,7 @@ Manage-Link, Vormerkung) is automated (`tests/smoke/customer-overlap-smoke.sh`, 
   already have an appointment with us at this time. Please choose another time." (0023/02)
 - [ ] **T-DB-04** Slot taken in the meantime: open the booking flow in two windows (one private), choose the same
   free slot with different emails up to the confirmation step, book in the first window, then submit in the second:
-  the same dialog "Termin nicht möglich" with the text "Der gewünschte Termin ist leider nicht verfügbar. …".
+  the same dialog "Termin nicht möglich" with the text "Diese Uhrzeit ist leider nicht mehr frei. …".
   (0023/02)
 - [ ] **T-DB-05** Unexpected error on the booking page: in the DevTools console run
   `$.post(App.Utils.Url.siteUrl('booking/register'), {csrf_token: vars('csrf_token')})`: dialog titled with the
@@ -266,3 +266,40 @@ Manage-Link, Vormerkung) is automated (`tests/smoke/customer-overlap-smoke.sh`, 
 - [ ] **T-DB-06** Unexpected error in the backend calendar: in the DevTools console run
   `$.post(App.Utils.Url.siteUrl('calendar/save_appointment'), {csrf_token: vars('csrf_token')})`: dialog titled with
   the company name as in T-DB-05. (0023/02)
+
+## 0025 German translation revision — 0025/02
+
+Theme `mebeauty`, booking page in German (<http://localhost>) unless a test case says otherwise. Wording follows
+`docs/translation-style-de.md`.
+
+- [ ] **T-DE-01** Step 1: heading "Dienstleistung auswählen", label "Dienstleistung", first option "Bitte
+  auswählen". After choosing S60 the second field is labelled "Bei wem möchten Sie buchen?" and offers A, B and
+  "Egal bei wem" (booking settings: the "any provider" switch, `display_any_provider`, on). No "Anbieter" anywhere
+  in the step. (0025/02)
+- [ ] **T-DE-02** Step indicator tooltips (hover the numbers 1–4): "Dienstleistung auswählen", "Datum und Uhrzeit
+  auswählen", "Ihre Angaben", "Termin bestätigen"; the step headings read the same. (0025/02)
+- [ ] **T-DE-03** Step 2: click "Weiter" without choosing a time: "Bitte wählen Sie eine Uhrzeit, bevor Sie
+  fortfahren." When the preselected day has no free times (e.g. open the page on a weekday after 18:00): "An
+  diesem Tag sind leider keine Termine frei. Bitte wählen Sie ein anderes Datum." (0025/02)
+- [ ] **T-DE-04** Step 3: click "Weiter" with empty required fields: "Felder mit * sind Pflichtfelder." (0025/02)
+- [ ] **T-DE-05** Step 4: heading "Termin bestätigen", right column "Ihre Kontaktdaten", submit button
+  "Bestätigen". With "Egal bei wem" the left column shows "Egal bei wem" under the service. (0025/02)
+- [ ] **T-DE-06** CAPTCHA on (booking settings "CAPTCHA erfordern", ALTCHA settings "ALTCHA aktivieren" on):
+  button "Ich bin kein Roboter" with the text "Bitte klicken Sie, um die Sicherheitsprüfung zu starten."; after the
+  click "Wird geprüft...", then "Geprüft" and "Sicherheitsprüfung abgeschlossen". Submitting without the check: "Die
+  Sicherheitsprüfung ist fehlgeschlagen. Bitte versuchen Sie es erneut." With ALTCHA off and a wrong image code: "Der
+  eingegebene Code ist falsch. Bitte versuchen Sie es erneut." (0025/02)
+- [ ] **T-DE-07** Refusal dialogs: T-DB-01 and T-DB-04 show the texts named there ("Diese Uhrzeit ist leider nicht
+  mehr frei. Bitte wählen Sie eine andere Uhrzeit." for a slot taken in the meantime). (0025/02)
+- [ ] **T-DE-08** Email verification on: after submitting, the notice "Bitte bestätigen Sie Ihre E-Mail-Adresse"
+  reads naturally and uses "Sie". (0025/02)
+- [ ] **T-DE-09** No bookable service (unassign S60 and S30 from A and B): title "Online-Buchung derzeit nicht
+  möglich", text "Zurzeit können keine Termine online gebucht werden. …". Booking disabled (booking settings): title
+  "Online-Buchung ist derzeit nicht möglich", browser tab "Termin buchen bei <company name> | <company name>". Restore
+  afterwards. (0025/02)
+- [ ] **T-DE-10** With "Cookie Hinweis zeigen" on (booking settings) and empty site data, the cookie notice reads
+  "Diese Website verwendet Cookies, damit Sie sie bestmöglich nutzen können." (0025/02)
+- [ ] **T-DE-11** Theme: the WhatsApp button's accessible name (`aria-label`, DevTools) reads "Schreiben Sie uns auf
+  WhatsApp". (0025/02)
+- [ ] **T-DE-12** Switch the booking page to English: step 1 asks "Who would you like to book with?" and offers
+  "Any Provider"; the other texts are unchanged. (0025/02)

@@ -80,7 +80,7 @@
 
                 <div class="mb-3" hidden>
                     <label for="select-provider" class="fs-5 mb-2">
-                        <strong><?= lang('provider') ?></strong>
+                        <strong><?= lang('booking_provider_question') ?></strong>
                     </label>
 
                     <select id="select-provider" class="form-select mb-4">
