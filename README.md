@@ -186,6 +186,7 @@ Once completed, the system is ready to use.
 
 * Code: GPL v3.0
 * Content: CC BY 3.0
+* MeBeauty name, logos and texts are not licensed under the GPL; see [NOTICE](NOTICE).
 
 ---
 

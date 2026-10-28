@@ -1,0 +1,23 @@
+MeBeauty Appointments
+=====================
+
+Code
+----
+
+The source code in this repository is licensed under the GNU General Public
+License, version 3 (GPL-3.0); see LICENSE. It is based on Easy!Appointments;
+see UPSTREAM.md for the upstream base.
+
+MeBeauty brand assets and texts
+-------------------------------
+
+The following are NOT licensed under the GPL. All rights are reserved by
+their owner:
+
+- The name "MeBeauty".
+- The MeBeauty logos, icons and images in assets/img/mebeauty/
+  (logo, hero image, app icon and social icons).
+- The MeBeauty favicon, assets/img/favicon.ico.
+- Other MeBeauty brand assets.
+- MeBeauty-specific texts: the theme application/views/themes/mebeauty/ and
+  the site_* language keys in application/language/*/translations_lang.php.
