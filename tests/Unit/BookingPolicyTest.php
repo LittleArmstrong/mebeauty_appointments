@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class BookingPolicyTest extends TestCase
@@ -22,7 +23,8 @@ class BookingPolicyTest extends TestCase
         return new \Booking_policy([
             'now' => fn() => new DateTimeImmutable($now, new DateTimeZone($now_timezone)),
             'settings' => $settings,
-            'format_date_time' => fn(DateTimeImmutable $date) => $date->format('Y-m-d H:i')
+            'format_date_time' => fn(DateTimeImmutable $date) => $date->format('Y-m-d H:i'),
+            'lang' => fn(string $key) => self::LEAD_TIME_WORDS[$key] ?? $key
         ]);
     }
 
@@ -30,6 +32,13 @@ class BookingPolicyTest extends TestCase
         'booking_deadline_mode' => 'fixed_time',
         'booking_deadline_time' => '18:00',
         'booking_deadline_days' => '1'
+    ];
+
+    private const LEAD_TIME_WORDS = [
+        'lead_time_hour' => 'Stunde',
+        'lead_time_hours' => 'Stunden',
+        'lead_time_minute' => 'Minute',
+        'lead_time_minutes' => 'Minuten'
     ];
 
     private const MINUTES_60 = ['booking_deadline_mode' => 'minutes', 'book_advance_timeout' => '60'];
@@ -62,7 +71,7 @@ class BookingPolicyTest extends TestCase
 
         $this->assertFalse($policy->get_lock('2026-01-05 11:00:00', 'UTC')['locked']);
         $this->assertTrue($policy->get_lock('2026-01-05 10:59:00', 'UTC')['locked']);
-        $this->assertSame('01:00', $policy->get_lock('2026-01-05 10:59:00', 'UTC')['limit_text']);
+        $this->assertSame('1 Stunde', $policy->get_lock('2026-01-05 10:59:00', 'UTC')['limit_text']);
 
         // Slot filter and lock agree: the earliest bookable start is exactly now + 60 minutes.
         $this->assertSame(
@@ -156,6 +165,40 @@ class BookingPolicyTest extends TestCase
 
         // No minimum lead time in fixed time mode: only the past is excluded.
         $this->assertSame('2026-01-05 17:00:00', $earliest->format('Y-m-d H:i:s'));
+    }
+
+    public static function minutesLimitTexts(): array
+    {
+        return [
+            '24 hours' => ['1440', '24 Stunden'],
+            '1 hour' => ['60', '1 Stunde'],
+            '30 minutes' => ['30', '30 Minuten'],
+            '1 minute' => ['1', '1 Minute'],
+            'hours and minutes' => ['90', '1 Stunde 30 Minuten'],
+            'hours and one minute' => ['121', '2 Stunden 1 Minute'],
+            'zero' => ['0', '0 Minuten']
+        ];
+    }
+
+    #[DataProvider('minutesLimitTexts')]
+    public function testMinutesModeLimitTextIsAReadableDuration(string $minutes, string $expected): void
+    {
+        $policy = $this->policy('2026-01-05 10:00:00', [
+            'booking_deadline_mode' => 'minutes',
+            'book_advance_timeout' => $minutes
+        ]);
+
+        $this->assertSame($expected, $policy->get_lock('2026-01-06 10:00:00', 'UTC')['limit_text']);
+    }
+
+    public function testManageMinutesLimitTextIsAReadableDuration(): void
+    {
+        $policy = $this->policy('2026-01-05 10:00:00', [
+            'manage_deadline_mode' => 'minutes',
+            'manage_deadline_minutes' => '1440'
+        ]);
+
+        $this->assertSame('24 Stunden', $policy->get_lock('2026-01-06 10:00:00', 'UTC', 'manage')['limit_text']);
     }
 
     public function testLockMessageInsertsTheLimitOnly(): void

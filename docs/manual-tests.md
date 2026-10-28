@@ -272,11 +272,11 @@ Manage-Link, Vormerkung) is automated (`tests/smoke/customer-overlap-smoke.sh`, 
 Theme `mebeauty`, booking page in German (<http://localhost>) unless a test case says otherwise. Wording follows
 `docs/translation-style-de.md`.
 
-- [ ] **T-DE-01** Step 1: heading "Dienstleistung auswählen", label "Dienstleistung", first option "Bitte
+- [ ] **T-DE-01** Step 1: heading "Dienstleistung und Person auswählen", label "Dienstleistung", first option "Bitte
   auswählen". After choosing S60 the second field is labelled "Bei wem möchten Sie buchen?" and offers A, B and
   "Egal bei wem" (booking settings: the "any provider" switch, `display_any_provider`, on). No "Anbieter" anywhere
   in the step. (0025/02)
-- [ ] **T-DE-02** Step indicator tooltips (hover the numbers 1–4): "Dienstleistung auswählen", "Datum und Uhrzeit
+- [ ] **T-DE-02** Step indicator tooltips (hover the numbers 1–4): "Dienstleistung und Person auswählen", "Datum und Uhrzeit
   auswählen", "Ihre Angaben", "Termin bestätigen"; the step headings read the same. (0025/02)
 - [ ] **T-DE-03** Step 2: click "Weiter" without choosing a time: "Bitte wählen Sie eine Uhrzeit, bevor Sie
   fortfahren." When the preselected day has no free times (e.g. open the page on a weekday after 18:00): "An
@@ -346,8 +346,9 @@ needs "Persönliche Daten löschen" on in the booking settings.
 - [ ] **T-DE-24** Reschedule: the last step's button reads "Umbuchung bestätigen" (a new booking still reads
   "Bestätigen"). (0025/04)
 - [ ] **T-DE-25** Lock page (as T-MA-03, "eigene Frist" in minutes): title "Umbuchen und Stornieren nicht mehr
-  möglich", text "Ein Termin kann bis 24:00 Stunden vor Beginn umgebucht oder storniert werden."; with "Feste Uhrzeit"
-  (T-MA-04): "Der Termin kann nicht mehr umgebucht oder storniert werden. Das war bis … möglich." (0025/04)
+  möglich", text "Ein Termin kann bis 24 Stunden vor Beginn umgebucht oder storniert werden." (with 90 minutes:
+  "… bis 1 Stunde 30 Minuten vor Beginn …"); with "Feste Uhrzeit" (T-MA-04): "Der Termin kann nicht mehr umgebucht
+  oder storniert werden. Das war bis … möglich." (0025/04)
 - [ ] **T-DE-26** Altered hash (T-MA-05): "Termin nicht gefunden" / "Diesen Termin gibt es nicht mehr. Vielleicht
   wurde er bereits storniert oder der Link ist unvollständig." (0025/04)
 - [ ] **T-DE-27** Red bar: "Löschen Sie alle Ihre Termine und persönlichen Daten bei uns." with button "Löschen";
