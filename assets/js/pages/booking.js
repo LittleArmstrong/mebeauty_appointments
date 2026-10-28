@@ -446,7 +446,7 @@ App.Pages.Booking = (function () {
             // Add the "Any Provider" entry
 
             if (providerOptionCount > 2 && Boolean(Number(vars('display_any_provider')))) {
-                $(new Option(lang('any_provider'), 'any-provider')).insertAfter($selectProvider.find('option:first'));
+                $(new Option(lang('booking_any_provider'), 'any-provider')).insertAfter($selectProvider.find('option:first'));
             }
 
             // Restore previous provider selection if they can serve the new service

@@ -44,6 +44,7 @@ First MeBeauty release, based on Easy!Appointments 1.6.0 (`4bc7ecd5`).
 - Asset URLs carry the modification time of the served file as cache-busting token, so browsers load changed scripts and styles after a deploy without a hard reload (0022)
 - Expected booking refusals (the customer already has an appointment at that time, the requested hour is no longer available) show a calm dialog "Termin nicht möglich" / "Appointment not possible" addressed to the customer instead of the error dialog; the entered data stays in the wizard. `booking/register` answers these refusals with HTTP 409 (previously 500) (0023)
 - Dialogs for unexpected errors on the booking page and in the backend are titled with the company name instead of "Easy!Appointments" (0023)
+- German texts revised per the style guide `docs/translation-style-de.md` ("Sie", function over word-for-word, terms from `GLOSSARY.md`): the booking wizard asks "Bei wem möchten Sie buchen?" with the option "Egal bei wem", step headings, hints, refusal and CAPTCHA texts read naturally, and the theme's WhatsApp button says "Schreiben Sie uns auf WhatsApp" (0025)
 
 ### Fixed
 
