@@ -29,6 +29,8 @@ the theme `site_*` keys. Terms follow [`GLOSSARY.md`](../GLOSSARY.md).
 | reschedule          | umbuchen / Umbuchung                                           | ändern, verschieben (as term)  |
 | cancel (appointment)| stornieren / Stornierung                                       | abbrechen, löschen             |
 | book                | buchen                                                         | reservieren                    |
+| unavailability      | Abwesenheit                                                    | Nichtverfügbarkeit             |
+| backend (section)   | Verwaltung                                                     | Backend-Sektion                |
 
 In the booking flow the person is chosen by a question, not by a job title: "Bei wem möchten Sie buchen?" with
 the option "Egal bei wem" (not "Jeder Anbieter").

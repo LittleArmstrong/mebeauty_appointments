@@ -297,7 +297,7 @@ Theme `mebeauty`, booking page in German (<http://localhost>) unless a test case
   möglich", text "Zurzeit können keine Termine online gebucht werden. …". Booking disabled (booking settings): title
   "Online-Buchung ist derzeit nicht möglich", browser tab "Termin buchen bei <company name> | <company name>". Restore
   afterwards. (0025/02)
-- [ ] **T-DE-10** With "Cookie Hinweis zeigen" on (booking settings) and empty site data, the cookie notice reads
+- [ ] **T-DE-10** With "Cookie-Hinweis anzeigen" on (booking settings) and empty site data, the cookie notice reads
   "Diese Website verwendet Cookies, damit Sie sie bestmöglich nutzen können." (0025/02)
 - [ ] **T-DE-11** Theme: the WhatsApp button's accessible name (`aria-label`, DevTools) reads "Schreiben Sie uns auf
   WhatsApp". (0025/02)
@@ -355,3 +355,25 @@ needs "Persönliche Daten löschen" on in the booking settings.
   löschen? Das lässt sich nicht rückgängig machen." with "Abbrechen" / "Löschen". (0025/04)
 - [ ] **T-DE-28** Same manage link in English: the hint names "Cancel appointment", the button reads "Cancel
   appointment"; the dialog offers "Keep appointment" / "Cancel appointment". (0025/04)
+
+Backend (0025/05): log in as admin, backend language German (account settings). Wording follows
+`docs/translation-style-de.md`; no "Anbieter", "Dienstleister", "Sekretär", "Bearbeiter" or "Service" anywhere.
+
+- [ ] **T-DE-29** Login page: heading "Verwaltung", text "Willkommen! Bitte melden Sie sich an, um die Verwaltung zu
+  öffnen."; booking footer while logged in: button "Verwaltung". (0025/05)
+- [ ] **T-DE-30** Menu "Benutzer": entries "Mitarbeitende", "Assistenz", "Admins"; each page title matches. On
+  "Mitarbeitende" delete a test record: dialog "Mitarbeiterin/Mitarbeiter löschen" (not "Zeitraum löschen"), message
+  "Mitarbeiterin/Mitarbeiter gelöscht."; on "Assistenz" saving shows "Assistenz gespeichert.". (0025/05)
+- [ ] **T-DE-31** Calendar: filter list groups "Mitarbeitende" and "Dienstleistungen"; appointment dialog and event
+  popover label "Mitarbeiterin/Mitarbeiter" and "Kundin/Kunde"; "Abwesenheit" in the add menu and its dialog "Neue
+  Abwesenheit"; off-hours read "Arbeitsfrei". A customer mail shows the label "Mitarbeiterin/Mitarbeiter". (0025/05)
+- [ ] **T-DE-32** Settings → Buchungseinstellungen: the switch reads "Option „Egal bei wem“ anzeigen" with the hint
+  naming „Egal bei wem“ as in the booking step; field table columns "Anzeigen" / "Pflichtfeld". (0025/05)
+- [ ] **T-DE-33** Settings → Geschäftsregeln (formerly "Unternehmerische Logik"): hints of the working plan
+  and breaks speak of "Mitarbeitende"; "Für alle Mitarbeitenden übernehmen" asks "Damit werden die Arbeitspläne
+  aller Mitarbeitenden überschrieben. Möchten Sie fortfahren?"; "Pause hinzufügen" button. (0025/05)
+- [ ] **T-DE-34** Settings → Integrationen → Webhooks: the event list reads "Dienstleistung speichern",
+  "Mitarbeiterin/Mitarbeiter speichern", "Assistenz speichern", "Admin speichern" (no "Sekretär Save", "Service
+  speichern", "Dienst löschen"). (0025/05)
+- [ ] **T-DE-35** Settings → Rechtliche Inhalte: section "Rechtliche Hinweise" with field "URL der Seite „Rechtliche
+  Hinweise“"; with the URL set, the booking footer link reads "Rechtliche Hinweise". (0025/05)
