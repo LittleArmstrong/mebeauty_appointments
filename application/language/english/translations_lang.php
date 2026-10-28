@@ -646,6 +646,7 @@ $lang['notify_users_on_delete_question'] = 'Would you like to send out a notific
 // Booking flow wording (spec 0025)
 $lang['booking_provider_question'] = 'Who would you like to book with?';
 $lang['booking_any_provider'] = 'Any Provider';
+$lang['appointment_changed_customer_subject'] = 'Your appointment has been changed';
 // Site chrome of the themes (ADR 0006)
 $lang['site_booking'] = 'Booking';
 $lang['site_book_online'] = 'Book an appointment online';

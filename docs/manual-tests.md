@@ -180,7 +180,7 @@ Setting "E-Mail-Bestätigung erforderlich" (booking settings) on.
   (cleans up, slot free again, the unverified appointment disappears from the calendar). Then open the link and
   confirm → appointment booked.
 - [ ] **T-EB-10** Late click, slot taken: as T-EB-09, but before clicking book the slot in another window → page
-  "Leider abgelaufen" with a link to the booking.
+  "Link abgelaufen" with a link to the booking.
 - [ ] **T-EB-11** Invalid after 24 h: as T-EB-09, additionally
   `last_sent_datetime = NOW() - INTERVAL 25 HOUR` → "Link ungültig".
 - [ ] **T-EB-12** Book in English: verification mail and pages in English.
@@ -303,3 +303,32 @@ Theme `mebeauty`, booking page in German (<http://localhost>) unless a test case
   WhatsApp". (0025/02)
 - [ ] **T-DE-12** Switch the booking page to English: step 1 asks "Who would you like to book with?" and offers
   "Any Provider"; the other texts are unchanged. (0025/02)
+
+Emails (0025/03): all mails in Mailpit (<http://localhost:8025>), customer and staff with language German
+(provider A: backend → providers page → A → "Sprache" German, notifications on; booking settings
+"Kundenbenachrichtigungen" on).
+
+- [ ] **T-DE-13** Book online in German: the customer mail is titled "Ihr Termin ist gebucht" (subject and heading),
+  text "Vielen Dank für Ihre Buchung. … Über „Termin verwalten“ können Sie ihn umbuchen oder stornieren.", button
+  "Termin verwalten". In the mail's HTML source (Mailpit → "HTML Source") the root element reads `<html lang="de">`.
+  (0025/03)
+- [ ] **T-DE-14** Same booking, staff mail to A: subject and heading "Neuer Termin gebucht", text "Über „Termin
+  verwalten“ öffnen Sie den Termin im Kalender."; the button opens the appointment in the backend calendar.
+  (0025/03)
+- [ ] **T-DE-15** Reschedule via the manage link: customer mail "Ihr Termin wurde geändert", staff mail "Termin
+  geändert", no text line below the heading. (0025/03)
+- [ ] **T-DE-16** Cancel via the manage link with a reason: customer and staff mail "Termin storniert", text "Der
+  folgende Termin wurde storniert.", the reason below the details. (0025/03)
+- [ ] **T-DE-17** Email verification on: the verification mail reads "Bitte bestätigen Sie Ihren Termin" / "Nur noch
+  ein Schritt: Bestätigen Sie Ihre E-Mail-Adresse, dann ist Ihr Termin gebucht.", button "Termin bestätigen", note
+  "Wir halten den Termin 10 Minuten für Sie frei. …". The link page says "Klicken Sie auf „Termin bestätigen“, um
+  Ihre Buchung abzuschließen." above a button with the same label. Expired and taken (T-EB-10): "Link abgelaufen";
+  not bookable: "Termin nicht gebucht" / "Dieser Termin konnte leider nicht gebucht werden. Bitte wählen Sie eine
+  andere Uhrzeit." (0025/03)
+- [ ] **T-DE-18** Reschedule with a new email (T-EB-14): verification mail "Bitte bestätigen Sie Ihre neue
+  E-Mail-Adresse", the link page names the button "E-Mail-Adresse bestätigen" exactly as the button reads. (0025/03)
+- [ ] **T-DE-19** Login page → "Passwort vergessen?" for a backend user with language German: mail "Passwort
+  zurücksetzen", text names the button "Passwort zurücksetzen", note "Der Link ist eine Stunde lang gültig."
+  (0025/03)
+- [ ] **T-DE-20** Book in English (language switch on the booking page, customer language English): customer mail in
+  English with `<html lang="en">`, while the staff mail to A (German) is German with `<html lang="de">`. (0025/03)

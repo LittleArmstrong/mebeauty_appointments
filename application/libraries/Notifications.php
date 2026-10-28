@@ -81,7 +81,7 @@ class Notifications
             if ($send_customer === true) {
                 config(['language' => $customer['language']]);
                 $this->CI->lang->load('translations');
-                $subject = $manage_mode ? lang('appointment_details_changed') : lang('appointment_booked');
+                $subject = $manage_mode ? lang('appointment_changed_customer_subject') : lang('appointment_booked');
                 $message = $manage_mode ? '' : lang('thank_you_for_appointment');
 
                 try {
