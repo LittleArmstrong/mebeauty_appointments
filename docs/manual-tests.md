@@ -122,7 +122,7 @@ Manage link = the appointment link from an appointment's customer mail (Mailpit)
   the manage link shows the lock page with the concrete limit. Appointment in more than 24 h: can be rescheduled.
 - [ ] **T-MA-04** Manage deadline "Feste Uhrzeit" now + 3 min, day offset 1, appointment tomorrow: open the manage
   link and leave it open, let the deadline expire, then submit: rejected with the lock message, appointment unchanged.
-- [ ] **T-MA-05** Manage link with an altered hash (change the last character): "Termin nicht gefunden.", no
+- [ ] **T-MA-05** Manage link with an altered hash (change the last character): "Termin nicht gefunden", no
   rescheduling.
 - [ ] **T-MA-06** In the backend the locked appointment can still be moved.
 
@@ -332,3 +332,26 @@ Emails (0025/03): all mails in Mailpit (<http://localhost:8025>), customer and s
   (0025/03)
 - [ ] **T-DE-20** Book in English (language switch on the booking page, customer language English): customer mail in
   English with `<html lang="en">`, while the staff mail to A (German) is German with `<html lang="de">`. (0025/03)
+
+Manage-Link page (0025/04): manage link from the customer mail (Mailpit), booking page in German; the delete bar
+needs "Persönliche Daten löschen" on in the booking settings.
+
+- [ ] **T-DE-21** The yellow bar reads "Sie können den Termin nicht wahrnehmen? Klicken Sie auf „Termin
+  stornieren“." next to a button labelled exactly "Termin stornieren". (0025/04)
+- [ ] **T-DE-22** Click "Termin stornieren": dialog "Termin stornieren", text "Bitte sagen Sie uns kurz, warum Sie
+  den Termin stornieren. Ein Stichwort genügt.", buttons "Termin behalten" (closes the dialog, appointment stays)
+  and "Termin stornieren" (with an empty reason the field is marked red and nothing happens). (0025/04)
+- [ ] **T-DE-23** Cancel with a reason: page "Termin storniert", text "Ihr Termin wurde storniert.", button "Weiter zur
+  Buchungsseite". (0025/04)
+- [ ] **T-DE-24** Reschedule: the last step's button reads "Umbuchung bestätigen" (a new booking still reads
+  "Bestätigen"). (0025/04)
+- [ ] **T-DE-25** Lock page (as T-MA-03, "eigene Frist" in minutes): title "Umbuchen und Stornieren nicht mehr
+  möglich", text "Ein Termin kann bis 24:00 Stunden vor Beginn umgebucht oder storniert werden."; with "Feste Uhrzeit"
+  (T-MA-04): "Der Termin kann nicht mehr umgebucht oder storniert werden. Das war bis … möglich." (0025/04)
+- [ ] **T-DE-26** Altered hash (T-MA-05): "Termin nicht gefunden" / "Diesen Termin gibt es nicht mehr. Vielleicht
+  wurde er bereits storniert oder der Link ist unvollständig." (0025/04)
+- [ ] **T-DE-27** Red bar: "Löschen Sie alle Ihre Termine und persönlichen Daten bei uns." with button "Löschen";
+  the dialog "Persönliche Daten löschen" asks "Möchten Sie Ihre persönlichen Daten und alle Ihre Termine wirklich
+  löschen? Das lässt sich nicht rückgängig machen." with "Abbrechen" / "Löschen". (0025/04)
+- [ ] **T-DE-28** Same manage link in English: the hint names "Cancel appointment", the button reads "Cancel
+  appointment"; the dialog offers "Keep appointment" / "Cancel appointment". (0025/04)

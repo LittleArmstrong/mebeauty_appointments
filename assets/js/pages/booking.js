@@ -571,13 +571,13 @@ App.Pages.Booking = (function () {
 
                 const buttons = [
                     {
-                        text: lang('close'),
+                        text: lang('keep_appointment_button'),
                         click: (event, messageModal) => {
                             messageModal.hide();
                         },
                     },
                     {
-                        text: lang('confirm'),
+                        text: lang('cancel_appointment_button'),
                         click: () => {
                             if ($cancellationReason.val() === '') {
                                 $cancellationReason.css('border', '2px solid #DC3545');
@@ -591,7 +591,7 @@ App.Pages.Booking = (function () {
 
                 App.Utils.Message.show(
                     lang('cancel_appointment_title'),
-                    lang('write_appointment_removal_reason'),
+                    lang('cancellation_reason_prompt'),
                     buttons,
                 );
 
