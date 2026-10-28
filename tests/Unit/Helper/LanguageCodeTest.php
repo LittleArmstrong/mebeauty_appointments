@@ -46,9 +46,10 @@ class LanguageCodeTest extends TestCase
         $this->assertNotEmpty($templates);
 
         foreach ($templates as $template) {
-            $declares_rendering_language = str_contains(
-                file_get_contents($template),
-                '<html lang="<?= e(language_code()) ?>">'
+            // The html tag must echo e(language_code()) as lang; spacing, quotes and attributes may vary.
+            $declares_rendering_language = (bool) preg_match(
+                '/<html\b[^>]*?\blang\s*=\s*(["\'])\s*<\?(?:=|php\s+echo)\s*e\(\s*language_code\(\s*\)\s*\)\s*;?\s*\?>\s*\1/i',
+                file_get_contents($template)
             );
 
             $this->assertTrue(
