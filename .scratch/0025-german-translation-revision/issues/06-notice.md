@@ -5,12 +5,12 @@
 
 **Blocked by:** –
 
-**Status:** in-progress
+**Status:** resolved
 
 - [x] `NOTICE` at the repository root
 - [x] README links to it
 - [x] `Rot vor Fix:` line recorded
-- [ ] `bash scripts/test.sh` green
+- [x] `bash scripts/test.sh` green
 
 ## Comments
 
@@ -26,3 +26,5 @@
   `mebeauty_appointments-mailpit-1` because host port 1025 is held by another project's container
   (`platform-mailpit-1`). Single checks in the worktree: `check:scratch` OK, `check:assets` OK. The test.sh item
   stays open until a full run is green.
+
+**2026-10-28, orchestrator:** `bash scripts/test.sh` green in the main checkout on merge commit `74984699` (integration branch incl. review fixes): PHPUnit, all checks and all smokes OK.

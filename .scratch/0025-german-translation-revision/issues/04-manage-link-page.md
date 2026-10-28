@@ -7,7 +7,7 @@ naturally. English hint and button fixed to match each other.
 
 **Blocked by:** 01
 
-**Status:** in-progress
+**Status:** needs-verification
 
 - [x] Cancellation banner: hint and own button key match (German and English)
 - [x] Cancellation reason prompt reworded
@@ -15,7 +15,7 @@ naturally. English hint and button fixed to match each other.
 - [x] Delete-personal-data bar reworded
 - [x] Manual test cases in `docs/manual-tests.md`
 - [x] `Rot vor Fix:` line recorded
-- [ ] `bash scripts/test.sh` green
+- [x] `bash scripts/test.sh` green
 - [ ] Visual check by the user (ends as `needs-verification`)
 
 ## Comments
@@ -87,3 +87,5 @@ naturally. English hint and button fixed to match each other.
 - Rot vor Fix: `BookingPolicyTest::testMinutesModeLimitTextIsAReadableDuration` (7 cases) and
   `testManageMinutesLimitTextIsAReadableDuration` failed with e.g. "Failed asserting that two strings are
   identical. -'24 Stunden' +'24:00'" (8 failures); green after `format_duration()`.
+
+**2026-10-28, orchestrator:** `bash scripts/test.sh` green in the main checkout on merge commit `74984699` (integration branch incl. review fixes): PHPUnit, all checks and all smokes OK. Open: visual check by the user (`docs/manual-tests.md`, section 0025).

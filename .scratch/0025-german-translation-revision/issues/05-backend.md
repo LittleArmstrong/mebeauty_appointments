@@ -6,14 +6,14 @@
 
 **Blocked by:** 01
 
-**Status:** in-progress
+**Status:** needs-verification
 
 - [x] Role terms unified (provider, secretary, service)
 - [x] Leftover and half-translated strings fixed
 - [x] Settings hints and messages reworded
 - [x] Manual test cases in `docs/manual-tests.md`
 - [x] `Rot vor Fix:` line recorded
-- [ ] `bash scripts/test.sh` green
+- [x] `bash scripts/test.sh` green
 - [ ] Visual check by the user (ends as `needs-verification`)
 
 ## Comments
@@ -64,3 +64,5 @@
   (effective) ones kept. `GermanTranslationTermsTest`: label `du/dich/dein` renamed to `du/dich/dir/dein` (the
   pattern also matches "dir"), the docblock now names exactly the checked terms and says the other "Avoid" entries
   are not checked there. Rot vor Fix: entfällt – test and data cleanup, no behaviour change.
+
+**2026-10-28, orchestrator:** `bash scripts/test.sh` green in the main checkout on merge commit `74984699` (integration branch incl. review fixes): PHPUnit, all checks and all smokes OK. Open: visual check by the user (`docs/manual-tests.md`, section 0025).

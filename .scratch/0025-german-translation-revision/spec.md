@@ -1,6 +1,6 @@
 # German translation revision: natural, function-based wording
 
-Status: in-progress
+Status: needs-verification
 Created: 2026-10-28
 Closed: –
 Priority: P2

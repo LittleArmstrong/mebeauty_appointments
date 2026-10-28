@@ -7,13 +7,13 @@ the same keys.
 
 **Blocked by:** –
 
-**Status:** in-progress
+**Status:** resolved
 
 - [x] Style guide in `docs/` with term table matching `GLOSSARY.md`
 - [x] Linked from `docs/manage-translations.md`
 - [x] PHPUnit key parity test German ↔ English
 - [x] `Rot vor Fix:` line recorded
-- [ ] `bash scripts/test.sh` green
+- [x] `bash scripts/test.sh` green
 
 ## Comments
 
@@ -29,3 +29,5 @@ the same keys.
   container (`platform-mailpit-1`, other project), so the box above stays open. Run individually in the worktree:
   phpunit OK (233 tests), check:format, check:scratch, check:views, check:assets OK. Migrations untouched; smokes not
   run (text/test-only change).
+
+**2026-10-28, orchestrator:** `bash scripts/test.sh` green in the main checkout on merge commit `74984699` (integration branch incl. review fixes): PHPUnit, all checks and all smokes OK.

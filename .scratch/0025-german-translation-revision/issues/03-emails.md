@@ -6,14 +6,14 @@ verification) reworded per the style guide; email templates declare the renderin
 
 **Blocked by:** 01
 
-**Status:** in-progress
+**Status:** needs-verification
 
 - [x] Customer email texts reworded (German)
 - [x] Staff email texts reworded (German)
 - [x] `lang` attribute follows the rendering language
 - [x] Manual test cases in `docs/manual-tests.md`
 - [x] `Rot vor Fix:` line recorded
-- [ ] `bash scripts/test.sh` green
+- [x] `bash scripts/test.sh` green
 - [ ] Visual check by the user (ends as `needs-verification`)
 
 ## Comments
@@ -78,3 +78,5 @@ verification) reworded per the style guide; email templates declare the renderin
   `LanguageCodeTest::test_email_templates_declare_the_rendering_language` compared a literal source string; it now
   uses a regex that allows other attributes, spacing and either quote but still requires `e(language_code())`
   echoed in the `lang` attribute of the `<html>` tag. Rot vor Fix: entfällt – test robustness only.
+
+**2026-10-28, orchestrator:** `bash scripts/test.sh` green in the main checkout on merge commit `74984699` (integration branch incl. review fixes): PHPUnit, all checks and all smokes OK. Open: visual check by the user (`docs/manual-tests.md`, section 0025).

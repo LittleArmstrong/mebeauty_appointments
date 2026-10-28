@@ -7,7 +7,7 @@ cannot be worded right; English fixed only where functionally wrong.
 
 **Blocked by:** 01
 
-**Status:** in-progress
+**Status:** needs-verification
 
 - [x] Wizard steps and booking messages reworded (German)
 - [x] Person step with question wording, "Egal bei wem"
@@ -15,7 +15,7 @@ cannot be worded right; English fixed only where functionally wrong.
 - [x] Own keys where needed, in German and English
 - [x] Manual test cases in `docs/manual-tests.md`
 - [x] `Rot vor Fix:` line recorded
-- [ ] `bash scripts/test.sh` green
+- [x] `bash scripts/test.sh` green
 - [ ] Visual check by the user (ends as `needs-verification`)
 
 ## Comments
@@ -70,3 +70,5 @@ cannot be worded right; English fixed only where functionally wrong.
   identical to `select_service`, although step 1 (`booking_type_step.php` heading, `booking_steps.php` tooltip)
   also chooses the person. Now "Dienstleistung und Person auswählen" (no job title, parallel to "Datum und Uhrzeit
   auswählen"). English unchanged. T-DE-01 and T-DE-02 updated.
+
+**2026-10-28, orchestrator:** `bash scripts/test.sh` green in the main checkout on merge commit `74984699` (integration branch incl. review fixes): PHPUnit, all checks and all smokes OK. Open: visual check by the user (`docs/manual-tests.md`, section 0025).
