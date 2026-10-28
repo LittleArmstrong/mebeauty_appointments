@@ -6,6 +6,8 @@ Easy!Appointments supports multiple languages. You can modify existing translati
 
 Each language has its own folder inside `/application/language/` (e.g. `english`, `german`, `french`). Inside each folder, the `translations_lang.php` file contains all the text shown in the app.
 
+**Fork:** German and English are maintained and must define the same keys (`tests/Unit/TranslationKeyParityTest.php`). German wording follows the [German translation style guide](translation-style-de.md).
+
 ## Adding a New Translation
 
 ### 1. Create the Language Folder
