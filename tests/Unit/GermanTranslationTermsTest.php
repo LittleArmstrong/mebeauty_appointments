@@ -5,8 +5,10 @@ namespace Tests\Unit;
 use Tests\TestCase;
 
 /**
- * The German texts follow docs/translation-style-de.md: the role terms listed under "Avoid" and the informal address
- * ("du", "dich", "dein") must not appear in german/translations_lang.php.
+ * Guards a subset of docs/translation-style-de.md in german/translations_lang.php: the words "Anbieter",
+ * "Dienstleister", "Sekretär", "Bearbeiter" and "Service(s)" and the informal address ("du", "dich", "dir",
+ * "dein…") must not appear. The other "Avoid" entries of the style guide (e.g. "Klient", "reservieren",
+ * "Nichtverfügbarkeit") are not checked here.
  */
 class GermanTranslationTermsTest extends TestCase
 {
@@ -16,7 +18,7 @@ class GermanTranslationTermsTest extends TestCase
         'Sekretär' => '/Sekretär/u',
         'Bearbeiter' => '/\bBearbeiter/u',
         'Service' => '/\bServices?\b/u',
-        'du/dich/dein' => '/\b(du|dich|dir|dein\w*)\b/iu'
+        'du/dich/dir/dein' => '/\b(du|dich|dir|dein\w*)\b/iu'
     ];
 
     public function test_german_texts_avoid_the_terms_of_the_style_guide(): void

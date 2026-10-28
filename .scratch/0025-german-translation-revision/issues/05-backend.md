@@ -58,3 +58,9 @@
 - Validation: `bash scripts/test.sh` aborted at `docker compose up -d` (port 1025 held by the foreign container
   `platform-mailpit-1`), so the box above stays open. Run individually in the worktree: phpunit OK (238 tests),
   check:views, check:assets, check:format (npm), check:scratch OK. Smokes not run.
+
+- Review fix (subagent, branch `agent/0025-review-fixes`): `enter_password_here` and `personal_information` were
+  defined twice in German and English (identical texts); the earlier, dead definitions are removed, the later
+  (effective) ones kept. `GermanTranslationTermsTest`: label `du/dich/dein` renamed to `du/dich/dir/dein` (the
+  pattern also matches "dir"), the docblock now names exactly the checked terms and says the other "Avoid" entries
+  are not checked there. Rot vor Fix: entfällt – test and data cleanup, no behaviour change.

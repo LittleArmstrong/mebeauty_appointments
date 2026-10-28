@@ -11,12 +11,14 @@
  * - Minutes mode: a start is allowed when start >= now + minutes (equality allowed).
  * - Fixed time mode: a day stays open while now <= deadline; afterwards the whole day is locked.
  *
- * The clock, the settings source and the date formatter can be injected for deterministic tests:
+ * The clock, the settings source, the date formatter and the translation lookup can be injected for deterministic
+ * tests:
  *
  *     new Booking_policy([
  *         'now' => fn() => new DateTimeImmutable('2026-01-05 10:00:00', new DateTimeZone('UTC')),
  *         'settings' => ['booking_deadline_mode' => 'minutes', 'book_advance_timeout' => '60'],
  *         'format_date_time' => fn(DateTimeInterface $date) => $date->format('Y-m-d H:i'),
+ *         'lang' => fn(string $key) => $key,
  *     ]);
  *
  * @package Libraries
@@ -39,6 +41,11 @@ class Booking_policy
     protected $format_date_time;
 
     /**
+     * @var callable Returns the translation of a language key.
+     */
+    protected $lang;
+
+    /**
      * @var array Settings read during this request (name => value).
      */
     protected array $setting_cache = [];
@@ -46,13 +53,15 @@ class Booking_policy
     /**
      * Booking_policy constructor.
      *
-     * @param array $params Optional "now" (callable), "settings" (array) and "format_date_time" (callable).
+     * @param array $params Optional "now" (callable), "settings" (array), "format_date_time" (callable) and "lang"
+     * (callable).
      */
     public function __construct(array $params = [])
     {
         $this->now = $params['now'] ?? null;
         $this->settings = $params['settings'] ?? null;
         $this->format_date_time = $params['format_date_time'] ?? 'format_date_time';
+        $this->lang = $params['lang'] ?? 'lang';
     }
 
     /**
@@ -220,9 +229,33 @@ class Booking_policy
 
         return [
             'locked' => $start < $earliest_start,
-            'limit_text' => sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60),
+            'limit_text' => $this->format_duration($minutes),
             'message' => $message
         ];
+    }
+
+    /**
+     * Format a lead time in minutes as a readable duration, e.g. "24 Stunden", "30 Minuten", "1 Stunde 30 Minuten".
+     *
+     * @param int $minutes Lead time in minutes.
+     *
+     * @return string
+     */
+    protected function format_duration(int $minutes): string
+    {
+        $hours = intdiv($minutes, 60);
+        $rest = $minutes % 60;
+        $parts = [];
+
+        if ($hours > 0) {
+            $parts[] = $hours . ' ' . ($this->lang)($hours === 1 ? 'lead_time_hour' : 'lead_time_hours');
+        }
+
+        if ($rest > 0 || $hours === 0) {
+            $parts[] = $rest . ' ' . ($this->lang)($rest === 1 ? 'lead_time_minute' : 'lead_time_minutes');
+        }
+
+        return implode(' ', $parts);
     }
 
     /**

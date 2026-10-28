@@ -73,3 +73,8 @@ verification) reworded per the style guide; email templates declare the renderin
   `platform-mailpit-1`; the project's own Mailpit therefore does not start either), so the box above stays open. Run
   individually in the worktree: phpunit OK (237 tests), check:views, check:assets, check:format, check:scratch OK.
   Smokes not run.
+
+- Review fix (subagent, branch `agent/0025-review-fixes`):
+  `LanguageCodeTest::test_email_templates_declare_the_rendering_language` compared a literal source string; it now
+  uses a regex that allows other attributes, spacing and either quote but still requires `e(language_code())`
+  echoed in the `lang` attribute of the `<html>` tag. Rot vor Fix: entfällt – test robustness only.
