@@ -73,3 +73,17 @@ naturally. English hint and button fixed to match each other.
 - Validation: `bash scripts/test.sh` aborted at `docker compose up -d` (port 1025 held by the foreign container
   `platform-mailpit-1`), so the box above stays open. Run individually in the worktree: phpunit OK (237 tests),
   check:views, check:assets, check:format (npm), check:scratch OK. Smokes not run.
+
+- Review fix (subagent, branch `agent/0025-review-fixes`): in minutes mode `Booking_policy::minutes_lock()` filled
+  `{$limit}` with `HH:MM`, so the German text read "bis 24:00 Stunden vor Beginn". `{$limit}` is now a readable
+  duration built from the new keys `lead_time_hour`/`lead_time_hours`/`lead_time_minute`/`lead_time_minutes` (DE
+  "Stunde/Stunden/Minute/Minuten", EN lowercase; the existing `hour`/`minute`/`duration_minutes` are capitalized
+  labels and did not fit), e.g. "24 Stunden", "30 Minuten", "1 Stunde 30 Minuten". Texts: DE
+  `appointment_locked_message` = `manage_locked_message_minutes` = "Ein Termin kann bis {$limit} vor Beginn
+  umgebucht oder storniert werden."; EN `appointment_locked_message` "The appointment cannot be rescheduled or
+  cancelled less than {$limit} before it starts." (was "… {$limit} hours in advance", functionally wrong). Only
+  callers: the three `get_lock(…, 'manage')` uses in `Booking` and `Booking_cancellation`; the manage-link smoke
+  compares the text before `{$limit}` from the language files and needs no change. T-DE-25 updated.
+- Rot vor Fix: `BookingPolicyTest::testMinutesModeLimitTextIsAReadableDuration` (7 cases) and
+  `testManageMinutesLimitTextIsAReadableDuration` failed with e.g. "Failed asserting that two strings are
+  identical. -'24 Stunden' +'24:00'" (8 failures); green after `format_duration()`.

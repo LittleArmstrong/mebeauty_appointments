@@ -65,3 +65,8 @@ cannot be worded right; English fixed only where functionally wrong.
   `platform-mailpit-1`), so the box above stays open. Run individually in the worktree: phpunit OK (233 tests),
   check:views, check:assets, check:format, check:scratch OK. Smokes not run (text-only change; no smoke asserts the
   changed texts).
+
+- Review fix (subagent, branch `agent/0025-review-fixes`): `service_and_provider` read "Dienstleistung auswählen",
+  identical to `select_service`, although step 1 (`booking_type_step.php` heading, `booking_steps.php` tooltip)
+  also chooses the person. Now "Dienstleistung und Person auswählen" (no job title, parallel to "Datum und Uhrzeit
+  auswählen"). English unchanged. T-DE-01 and T-DE-02 updated.
