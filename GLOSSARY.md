@@ -37,7 +37,7 @@ Frist, bis zu der ein bestehender Termin umgebucht oder storniert werden kann; g
 _Avoid_: Änderungsfrist, Stornofrist
 
 **Slot-Kapazität (Slot Capacity)**:
-Maximale Anzahl paralleler Buchungen eines Services über alle Dienstleister hinweg (0 = unbegrenzt); bildet begrenzte Ressourcen wie Räume oder Geräte ab.
+Maximale Anzahl paralleler Buchungen eines Services über alle Mitarbeitenden hinweg (0 = unbegrenzt); bildet begrenzte Ressourcen wie Räume oder Geräte ab.
 _Avoid_: Parallel-Limit, Geräte-Limit
 
 **Tagesabstand (Day Offset)**:
@@ -49,8 +49,8 @@ Globale Ruhe-/Aufräumzeit nach einem Termin, in der kein neuer Termin beginnen 
 _Avoid_: Aufräumzeit, Abstandszeit
 
 **Arbeitsende**:
-Ende des effektiven Tagesplans eines Dienstleisters, einschließlich einer Arbeitsplan-Ausnahme für diesen Tag; Pausen und Terminbeginne sind kein Arbeitsende.
-_Avoid_: Feierabend, Periodenende, Tagesende (ohne Bezug zum Dienstleister)
+Ende des effektiven Tagesplans einer Mitarbeiterin bzw. eines Mitarbeiters, einschließlich einer Arbeitsplan-Ausnahme für diesen Tag; Pausen und Terminbeginne sind kein Arbeitsende.
+_Avoid_: Feierabend, Periodenende, Tagesende (ohne Bezug zu Mitarbeitenden)
 
 **Manage-Link**:
 Der persönliche Link aus der Terminbestätigung, mit dem ein Kunde genau seinen Termin umbuchen oder stornieren darf; der darin enthaltene Termin-Hash ist die einzige Berechtigung dafür.
@@ -67,6 +67,14 @@ _Avoid_: Momentaufnahme, Snapshot, Buchungskontakt
 **Kundendatensatz**:
 Der Eintrag eines Kunden in der Kundenverwaltung; enthält den letzten bekannten Stand der Kundendaten und dient der Wiedererkennung über die E-Mail-Adresse.
 _Avoid_: Kundenstamm, Kundenprofil, Kundenkonto
+
+**Mitarbeiterin / Mitarbeiter (Provider)**:
+Person, die Termine ausführt und einen eigenen Arbeitsplan und Kalender hat; Kundinnen wählen im Booking-Flow, bei wem sie buchen. Mehrere zusammen: Mitarbeitende.
+_Avoid_: Dienstleister, Anbieter, Behandlerin
+
+**Assistenz (Secretary)**:
+Backend-Benutzer, der Termine für zugeordnete Mitarbeitende verwaltet, selbst aber keine Termine ausführt.
+_Avoid_: Sekretär, Bearbeiter, Büropersonal
 
 **E-Mail-Bestätigung**:
 Nachweis per Link (und Schaltfläche auf der Link-Seite), dass die bei einer Online-Buchung eingegebene E-Mail-Adresse der buchenden Person gehört; per Einstellung erforderlich.

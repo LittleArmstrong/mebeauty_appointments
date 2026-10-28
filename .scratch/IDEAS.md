@@ -95,3 +95,28 @@ the ticket text.
 **Open questions:**
 
 - Is one sentence in the tracker doc enough, or should the spec template carry an "who verifies" column?
+
+## Site-Chrome in the booking flow: keep, slim down or drop
+
+Added: 2026-10-28, from the translation/frontend grilling session (decision postponed by the user).
+
+**Problem:** The booking flow rebuilds the mebeauty-Site's navbar, intro, footer and WhatsApp button as theme
+partials (`application/views/themes/mebeauty/site_navbar.php`, `site_intro.php`, `site_footer.php`,
+`site_whatsapp.php`; ADR 0006). Navigation, contact data and opening hours therefore exist twice and every change on
+the Astro site has to be repeated by hand; their texts sit in the core language file
+(`application/language/german/translations_lang.php:650-665`) instead of with the theme. The repository is public,
+so the customer-specific chrome is the most visible MeBeauty-specific part of it.
+
+**Proposal:** Options discussed:
+
+- A) Slim header (logo, "back to the website") and a minimal footer with contact/imprint; site navigation and the
+  full footer are dropped. Removes the double maintenance, booking no longer looks 1:1 like the site.
+- B) Keep as is (ADR 0006), optionally move the `site_*` keys into a theme-owned language file.
+- C) Take header/footer HTML from the Astro build at deploy time. Practically blocked by Tailwind vs. Bootstrap
+  (same reason as ADR 0001).
+
+**Open questions:**
+
+- How important is the 1:1 site look in the booking flow compared with less maintenance?
+- If A: which elements are legally or practically required in the slim footer (imprint, privacy, phone)?
+- Does A need a follow-up ADR superseding the Site-Chrome part of ADR 0006?
