@@ -27,7 +27,7 @@ $lang['fields_are_required'] = 'Fields with * are required.';
 $lang['appointment_confirmation'] = 'Appointment Confirmation';
 $lang['confirm'] = 'Confirm';
 $lang['update'] = 'Update';
-$lang['cancel_appointment_hint'] = 'Press the "Cancel" button to remove the appointment from the company schedule.';
+$lang['cancel_appointment_hint'] = 'Press the "Cancel appointment" button to remove the appointment from the company schedule.';
 $lang['cancel'] = 'Cancel';
 $lang['appointment_registered'] = 'Your appointment has been successfully registered!';
 $lang['cancel_appointment_title'] = 'Cancel Appointment';
@@ -647,6 +647,11 @@ $lang['notify_users_on_delete_question'] = 'Would you like to send out a notific
 $lang['booking_provider_question'] = 'Who would you like to book with?';
 $lang['booking_any_provider'] = 'Any Provider';
 $lang['appointment_changed_customer_subject'] = 'Your appointment has been changed';
+// Manage-Link page wording (spec 0025)
+$lang['cancel_appointment_button'] = 'Cancel appointment';
+$lang['keep_appointment_button'] = 'Keep appointment';
+$lang['cancellation_reason_prompt'] = 'Please tell us briefly why you are cancelling the appointment. A few words are enough.';
+$lang['reschedule_appointment_button'] = 'Update';
 // Site chrome of the themes (ADR 0006)
 $lang['site_booking'] = 'Booking';
 $lang['site_book_online'] = 'Book an appointment online';

@@ -89,7 +89,7 @@
         <form id="book-appointment-form" class="d-inline-block" method="post">
             <button id="book-appointment-submit" type="button" class="btn btn-primary w-100">
                 <i class="fas fa-check-square me-2"></i>
-                <?= $manage_mode ? lang('update') : lang('confirm') ?>
+                <?= $manage_mode ? lang('reschedule_appointment_button') : lang('confirm') ?>
             </button>
             <input type="hidden" name="csrfToken"/>
             <input type="hidden" name="post_data"/>
